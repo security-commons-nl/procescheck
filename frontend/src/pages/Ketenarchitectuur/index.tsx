@@ -18,17 +18,17 @@ import * as dagre from 'dagre'
 import { useQuery } from '@tanstack/react-query'
 import { processesApi } from '../../api/processes'
 import { biaApi } from '../../api/bia'
-import { GitBranch, Monitor, X, Search, RotateCcw, ChevronDown } from 'lucide-react'
+import { GitBranch, Monitor, X, Search, RotateCcw, ChevronDown, Columns2, Rows } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const NODE_W = 210
 const NODE_H = 60
 
 // --- Dagre layout ---
-function applyLayout(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge[] } {
+function applyLayout(nodes: Node[], edges: Edge[], rankdir: 'LR' | 'TB'): { nodes: Node[]; edges: Edge[] } {
   const g = new dagre.graphlib.Graph()
   g.setDefaultEdgeLabel(() => ({}))
-  g.setGraph({ rankdir: 'LR', ranksep: 120, nodesep: 55, marginx: 60, marginy: 60 })
+  g.setGraph({ rankdir, ranksep: 120, nodesep: 55, marginx: 60, marginy: 60 })
   nodes.forEach(n => g.setNode(n.id, { width: NODE_W, height: NODE_H }))
   edges.forEach(e => g.setEdge(e.source, e.target))
   dagre.layout(g)
@@ -224,6 +224,7 @@ function MultiSelect({
 
 // --- Main component ---
 export default function Ketenarchitectuur() {
+  const [direction, setDirection] = useState<'LR' | 'TB'>('LR')
   const [showProcesses, setShowProcesses] = useState(true)
   const [showApplications, setShowApplications] = useState(true)
   const [search, setSearch] = useState('')
@@ -383,10 +384,10 @@ export default function Ketenarchitectuur() {
       return
     }
 
-    const { nodes: ln, edges: le } = applyLayout(rawNodes, rawEdges)
+    const { nodes: ln, edges: le } = applyLayout(rawNodes, rawEdges, direction)
     setNodes(ln)
     setEdges(le)
-  }, [processes, showProcesses, showApplications, search, selectedProcessIds, selectedAppIds])
+  }, [processes, showProcesses, showApplications, search, selectedProcessIds, selectedAppIds, direction])
 
   // Hover: dim unconnected nodes/edges
   const onNodeMouseEnter = useCallback((_: React.MouseEvent, node: Node) => {
@@ -517,6 +518,36 @@ export default function Ketenarchitectuur() {
             >
               <Monitor size={13} />
               <span className={clsx(!showApplications && 'line-through')}>Applicaties</span>
+            </button>
+          </div>
+
+          {/* Layout direction toggle */}
+          <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setDirection('LR')}
+              className={clsx(
+                'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors',
+                direction === 'LR'
+                  ? 'bg-gray-100 text-gray-800'
+                  : 'bg-white text-gray-400 hover:bg-gray-50',
+              )}
+              title="Verticaal (kolommen)"
+            >
+              <Columns2 size={13} />
+              Verticaal
+            </button>
+            <button
+              onClick={() => setDirection('TB')}
+              className={clsx(
+                'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-gray-200',
+                direction === 'TB'
+                  ? 'bg-gray-100 text-gray-800'
+                  : 'bg-white text-gray-400 hover:bg-gray-50',
+              )}
+              title="Horizontaal (rijen)"
+            >
+              <Rows size={13} />
+              Horizontaal
             </button>
           </div>
         </div>

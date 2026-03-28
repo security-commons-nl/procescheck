@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { processesApi } from '../../api/processes'
 import { applicationsApi } from '../../api/applications'
+import { biaApi } from '../../api/bia'
+import { businessContextApi } from '../../api/businessContext'
+import { BiaScoreSummary, BiaAlgemeenReadOnly } from '../Bia/biaShared'
+import { BusinessContextReadOnly } from '../BusinessContext/businessContextShared'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import { Card } from '../../components/common/Card'
-import { CriticalBadge } from '../../components/common/Badge'
+import { ScoreBadge } from '../../components/common/Badge'
 import { FormField, Input, Textarea } from '../../components/common/FormField'
 import { Pencil, Unlink, ArrowLeft, Plus, List, FilePlus } from 'lucide-react'
 import type { Application } from '../../types'
+
 
 const TABS = ['Overzicht', 'Applicaties', 'BIA & BIV-Classificatie', 'Procescontext'] as const
 type ModalView = 'choice' | 'existing' | 'new'
@@ -29,6 +34,25 @@ export default function ProcessDetail() {
     queryKey: ['processes', pid],
     queryFn: () => processesApi.get(pid),
   })
+
+  const { data: bia, isLoading: biaLoading } = useQuery({
+    queryKey: ['bia', pid],
+    queryFn: () => biaApi.get(pid),
+    enabled: !!pid,
+    retry: false,
+  })
+
+  const { data: businessContext, isLoading: bcLoading } = useQuery({
+    queryKey: ['business-context', pid],
+    queryFn: () => businessContextApi.get(pid),
+    enabled: !!pid,
+    retry: false,
+  })
+
+  const procesClassificatie =
+    bia?.availability_score != null || bia?.integrity_score != null || bia?.confidentiality_score != null
+      ? Math.min(bia.availability_score ?? 5, bia.integrity_score ?? 5, bia.confidentiality_score ?? 5)
+      : undefined
 
   const { data: allApps = [] } = useQuery({
     queryKey: ['applications', appSearch],
@@ -120,7 +144,7 @@ export default function ProcessDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
             <Field label="Eigenaar" value={process.owner} />
             <Field label="Afdeling" value={process.department} />
-            <Field label="Classificatie"><CriticalBadge isCritical={process.is_critical} /></Field>
+            <Field label="Procesclassificatie"><ScoreBadge score={procesClassificatie} /></Field>
             <Field label="Laatst gewijzigd" value={process.last_assessment_date} />
             <Field label="Beschrijving" value={process.description} full />
             <Field label="Doelstelling" value={process.objective} full />
@@ -161,30 +185,41 @@ export default function ProcessDetail() {
 
       {/* BIA & BIV-Classificatie */}
       {tab === 'BIA & BIV-Classificatie' && (
-        <Card>
-          {process.has_bia ? (
-            <p className="text-sm text-gray-500">BIA is ingevuld. Ga naar <Link to={`/bia/${pid}`} className="text-brand-600 underline">BIA pagina</Link> om te bewerken.</p>
-          ) : (
+        biaLoading ? (
+          <Card><p className="text-sm text-gray-400 text-center py-8">Laden…</p></Card>
+        ) : !bia ? (
+          <Card>
             <div className="text-center py-8">
               <p className="text-gray-400 text-sm mb-4">Nog geen BIA ingevuld voor dit proces.</p>
               <Button onClick={() => navigate(`/bia/${pid}`)}>BIA invullen</Button>
             </div>
-          )}
-        </Card>
+          </Card>
+        ) : (
+          <>
+            <BiaScoreSummary
+              availabilityScore={bia.availability_score}
+              integrityScore={bia.integrity_score}
+              confidentialityScore={bia.confidentiality_score}
+            />
+            <BiaAlgemeenReadOnly bia={bia} />
+          </>
+        )
       )}
 
       {/* Procescontext */}
       {tab === 'Procescontext' && (
-        <Card>
-          {process.has_business_context ? (
-            <p className="text-sm text-gray-500">Procescontext ingevuld. <Link to={`/business-context/${pid}`} className="text-brand-600 underline">Bekijk / bewerk</Link></p>
-          ) : (
+        bcLoading ? (
+          <Card><p className="text-sm text-gray-400 text-center py-8">Laden…</p></Card>
+        ) : !businessContext ? (
+          <Card>
             <div className="text-center py-8">
               <p className="text-gray-400 text-sm mb-4">Nog geen procescontext ingevuld.</p>
               <Button onClick={() => navigate(`/business-context/${pid}`)}>Procescontext invullen</Button>
             </div>
-          )}
-        </Card>
+          </Card>
+        ) : (
+          <BusinessContextReadOnly bc={businessContext} />
+        )
       )}
 
       {/* ── Modal ── */}

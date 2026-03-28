@@ -5,7 +5,7 @@ import { processesApi } from '../../api/processes'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import { Card } from '../../components/common/Card'
-import { FormField, Input, Textarea, Select } from '../../components/common/FormField'
+import { FormField, Input, Textarea } from '../../components/common/FormField'
 import type { Process } from '../../types'
 
 export default function ProcessForm() {
@@ -35,8 +35,6 @@ export default function ProcessForm() {
     objective: '',
     owner: '',
     department: '',
-    is_critical: true,
-    critical_reason: '',
     notes: '',
   })
 
@@ -100,15 +98,6 @@ export default function ProcessForm() {
           <FormField label="Afdeling / Domein / Cluster">
             <Input value={form.department ?? ''} onChange={e => set('department', e.target.value)} />
           </FormField>
-          <FormField label="Kritisch proces">
-            <Select
-              value={form.is_critical ? 'true' : 'false'}
-              onChange={e => set('is_critical', e.target.value === 'true')}
-            >
-              <option value="true">Ja</option>
-              <option value="false">Nee</option>
-            </Select>
-          </FormField>
           <FormField label="Laatste beoordelingsdatum">
             <div className="flex items-center h-10 px-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500">
               {isEdit && existing?.last_assessment_date
@@ -130,15 +119,6 @@ export default function ProcessForm() {
               rows={3}
             />
           </FormField>
-          {form.is_critical && (
-            <FormField label="Reden / motivatie kritisch" className="md:col-span-2">
-              <Textarea
-                value={form.critical_reason ?? ''}
-                onChange={e => set('critical_reason', e.target.value)}
-                rows={3}
-              />
-            </FormField>
-          )}
           <FormField label="Notities" className="md:col-span-2">
             <Textarea
               value={form.notes ?? ''}
