@@ -14,7 +14,6 @@ export interface Process {
   updated_at: string
   applications: ApplicationSummary[]
   has_bia: boolean
-  has_rto_rpo: boolean
   has_business_context: boolean
 }
 
@@ -81,18 +80,6 @@ export interface BiaAssessment {
   updated_at: string
 }
 
-export interface RtoRpo {
-  id: number
-  process_id: number
-  rto_value?: number
-  rto_unit?: string
-  rpo_value?: number
-  rpo_unit?: string
-  explanation?: string
-  created_at: string
-  updated_at: string
-}
-
 export interface BusinessContext {
   id: number
   process_id: number
@@ -131,7 +118,6 @@ export interface ProcessCompleteness {
   name: string
   is_critical: boolean
   has_bia: boolean
-  has_rto_rpo: boolean
   has_business_context: boolean
   app_count: number
   is_complete: boolean

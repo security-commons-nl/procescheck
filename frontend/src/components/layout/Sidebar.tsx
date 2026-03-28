@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard, GitBranch, Monitor, Shield, Clock, Map, Download, ChevronLeft, ChevronRight, Network,
+  LayoutDashboard, GitBranch, Monitor, Shield, Map, Download, ChevronLeft, ChevronRight, Network,
 } from 'lucide-react'
 import { useState } from 'react'
 import { clsx } from 'clsx'
@@ -10,7 +10,6 @@ const NAV = [
   { to: '/processes', icon: GitBranch, label: 'Processen' },
   { to: '/applications', icon: Monitor, label: 'Applicaties' },
   { to: '/bia', icon: Shield, label: 'BIA & BIV-Classificatie' },
-  { to: '/rto-rpo', icon: Clock, label: 'RTO / RPO' },
   { to: '/business-context', icon: Map, label: 'Procescontext' },
   { to: '/ketenarchitectuur', icon: Network, label: 'Ketenarchitectuur' },
   { to: '/export', icon: Download, label: 'Export' },

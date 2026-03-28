@@ -11,7 +11,7 @@ import { FormField, Input, Textarea } from '../../components/common/FormField'
 import { Pencil, Unlink, ArrowLeft, Plus, List, FilePlus } from 'lucide-react'
 import type { Application } from '../../types'
 
-const TABS = ['Overzicht', 'Applicaties', 'BIA & BIV-Classificatie', 'RTO/RPO', 'Procescontext'] as const
+const TABS = ['Overzicht', 'Applicaties', 'BIA & BIV-Classificatie', 'Procescontext'] as const
 type ModalView = 'choice' | 'existing' | 'new'
 
 export default function ProcessDetail() {
@@ -168,20 +168,6 @@ export default function ProcessDetail() {
             <div className="text-center py-8">
               <p className="text-gray-400 text-sm mb-4">Nog geen BIA ingevuld voor dit proces.</p>
               <Button onClick={() => navigate(`/bia/${pid}`)}>BIA invullen</Button>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {/* RTO/RPO */}
-      {tab === 'RTO/RPO' && (
-        <Card>
-          {process.has_rto_rpo ? (
-            <p className="text-sm text-gray-500">RTO/RPO ingesteld. <Link to={`/rto-rpo/${pid}`} className="text-brand-600 underline">Bekijk / bewerk</Link></p>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-400 text-sm mb-4">Nog geen RTO/RPO ingesteld.</p>
-              <Button onClick={() => navigate(`/rto-rpo/${pid}`)}>RTO/RPO instellen</Button>
             </div>
           )}
         </Card>

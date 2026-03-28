@@ -8,7 +8,6 @@ import ApplicationList from './pages/Applications/ApplicationList'
 import ApplicationDetail from './pages/Applications/ApplicationDetail'
 import ApplicationForm from './pages/Applications/ApplicationForm'
 import BiaPage from './pages/Bia/BiaPage'
-import RtoRpoPage from './pages/RtoRpo/RtoRpoPage'
 import BusinessContextPage from './pages/BusinessContext/BusinessContextPage'
 import ExportPage from './pages/Export/ExportPage'
 import Ketenarchitectuur from './pages/Ketenarchitectuur'
@@ -30,8 +29,6 @@ export default function App() {
           <Route path="/applications/:id/edit" element={<ApplicationForm />} />
           <Route path="/bia" element={<BiaPage />} />
           <Route path="/bia/:processId" element={<BiaPage />} />
-          <Route path="/rto-rpo" element={<RtoRpoPage />} />
-          <Route path="/rto-rpo/:processId" element={<RtoRpoPage />} />
           <Route path="/business-context" element={<BusinessContextPage />} />
           <Route path="/business-context/:processId" element={<BusinessContextPage />} />
           <Route path="/export" element={<ExportPage />} />
