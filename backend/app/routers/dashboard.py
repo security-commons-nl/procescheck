@@ -5,6 +5,9 @@ from app.models import Process
 from app.models.bia import BiaAssessment
 from app.schemas.dashboard import (
     DashboardSummary, ProcessCompleteness, BivTopStats, BivTopItem,
+    RiskOverview, BivDistribution, BivDimensionDistribution,
+    CriticalProcessRisk, Coverage, CoverageStats, PrivacyExposure,
+    PriorityAction,
 )
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
@@ -111,4 +114,159 @@ def get_biv_top(limit: int = 5, db: Session = Depends(get_db)):
         availability=_top(BiaAssessment.availability_score),
         integrity=_top(BiaAssessment.integrity_score),
         confidentiality=_top(BiaAssessment.confidentiality_score),
+    )
+
+
+@router.get("/risk-overview", response_model=RiskOverview)
+def get_risk_overview(db: Session = Depends(get_db)):
+    processes = db.query(Process).order_by(Process.code).all()
+    total = len(processes)
+
+    def _dim_dist(score_attr: str) -> BivDimensionDistribution:
+        counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        not_assessed = 0
+        for p in processes:
+            if p.bia is None:
+                not_assessed += 1
+            else:
+                score = getattr(p.bia, score_attr, None)
+                if score in counts:
+                    counts[score] += 1
+                else:
+                    not_assessed += 1
+        return BivDimensionDistribution(
+            vitaal=counts[1], hoog=counts[2], midden=counts[3],
+            laag=counts[4], minimaal=counts[5], not_assessed=not_assessed,
+        )
+
+    biv_dist = BivDistribution(
+        availability=_dim_dist("availability_score"),
+        integrity=_dim_dist("integrity_score"),
+        confidentiality=_dim_dist("confidentiality_score"),
+    )
+
+    # Critical processes with risk info
+    critical_list: list[CriticalProcessRisk] = []
+    for p in processes:
+        if not p.is_critical:
+            continue
+        _, missing = _check_completeness(p)
+        rto_val = p.rto_rpo.rto_value if p.rto_rpo else None
+        rto_unit = p.rto_rpo.rto_unit if p.rto_rpo else None
+        critical_list.append(CriticalProcessRisk(
+            id=p.id,
+            code=p.code,
+            name=p.name,
+            availability_score=p.bia.availability_score if p.bia else None,
+            integrity_score=p.bia.integrity_score if p.bia else None,
+            confidentiality_score=p.bia.confidentiality_score if p.bia else None,
+            has_bia=p.bia is not None,
+            has_rto_rpo=p.rto_rpo is not None,
+            rto_value=rto_val,
+            rto_unit=rto_unit,
+            missing_fields=missing,
+        ))
+
+    # Coverage
+    def _cov(done_fn) -> CoverageStats:
+        done = sum(1 for p in processes if done_fn(p))
+        pct = round(done / total * 100) if total > 0 else 0
+        return CoverageStats(done=done, total=total, pct=pct)
+
+    coverage = Coverage(
+        bia=_cov(lambda p: p.bia is not None),
+        rto_rpo=_cov(lambda p: p.rto_rpo is not None),
+        business_context=_cov(lambda p: p.business_context is not None),
+        applications=_cov(lambda p: len(p.applications) > 0),
+    )
+
+    # Privacy exposure + coverage (% processen met persoonsgegevens)
+    privacy = PrivacyExposure(
+        personal_data=sum(
+            1 for p in processes
+            if p.business_context and p.business_context.personal_data
+        ),
+        special_personal_data=sum(
+            1 for p in processes
+            if p.business_context and p.business_context.special_personal_data
+        ),
+    )
+    privacy_coverage = _cov(
+        lambda p: bool(p.business_context and p.business_context.personal_data)
+    )
+
+    # Procescompleetheid: Eigenaar, Afdeling, Beschrijving, Doelstelling,
+    # en Reden kritisch (alleen als het proces kritisch is)
+    def _fields_complete(p: Process) -> bool:
+        if not p.owner:
+            return False
+        if not p.department:
+            return False
+        if not p.description:
+            return False
+        if not p.objective:
+            return False
+        if p.is_critical and not p.critical_reason:
+            return False
+        return True
+
+    process_fields_coverage = _cov(_fields_complete)
+
+    # High risk count: score 1 or 2 in any BIV dimension
+    def _is_high_risk(p: Process) -> bool:
+        if p.bia is None:
+            return False
+        for attr in ("availability_score", "integrity_score", "confidentiality_score"):
+            s = getattr(p.bia, attr, None)
+            if s is not None and s <= 2:
+                return True
+        return False
+
+    high_risk_count = sum(1 for p in processes if _is_high_risk(p))
+
+    # Priority actions — sorted: critical-no-BIA first, then high-risk-no-rto, then rest incomplete
+    actions: list[PriorityAction] = []
+    for p in processes:
+        _, missing = _check_completeness(p)
+        if not missing:
+            continue
+        if p.is_critical and p.bia is None:
+            priority = "critical"
+            reason = "Informatie ontbreekt"
+        elif _is_high_risk(p) and p.rto_rpo is None:
+            priority = "high"
+            reason = "Hoog risico: geen RTO/RPO gedefinieerd"
+        elif p.is_critical:
+            priority = "high"
+            reason = "Kritisch proces — onvolledig gedocumenteerd"
+        elif len(missing) >= 4:
+            priority = "medium"
+            reason = f"{len(missing)} velden ontbreken"
+        else:
+            priority = "medium"
+            reason = f"{len(missing)} veld(en) ontbreken"
+
+        actions.append(PriorityAction(
+            id=p.id,
+            code=p.code,
+            name=p.name,
+            is_critical=p.is_critical,
+            priority=priority,
+            reason=reason,
+            missing_fields=missing,
+        ))
+
+    # Sort: critical first, then high, then medium
+    order = {"critical": 0, "high": 1, "medium": 2}
+    actions.sort(key=lambda a: order[a.priority])
+
+    return RiskOverview(
+        biv_distribution=biv_dist,
+        critical_processes=critical_list,
+        coverage=coverage,
+        privacy_exposure=privacy,
+        privacy_coverage=privacy_coverage,
+        process_fields_coverage=process_fields_coverage,
+        high_risk_count=high_risk_count,
+        priority_actions=actions,
     )
