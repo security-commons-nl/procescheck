@@ -1,5 +1,4 @@
 import re
-from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.deps import get_db
@@ -62,7 +61,7 @@ def create_process(body: ProcessCreate, db: Session = Depends(get_db)):
     if db.query(Process).filter(Process.code == code).first():
         raise HTTPException(400, f"Procescode '{code}' bestaat al")
     data = body.model_dump(exclude={"code"})
-    p = Process(code=code, last_assessment_date=date.today(), **data)
+    p = Process(code=code, **data)
     db.add(p)
     db.commit()
     db.refresh(p)
@@ -84,7 +83,6 @@ def update_process(process_id: int, body: ProcessUpdate, db: Session = Depends(g
         raise HTTPException(404, "Proces niet gevonden")
     for k, v in body.model_dump(exclude_unset=True).items():
         setattr(p, k, v)
-    p.last_assessment_date = date.today()
     db.commit()
     db.refresh(p)
     return _to_response(p)

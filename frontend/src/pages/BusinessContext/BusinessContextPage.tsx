@@ -447,6 +447,7 @@ export default function BusinessContextPage() {
           </div>
         )}
       </div>
+
     </>
   )
 
@@ -502,6 +503,40 @@ export default function BusinessContextPage() {
             Selecteer een proces aan de linkerkant.
           </div>
         )}
+
+        {pid && (() => {
+          const cutoff = new Date()
+          cutoff.setFullYear(cutoff.getFullYear() - 1)
+          const reviewDate = current.review_date ? new Date(current.review_date) : null
+          const isExpired = reviewDate !== null && reviewDate < cutoff
+          return (
+            <div className="mb-3 bg-white border border-gray-200 rounded-xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-gray-500 shrink-0">
+                Laatste review datum
+              </span>
+              <div className="flex items-center gap-3">
+                <input
+                  type="date"
+                  value={current.review_date ?? ''}
+                  onChange={e => setStr('review_date', e.target.value)}
+                  className={[
+                    'h-8 rounded-lg border px-3 text-sm focus:outline-none focus:ring-2',
+                    isExpired
+                      ? 'border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
+                      : reviewDate
+                        ? 'border-green-300 bg-green-50 text-green-700 focus:ring-green-300'
+                        : 'border-gray-200 bg-white text-gray-700 focus:ring-brand-300',
+                  ].join(' ')}
+                />
+                {isExpired && (
+                  <span className="text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                    Review verlopen
+                  </span>
+                )}
+              </div>
+            </div>
+          )
+        })()}
 
         {pid && !fullscreen && canvasContent}
       </div>

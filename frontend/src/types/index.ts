@@ -31,6 +31,7 @@ export interface Application {
   business_owner?: string
   technical_owner?: string
   notes?: string
+  review_date?: string
   created_at: string
   updated_at: string
   processes: ProcessSummary[]
@@ -100,6 +101,7 @@ export interface BusinessContext {
   key_aspects?: string
   personal_data?: boolean
   special_personal_data?: boolean
+  review_date?: string
   created_at: string
   updated_at: string
 }

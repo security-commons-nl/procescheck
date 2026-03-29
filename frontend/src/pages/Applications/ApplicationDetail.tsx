@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { applicationsApi } from '../../api/applications'
@@ -17,11 +17,14 @@ export default function ApplicationDetail() {
 
   const [showModal, setShowModal] = useState(false)
   const [processSearch, setProcessSearch] = useState('')
+  const [reviewDate, setReviewDate] = useState('')
 
   const { data: app, isLoading } = useQuery({
     queryKey: ['applications', aid],
     queryFn: () => applicationsApi.get(aid),
   })
+
+  useEffect(() => { setReviewDate(app?.review_date ?? '') }, [app?.review_date])
 
   const { data: allProcesses = [] } = useQuery({
     queryKey: ['processes'],
@@ -31,6 +34,11 @@ export default function ApplicationDetail() {
 
   const linkMutation = useMutation({
     mutationFn: (processId: number) => processesApi.linkApp(processId, aid),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['applications', aid] }) },
+  })
+
+  const reviewMutation = useMutation({
+    mutationFn: (val: string) => applicationsApi.update(aid, { review_date: val || null } as any),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['applications', aid] }) },
   })
 
@@ -60,7 +68,38 @@ export default function ApplicationDetail() {
               <Field label="Applicatienaam" value={app.name} />
               <Field label="Functioneel eigenaar" value={app.business_owner} />
               <Field label="Technisch eigenaar" value={app.technical_owner} />
-              <Field label="Laatst gewijzigd" value={app.updated_at ? new Date(app.updated_at).toLocaleDateString('nl-NL') : undefined} />
+              {(() => {
+                const cutoff = new Date()
+                cutoff.setFullYear(cutoff.getFullYear() - 1)
+                const rd = reviewDate ? new Date(reviewDate) : null
+                const isExpired = rd !== null && rd < cutoff
+                return (
+                  <div>
+                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Laatste review datum</dt>
+                    <dd className="flex flex-wrap items-center gap-2">
+                      <input
+                        type="date"
+                        value={reviewDate}
+                        onChange={e => {
+                          setReviewDate(e.target.value)
+                          reviewMutation.mutate(e.target.value)
+                        }}
+                        className={[
+                          'h-8 rounded-lg border px-3 text-sm focus:outline-none focus:ring-2 focus:border-transparent',
+                          isExpired
+                            ? 'border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
+                            : 'border-gray-300 bg-white text-gray-800 focus:ring-brand-500',
+                        ].join(' ')}
+                      />
+                      {isExpired && (
+                        <span className="text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                          Review verlopen
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                )
+              })()}
               <Field label="Beschrijving" value={app.description} full />
               <Field label="Notities" value={app.notes} full />
             </div>

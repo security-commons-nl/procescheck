@@ -10,6 +10,7 @@ class ProcessBase(BaseModel):
     department: str | None = None
     is_critical: bool = True
     critical_reason: str | None = None
+    last_assessment_date: date | None = None
     notes: str | None = None
 
 
@@ -27,8 +28,8 @@ class ProcessUpdate(BaseModel):
     department: str | None = None
     is_critical: bool | None = None
     critical_reason: str | None = None
+    last_assessment_date: date | None = None
     notes: str | None = None
-    # last_assessment_date is server-managed; not accepted from client
 
 
 class ApplicationSummary(BaseModel):

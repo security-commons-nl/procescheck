@@ -1,5 +1,5 @@
-from datetime import datetime
-from sqlalchemy import String, Text, DateTime, func
+from datetime import datetime, date
+from sqlalchemy import String, Text, DateTime, Date, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -14,6 +14,7 @@ class Application(Base):
     business_owner: Mapped[str | None] = mapped_column(String(255))
     technical_owner: Mapped[str | None] = mapped_column(String(255))
     notes: Mapped[str | None] = mapped_column(Text)
+    review_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

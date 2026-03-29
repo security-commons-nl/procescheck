@@ -69,6 +69,34 @@ export default function ApplicationForm() {
           <FormField label="Technisch eigenaar">
             <Input value={form.technical_owner ?? ''} onChange={e => set('technical_owner', e.target.value)} />
           </FormField>
+          <FormField label="Laatste review datum">
+            {(() => {
+              const cutoff = new Date()
+              cutoff.setFullYear(cutoff.getFullYear() - 1)
+              const rd = form.review_date ? new Date(form.review_date) : null
+              const isExpired = rd !== null && rd < cutoff
+              return (
+                <>
+                  <input
+                    type="date"
+                    value={form.review_date ?? ''}
+                    onChange={e => set('review_date', e.target.value)}
+                    className={[
+                      'w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent',
+                      isExpired
+                        ? 'border border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
+                        : 'border border-gray-300 focus:ring-brand-500',
+                    ].join(' ')}
+                  />
+                  {isExpired && (
+                    <span className="text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5 self-start">
+                      Review verlopen
+                    </span>
+                  )}
+                </>
+              )
+            })()}
+          </FormField>
           <FormField label="Beschrijving" className="md:col-span-2">
             <Textarea value={form.description ?? ''} onChange={e => set('description', e.target.value)} />
           </FormField>

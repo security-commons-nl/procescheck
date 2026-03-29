@@ -494,8 +494,33 @@ export default function BiaPage() {
                   <FormField label="Interviewer">
                     <Input value={currentForm.interviewer_name ?? ''} onChange={e => setField('interviewer_name', e.target.value)} />
                   </FormField>
-                  <FormField label="Interviewdatum">
-                    <Input type="date" value={currentForm.interview_date ?? ''} onChange={e => setField('interview_date', e.target.value)} />
+                  <FormField label="Laatste review datum">
+                    {(() => {
+                      const cutoff = new Date()
+                      cutoff.setFullYear(cutoff.getFullYear() - 1)
+                      const reviewDate = currentForm.interview_date ? new Date(currentForm.interview_date) : null
+                      const isExpired = reviewDate !== null && reviewDate < cutoff
+                      return (
+                        <>
+                          <input
+                            type="date"
+                            value={currentForm.interview_date ?? ''}
+                            onChange={e => setField('interview_date', e.target.value)}
+                            className={[
+                              'w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent',
+                              isExpired
+                                ? 'border border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
+                                : 'border border-gray-300 focus:ring-brand-500',
+                            ].join(' ')}
+                          />
+                          {isExpired && (
+                            <span className="text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5 self-start">
+                              Review verlopen
+                            </span>
+                          )}
+                        </>
+                      )
+                    })()}
                   </FormField>
 
                   <FormField label="Notities" className="md:col-span-2">

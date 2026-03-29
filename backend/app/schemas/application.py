@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel
 
 
@@ -9,6 +9,7 @@ class ApplicationBase(BaseModel):
     business_owner: str | None = None
     technical_owner: str | None = None
     notes: str | None = None
+    review_date: date | None = None
 
 
 class ApplicationCreate(ApplicationBase):
@@ -22,6 +23,7 @@ class ApplicationUpdate(BaseModel):
     business_owner: str | None = None
     technical_owner: str | None = None
     notes: str | None = None
+    review_date: date | None = None
 
 
 class ProcessSummary(BaseModel):

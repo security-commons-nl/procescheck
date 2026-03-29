@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel
 
 
@@ -20,6 +20,7 @@ class BusinessContextUpsert(BaseModel):
     key_aspects: str | None = None
     personal_data: bool = False
     special_personal_data: bool = False
+    review_date: date | None = None
 
 
 class BusinessContextResponse(BusinessContextUpsert):

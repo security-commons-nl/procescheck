@@ -30,10 +30,14 @@ export default function ProcessDetail() {
 
   const pid = Number(id)
 
+  const [reviewDate, setReviewDate] = useState('')
+
   const { data: process, isLoading } = useQuery({
     queryKey: ['processes', pid],
     queryFn: () => processesApi.get(pid),
   })
+
+  useEffect(() => { setReviewDate(process?.last_assessment_date ?? '') }, [process?.last_assessment_date])
 
   const { data: bia, isLoading: biaLoading } = useQuery({
     queryKey: ['bia', pid],
@@ -105,6 +109,11 @@ export default function ProcessDetail() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['processes', pid] }),
   })
 
+  const reviewMutation = useMutation({
+    mutationFn: (val: string) => processesApi.update(pid, { last_assessment_date: val || null } as any),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['processes', pid] }),
+  })
+
   if (isLoading) return <p className="text-gray-400 p-8">Laden...</p>
   if (!process) return <p className="text-red-500 p-8">Proces niet gevonden.</p>
 
@@ -145,7 +154,38 @@ export default function ProcessDetail() {
             <Field label="Eigenaar" value={process.owner} />
             <Field label="Afdeling" value={process.department} />
             <Field label="Procesclassificatie"><ScoreBadge score={procesClassificatie} /></Field>
-            <Field label="Laatst gewijzigd" value={process.last_assessment_date} />
+            {(() => {
+              const cutoff = new Date()
+              cutoff.setFullYear(cutoff.getFullYear() - 1)
+              const rd = reviewDate ? new Date(reviewDate) : null
+              const isExpired = rd !== null && rd < cutoff
+              return (
+                <div>
+                  <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Laatste review datum</dt>
+                  <dd className="flex flex-wrap items-center gap-2">
+                    <input
+                      type="date"
+                      value={reviewDate}
+                      onChange={e => {
+                        setReviewDate(e.target.value)
+                        reviewMutation.mutate(e.target.value)
+                      }}
+                      className={[
+                        'h-8 rounded-lg border px-3 text-sm focus:outline-none focus:ring-2 focus:border-transparent',
+                        isExpired
+                          ? 'border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
+                          : 'border-gray-300 bg-white text-gray-800 focus:ring-brand-500',
+                      ].join(' ')}
+                    />
+                    {isExpired && (
+                      <span className="text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                        Review verlopen
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              )
+            })()}
             <Field label="Beschrijving" value={process.description} full />
             <Field label="Doelstelling" value={process.objective} full />
             {process.is_critical && <Field label="Reden kritisch" value={process.critical_reason} full />}

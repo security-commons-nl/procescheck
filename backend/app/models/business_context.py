@@ -1,5 +1,5 @@
-from datetime import datetime
-from sqlalchemy import Text, Boolean, DateTime, ForeignKey, func
+from datetime import datetime, date
+from sqlalchemy import Text, Boolean, DateTime, Date, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -27,6 +27,7 @@ class BusinessContext(Base):
     key_aspects: Mapped[str | None] = mapped_column(Text)
     personal_data: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     special_personal_data: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    review_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
