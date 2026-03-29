@@ -137,3 +137,73 @@ export interface BivTopStats {
   integrity: BivTopItem[]
   confidentiality: BivTopItem[]
 }
+
+// ── Risk Overview ──────────────────────────────────────────────────────────────
+
+export interface BivDimensionDistribution {
+  vitaal: number
+  hoog: number
+  midden: number
+  laag: number
+  minimaal: number
+  not_assessed: number
+}
+
+export interface BivDistribution {
+  availability: BivDimensionDistribution
+  integrity: BivDimensionDistribution
+  confidentiality: BivDimensionDistribution
+}
+
+export interface CriticalProcessRisk {
+  id: number
+  code: string
+  name: string
+  availability_score: number | null
+  integrity_score: number | null
+  confidentiality_score: number | null
+  has_bia: boolean
+  has_rto_rpo: boolean
+  rto_value: number | null
+  rto_unit: string | null
+  missing_fields: string[]
+}
+
+export interface CoverageStats {
+  done: number
+  total: number
+  pct: number
+}
+
+export interface Coverage {
+  bia: CoverageStats
+  rto_rpo: CoverageStats
+  business_context: CoverageStats
+  applications: CoverageStats
+}
+
+export interface PrivacyExposure {
+  personal_data: number
+  special_personal_data: number
+}
+
+export interface PriorityAction {
+  id: number
+  code: string
+  name: string
+  is_critical: boolean
+  priority: 'critical' | 'high' | 'medium'
+  reason: string
+  missing_fields: string[]
+}
+
+export interface RiskOverview {
+  biv_distribution: BivDistribution
+  critical_processes: CriticalProcessRisk[]
+  coverage: Coverage
+  privacy_exposure: PrivacyExposure
+  privacy_coverage: CoverageStats
+  process_fields_coverage: CoverageStats
+  high_risk_count: number
+  priority_actions: PriorityAction[]
+}
