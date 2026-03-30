@@ -104,3 +104,16 @@ class RiskOverview(BaseModel):
     process_fields_coverage: CoverageStats
     high_risk_count: int
     priority_actions: list[PriorityAction]
+
+
+class ReviewStatusItem(BaseModel):
+    on_time: int
+    total: int
+    pct: int
+
+
+class ReviewStatus(BaseModel):
+    processes: ReviewStatusItem
+    applications: ReviewStatusItem
+    bia: ReviewStatusItem
+    business_context: ReviewStatusItem

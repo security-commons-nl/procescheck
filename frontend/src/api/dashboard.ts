@@ -1,5 +1,5 @@
 import client from './client'
-import type { DashboardSummary, ProcessCompleteness, BivTopStats, RiskOverview } from '../types'
+import type { DashboardSummary, ProcessCompleteness, BivTopStats, RiskOverview, ReviewStatus } from '../types'
 
 export const dashboardApi = {
   summary: () =>
@@ -10,4 +10,6 @@ export const dashboardApi = {
     client.get<BivTopStats>('/dashboard/biv-top', { params: { limit } }).then(r => r.data),
   riskOverview: () =>
     client.get<RiskOverview>('/dashboard/risk-overview').then(r => r.data),
+  reviewStatus: () =>
+    client.get<ReviewStatus>('/dashboard/review-status').then(r => r.data),
 }

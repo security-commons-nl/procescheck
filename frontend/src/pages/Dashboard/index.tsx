@@ -9,7 +9,7 @@ import {
   Shield, Database, Users, Eye, CheckCircle2, XCircle, FileText,
 } from 'lucide-react'
 import type {
-  BivDimensionDistribution, CriticalProcessRisk, PriorityAction,
+  BivDimensionDistribution, CriticalProcessRisk, PriorityAction, ReviewStatus,
 } from '../../types'
 import { clsx } from 'clsx'
 
@@ -97,6 +97,40 @@ function PrivacyInfoCard({ count, total }: { count: number; total: number }) {
       {/* Visuele scheiding i.p.v. balk */}
       <div className="w-full h-px bg-purple-100" />
       <p className="text-xs text-purple-400 leading-tight truncate">{label}</p>
+    </div>
+  )
+}
+
+// ── Review KPI Panel (no Card wrapper — used inside a containing Card) ────────
+
+function ReviewKpiPanel({
+  icon: Icon, iconColorClass, title, pct, count, total, label,
+}: {
+  icon: React.ElementType
+  iconColorClass: string
+  title: string
+  pct: number
+  count: number
+  total: number
+  label: string
+}) {
+  const isComplete = pct === 100
+  const pctColor = isComplete ? 'text-green-600' : 'text-red-600'
+  const barColor = isComplete ? 'bg-green-500' : 'bg-red-500'
+  return (
+    <div className="flex flex-col gap-3 px-5 first:pl-0 last:pr-0">
+      <div className="flex items-center gap-1.5">
+        <Icon size={13} className={iconColorClass} />
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide leading-none">{title}</p>
+      </div>
+      <div className="flex items-end justify-between gap-2">
+        <span className={clsx('text-2xl font-semibold tabular-nums leading-none', pctColor)}>{pct}%</span>
+        <span className="text-xs text-gray-400 tabular-nums pb-0.5">{count}/{total}</span>
+      </div>
+      <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+        <div className={clsx('h-full rounded-full transition-all', barColor)} style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-xs text-gray-400 leading-tight truncate">{label}</p>
     </div>
   )
 }
@@ -261,6 +295,10 @@ export default function Dashboard() {
     queryKey: ['dashboard', 'risk-overview'],
     queryFn: dashboardApi.riskOverview,
   })
+  const { data: reviewStatus } = useQuery({
+    queryKey: ['dashboard', 'review-status'],
+    queryFn: dashboardApi.reviewStatus,
+  })
 
   const total = summary?.total_processes ?? 0
   const hasData = total > 0
@@ -339,6 +377,51 @@ export default function Dashboard() {
               <BivDistPanel title="Beschikbaarheid" dist={risk.biv_distribution.availability} total={total} />
               <BivDistPanel title="Integriteit" dist={risk.biv_distribution.integrity} total={total} />
               <BivDistPanel title="Vertrouwelijkheid" dist={risk.biv_distribution.confidentiality} total={total} />
+            </div>
+          </Card>
+
+          {/* ── Review Status ── */}
+          <Card>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">
+              Reviewmonitoring
+            </h2>
+            <div className="grid grid-cols-4 divide-x divide-gray-100">
+              <ReviewKpiPanel
+                icon={GitBranch}
+                iconColorClass="text-gray-500"
+                title="Processen"
+                pct={reviewStatus?.processes.pct ?? 0}
+                count={reviewStatus?.processes.on_time ?? 0}
+                total={reviewStatus?.processes.total ?? 0}
+                label={`${reviewStatus?.processes.on_time ?? 0} ${(reviewStatus?.processes.on_time ?? 0) === 1 ? 'proces' : 'processen'} op tijd gereviewed`}
+              />
+              <ReviewKpiPanel
+                icon={Database}
+                iconColorClass="text-cyan-500"
+                title="Applicaties"
+                pct={reviewStatus?.applications.pct ?? 0}
+                count={reviewStatus?.applications.on_time ?? 0}
+                total={reviewStatus?.applications.total ?? 0}
+                label={`${reviewStatus?.applications.on_time ?? 0} ${(reviewStatus?.applications.on_time ?? 0) === 1 ? 'applicatie' : 'applicaties'} op tijd gereviewed`}
+              />
+              <ReviewKpiPanel
+                icon={Shield}
+                iconColorClass="text-blue-400"
+                title="BIA & BIV-Classificatie"
+                pct={reviewStatus?.bia.pct ?? 0}
+                count={reviewStatus?.bia.on_time ?? 0}
+                total={reviewStatus?.bia.total ?? 0}
+                label={`${reviewStatus?.bia.on_time ?? 0} ${(reviewStatus?.bia.on_time ?? 0) === 1 ? 'BIA' : "BIA's"} op tijd gereviewed`}
+              />
+              <ReviewKpiPanel
+                icon={FileText}
+                iconColorClass="text-indigo-400"
+                title="Procescontext"
+                pct={reviewStatus?.business_context.pct ?? 0}
+                count={reviewStatus?.business_context.on_time ?? 0}
+                total={reviewStatus?.business_context.total ?? 0}
+                label={`${reviewStatus?.business_context.on_time ?? 0} ${(reviewStatus?.business_context.on_time ?? 0) === 1 ? 'procescontext' : 'procescontexten'} op tijd gereviewed`}
+              />
             </div>
           </Card>
 

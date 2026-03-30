@@ -199,6 +199,19 @@ export interface PriorityAction {
   missing_fields: string[]
 }
 
+export interface ReviewStatusItem {
+  on_time: number
+  total: number
+  pct: number
+}
+
+export interface ReviewStatus {
+  processes: ReviewStatusItem
+  applications: ReviewStatusItem
+  bia: ReviewStatusItem
+  business_context: ReviewStatusItem
+}
+
 export interface RiskOverview {
   biv_distribution: BivDistribution
   critical_processes: CriticalProcessRisk[]

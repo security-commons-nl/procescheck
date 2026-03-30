@@ -1,13 +1,14 @@
+from datetime import date as _date
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.deps import get_db
-from app.models import Process
+from app.models import Process, Application
 from app.models.bia import BiaAssessment
 from app.schemas.dashboard import (
     DashboardSummary, ProcessCompleteness, BivTopStats, BivTopItem,
     RiskOverview, BivDistribution, BivDimensionDistribution,
     CriticalProcessRisk, Coverage, CoverageStats, PrivacyExposure,
-    PriorityAction,
+    PriorityAction, ReviewStatus, ReviewStatusItem,
 )
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
@@ -269,4 +270,38 @@ def get_risk_overview(db: Session = Depends(get_db)):
         process_fields_coverage=process_fields_coverage,
         high_risk_count=high_risk_count,
         priority_actions=actions,
+    )
+
+
+@router.get("/review-status", response_model=ReviewStatus)
+def get_review_status(db: Session = Depends(get_db)):
+    today = _date.today()
+    try:
+        cutoff = today.replace(year=today.year - 1)
+    except ValueError:
+        cutoff = _date(today.year - 1, 2, 28)
+
+    def on_time(d) -> bool:
+        return d is not None and d >= cutoff
+
+    def _item(done: int, total: int) -> ReviewStatusItem:
+        pct = round(done / total * 100) if total > 0 else 0
+        return ReviewStatusItem(on_time=done, total=total, pct=pct)
+
+    processes = db.query(Process).all()
+    total_proc = len(processes)
+
+    proc_done = sum(1 for p in processes if on_time(p.last_assessment_date))
+    bia_done  = sum(1 for p in processes if p.bia is not None and on_time(p.bia.interview_date))
+    bc_done   = sum(1 for p in processes if p.business_context is not None and on_time(p.business_context.review_date))
+
+    applications = db.query(Application).all()
+    total_apps = len(applications)
+    apps_done = sum(1 for a in applications if on_time(a.review_date))
+
+    return ReviewStatus(
+        processes=_item(proc_done, total_proc),
+        applications=_item(apps_done, total_apps),
+        bia=_item(bia_done, total_proc),
+        business_context=_item(bc_done, total_proc),
     )
