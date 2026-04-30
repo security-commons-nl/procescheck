@@ -58,6 +58,28 @@ const B_QUESTIONS: BiaQuestion[] = [
       { label: ANSWER_LABELS[4], info: 'Een dataverlies van een week of meer of een systeemuitval die oploopt tot meer dan een week kan zonder merkbare schade worden opgevangen. Kernactiviteiten blijven doorgaan, hooguit met lichte vertraging, en de informatie kan eenvoudig worden vervangen of hersteld. Voor burgers of bestuurders is er geen voelbare impact en de continuïteit van de organisatie komt niet in gevaar.' },
     ],
   },
+  {
+    key: 'b3',
+    label: 'Hoeveel tijd is er nodig om, nadat de systemen weer beschikbaar zijn, alle achterstallige werkzaamheden en administratie in te halen tot het proces weer op een normaal operationeel niveau draait?',
+    answers: [
+      { label: ANSWER_LABELS[0], info: 'Enkele uren' },
+      { label: ANSWER_LABELS[1], info: '4 tot 8 uur' },
+      { label: ANSWER_LABELS[2], info: '2 werkdagen' },
+      { label: ANSWER_LABELS[3], info: '1 week' },
+      { label: ANSWER_LABELS[4], info: 'Meer dan een week' },
+    ],
+  },
+  {
+    key: 'b4',
+    label: 'Wat is de maximale tijdsduur dat dit proces stil kan liggen (houd hierbij rekening met uitval van systemen, herstelwerkzaamheden en het volledig wegwerken van eventuele achterstanden)?',
+    answers: [
+      { label: ANSWER_LABELS[0], info: 'Enkele uren' },
+      { label: ANSWER_LABELS[1], info: '4 tot 8 uur' },
+      { label: ANSWER_LABELS[2], info: '2 werkdagen' },
+      { label: ANSWER_LABELS[3], info: '1 week' },
+      { label: ANSWER_LABELS[4], info: 'Meer dan een week' },
+    ],
+  },
 ]
 
 // ── Integriteit questions (Template BIA & BIV-Classificatie.xlsx) ─────────────
@@ -183,8 +205,8 @@ export default function BiaPage() {
 
   // Auto-calculate final scores: highest severity (= lowest numeric) across all answered questions
   const autoB = useMemo(
-    () => highestSeverity([currentForm.b1_score, currentForm.b2_score] as (number | undefined)[]),
-    [currentForm.b1_score, currentForm.b2_score],
+    () => highestSeverity([currentForm.b1_score, currentForm.b2_score, currentForm.b3_score, currentForm.b4_score] as (number | undefined)[]),
+    [currentForm.b1_score, currentForm.b2_score, currentForm.b3_score, currentForm.b4_score],
   )
   const autoI = useMemo(
     () => highestSeverity([currentForm.i1_score] as (number | undefined)[]),
@@ -414,7 +436,7 @@ export default function BiaPage() {
               <Card>
                 <p className="text-sm text-gray-500 mb-5">Beoordeel de impact van uitval van het proces op onderstaande criteria.</p>
                 <div className="space-y-6">
-                  {B_QUESTIONS.map(q => (
+                  {B_QUESTIONS.filter(q => scope === 'Business Continuïteit' || !['b3', 'b4'].includes(q.key)).map(q => (
                     <QuestionBlock
                       key={q.key}
                       question={q}
