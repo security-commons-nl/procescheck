@@ -233,7 +233,7 @@ export function BiaAlgemeenReadOnly({ bia }: { bia: BiaAssessment }) {
 
       <Card className="mt-4">
         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
-          Business Continuity Parameters
+          Continuïteitsparameters
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <RoBcpField label="MTPD / MTD">

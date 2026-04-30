@@ -1,4 +1,6 @@
 import bcpTimelineImg from '../../assets/bcp-timeline.png'
+import itContinueiteitImg from '../../assets/it-continuiteit.png'
+import businessContinueiteitImg from '../../assets/business-continuiteit.png'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -322,6 +324,7 @@ export default function BiaPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [tab, setTab] = useState<TabKey>('Algemeen')
+  const [scope, setScope] = useState<'IT-Continuïteit' | 'Business Continuïteit'>('IT-Continuïteit')
   const [selectedPid, setSelectedPid] = useState<number | undefined>(
     processId ? Number(processId) : undefined,
   )
@@ -427,6 +430,26 @@ export default function BiaPage() {
           </Card>
         )}
 
+        {/* Scope Selector */}
+        <div className="flex items-center gap-3 mb-5">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Scope</span>
+          <div className="relative flex items-center bg-gray-100 rounded-full p-0.5">
+            {(['IT-Continuïteit', 'Business Continuïteit'] as const).map(option => (
+              <button
+                key={option}
+                onClick={() => setScope(option)}
+                className={`relative z-10 px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                  scope === option
+                    ? 'bg-white text-brand-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {pid && (
           <>
             {/* Score summary */}
@@ -530,28 +553,39 @@ export default function BiaPage() {
               </Card>
 
               <Card className="mt-4">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Business Continuity Parameters</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Continuïteitsparameters</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <FormField label="MTPD / MTD">
-                    <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[4], effectiveForm.b5_score)} />
-                  </FormField>
+                  {scope === 'Business Continuïteit' && (
+                    <FormField label="MTPD / MTD">
+                      <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[4], effectiveForm.b5_score)} />
+                    </FormField>
+                  )}
                   <FormField label="RTO">
                     <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[5], effectiveForm.b6_score)} />
                   </FormField>
-                  <FormField label="WRT">
-                    <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[6], effectiveForm.b7_score)} />
-                  </FormField>
+                  {scope === 'Business Continuïteit' && (
+                    <FormField label="WRT">
+                      <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[6], effectiveForm.b7_score)} />
+                    </FormField>
+                  )}
                   <FormField label="RPO">
                     <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[7], effectiveForm.b8_score)} />
                   </FormField>
                 </div>
                 <div className="mt-8 pt-8 border-t border-gray-100">
-                  <BcpTimeline
-                    mtpd={effectiveForm.b5_score ? BCP_COMPACT_MAP.mtpd[effectiveForm.b5_score as keyof typeof BCP_COMPACT_MAP.mtpd] : undefined}
-                    rto={effectiveForm.b6_score  ? BCP_COMPACT_MAP.rto[effectiveForm.b6_score  as keyof typeof BCP_COMPACT_MAP.rto]  : undefined}
-                    wrt={effectiveForm.b7_score  ? BCP_COMPACT_MAP.wrt[effectiveForm.b7_score  as keyof typeof BCP_COMPACT_MAP.wrt]  : undefined}
-                    rpo={effectiveForm.b8_score  ? BCP_COMPACT_MAP.rpo[effectiveForm.b8_score  as keyof typeof BCP_COMPACT_MAP.rpo]  : undefined}
-                  />
+                  {scope === 'IT-Continuïteit' ? (
+                    <ItContinueitTimeline
+                      rto={effectiveForm.b6_score ? BCP_COMPACT_MAP.rto[effectiveForm.b6_score as keyof typeof BCP_COMPACT_MAP.rto] : undefined}
+                      rpo={effectiveForm.b8_score ? BCP_COMPACT_MAP.rpo[effectiveForm.b8_score as keyof typeof BCP_COMPACT_MAP.rpo] : undefined}
+                    />
+                  ) : (
+                    <img
+                      src={businessContinueiteitImg}
+                      alt="Business Continuïteit tijdlijn"
+                      className="w-full h-auto block"
+                      draggable={false}
+                    />
+                  )}
                 </div>
               </Card>
               </>
@@ -750,6 +784,48 @@ function BcpTimeline({ mtpd, rto, wrt, rpo }: {
       {/* WRT — arrow x=1167–1522 (center=1344 → 71.8%), white zone y=226–264 (center=245 → 42.5%) */}
       <span style={{ ...base, left: '71.8%', top: '42.5%' }}>
         {cap(wrt)}
+      </span>
+    </div>
+  )
+}
+
+// ── ItContinueitTimeline ──────────────────────────────────────────────────────
+// Uses IT-Continuiteit.png (1872×576) as background; overlays RPO and RTO.
+// Calibration via pixel scan — white box centers:
+//   RPO: x=540 → left=28.8%, y≈202 → top=35.1%
+//   RTO: x=937 → left=50.1%, y≈202 → top=35.1%
+
+function ItContinueitTimeline({ rto, rpo }: { rto?: string; rpo?: string }) {
+  const dash = '—'
+  const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : dash
+
+  const base: React.CSSProperties = {
+    position: 'absolute',
+    transform: 'translate(-50%, -50%)',
+    whiteSpace: 'nowrap',
+    fontSize: '0.7rem',
+    fontWeight: 700,
+    lineHeight: 1,
+    color: '#1a1a1a',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }
+
+  return (
+    <div className="relative w-full" style={{ lineHeight: 0 }}>
+      <img
+        src={itContinueiteitImg}
+        alt="IT-Continuïteit tijdlijn: RPO en RTO"
+        className="w-full h-auto block"
+        draggable={false}
+      />
+      {/* RPO — x=540 (28.8%), white zone center y≈202 (35.1%) */}
+      <span style={{ ...base, left: '28.8%', top: '35.1%' }}>
+        {cap(rpo)}
+      </span>
+      {/* RTO — x=937 (50.1%), white zone center y≈202 (35.1%) */}
+      <span style={{ ...base, left: '50.1%', top: '35.1%' }}>
+        {cap(rto)}
       </span>
     </div>
   )
