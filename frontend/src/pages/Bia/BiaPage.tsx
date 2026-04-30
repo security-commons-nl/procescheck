@@ -31,230 +31,61 @@ type BiaQuestion = {
 
 const ANSWER_LABELS = ['Catastrofaal', 'Kritiek / zeer ernstig', 'Gemiddeld', 'Gering', 'Verwaarloosbaar']
 
-// ── Beschikbaarheid questions (from Excel, rows 3–10) ─────────────────────────
+// ── Beschikbaarheid questions (Template BIA & BIV-Classificatie.xlsx) ────────
 
 const B_QUESTIONS: BiaQuestion[] = [
   {
     key: 'b1',
-    label: 'Hoe erg is het als informatie tijdelijk niet beschikbaar is, kan het proces dan nog doordraaien?',
+    label: 'Wat is de maximale uitvalduur van het proces voordat onaanvaardbare gevolgen optreden?',
     answers: [
-      { label: ANSWER_LABELS[0], info: 'Uitval van enkele uren is niet acceptabel en kan leiden tot onherstelbare schade en bestuurlijke crisis. Continuïteit moet permanent worden gewaarborgd. Near real-time beschikbaarheid is noodzakelijk.' },
-      { label: ANSWER_LABELS[1], info: 'Uitval van maximaal 8 uur kan cruciale processen stilleggen. De informatie is moeilijk te vervangen en herstel vergt veel tijd, middelen en geld. Gevolgen worden breed gevoeld binnen en buiten de organisatie.' },
-      { label: ANSWER_LABELS[2], info: 'Uitval van maximaal 2 werkdagen heeft aanzienlijke invloed op kernactiviteiten en kan leiden tot klachten of verminderde dienstverlening. Herstel vergt aanzienlijke inspanning en extra kosten.' },
-      { label: ANSWER_LABELS[3], info: 'Uitval van maximaal 1 week kan leiden tot hinder maar heeft geen aanzienlijke invloed op de dienstverlening. Herstel vraagt enige inspanning maar is goed uitvoerbaar.' },
-      { label: ANSWER_LABELS[4], info: 'Tijdelijke onbeschikbaarheid is vrijwel zonder gevolgen. Uitval van meer dan een week kan zonder merkbare schade worden opgevangen. Kernactiviteiten blijven doorgaan en de informatie is eenvoudig te vervangen of te herstellen.' },
+      { label: ANSWER_LABELS[0], info: 'Uitval van enkele uren is niet acceptabel en kan leiden tot onherstelbare schade en bestuurlijke crisis. De informatie is onvervangbaar en de processen die ermee samenhangen zijn vitaal voor de samenleving. Continuïteit moet permanent worden gewaarborgd. Near real-time beschikbaarheid is noodzakelijk. Uitval raakt direct de kern van de organisatie en kan het vertrouwen van burgers en bestuur onherstelbaar aantasten.' },
+      { label: ANSWER_LABELS[1], info: 'Een dataverlies van 4 tot 8 uur of een systeemuitval van maximaal 8 uur kan strategische processen stilleggen. De informatie is moeilijk te vervangen en herstel vergt veel tijd, middelen en geld. De gevolgen worden breed gevoeld, zowel in de organisatie als daarbuiten, en kunnen leiden tot forse maatschappelijke ontwrichting en bestuurlijke druk.' },
+      { label: ANSWER_LABELS[2], info: 'Een dataverlies van 8 tot 24 uur of een systeemuitval van maximaal 2 werkdagen heeft aanzienlijke invloed op kernactiviteiten en kan leiden tot klachten of verminderde dienstverlening. Het herstel van de informatie of systemen vergt aanzienlijke inspanning en brengt extra kosten met zich mee. De maatschappelijke impact wordt zichtbaar, maar met voldoende inzet in herstel nog goed mogelijk.' },
+      { label: ANSWER_LABELS[3], info: 'Een dataverlies van maximaal 24 uur of een systeemuitval van maximaal 1 week kan leiden tot hinder in processen, maar de dienstverlening blijft grotendeels doorgaan. Herstel vraagt wel enige inspanning en planning, maar is goed uitvoerbaar. Voor burgers is er beperkte merkbare overlast en het vertrouwen in de organisatie blijft in stand.' },
+      { label: ANSWER_LABELS[4], info: 'Een dataverlies van een week of meer of een systeemuitval die oploopt tot meer dan een week kan zonder merkbare schade worden opgevangen. Kernactiviteiten blijven doorgaan, hooguit met lichte vertraging, en de informatie kan eenvoudig worden vervangen of hersteld. Voor burgers of bestuurders is er geen voelbare impact en de continuïteit van de organisatie komt niet in gevaar.' },
     ],
   },
   {
     key: 'b2',
-    label: 'Managementbeslissingen: Welke tijdsduur, die het nemen van beslissingen door het ontbreken van informatie negatief beïnvloedt, is acceptabel?',
+    label: 'Wat is de maximale hoeveelheid dataverlies die acceptabel is zonder onaanvaardbare gevolgen?',
     answers: [
-      { label: ANSWER_LABELS[0], info: 'Geen uitval acceptabel. Elke vertraging in informatievoorziening kan leiden tot onherstelbare fouten in besluitvorming en een bestuurlijke crisis.' },
-      { label: ANSWER_LABELS[1], info: 'Tot maximaal 8 uur. Uitval legt besluitvorming grotendeels stil en kan de koers van de organisatie ernstig ontsporen.' },
-      { label: ANSWER_LABELS[2], info: 'Tot twee werkdagen. Vertraging heeft aanzienlijke invloed op kernbeslissingen en kan leiden tot verkeerd beleid of gemiste kansen.' },
-      { label: ANSWER_LABELS[3], info: 'Tot één week. Enige vertraging in besluitvorming is hinderlijk maar heeft geen aanzienlijke invloed op de organisatie.' },
-      { label: ANSWER_LABELS[4], info: 'Meer dan een week. Beslissingen kunnen probleemloos worden uitgesteld, er is geen merkbare invloed op het bestuur of management.' },
-    ],
-  },
-  {
-    key: 'b3',
-    label: 'Imagoverlies: Hoe lang duurt het voordat er sprake is van imagoverlies wanneer informatie niet voorhanden is?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Geen uitval acceptabel. Elke periode van niet-beschikbaarheid tast het vertrouwen van burgers en het bestuur onherstelbaar aan.' },
-      { label: ANSWER_LABELS[1], info: 'Tot maximaal 8 uur. Forse en blijvende imagoschade, het vertrouwen van burgers, partners en medewerkers krijgt een serieuze knauw.' },
-      { label: ANSWER_LABELS[2], info: 'Tot twee werkdagen. Merkbare imagoschade; burgers en ketenpartners verliezen zichtbaar vertrouwen in de dienstverlening.' },
-      { label: ANSWER_LABELS[3], info: 'Tot één week. Beperkte imagoschade; enige hinder voor burgers of partners, maar het vertrouwen blijft grotendeels intact.' },
-      { label: ANSWER_LABELS[4], info: 'Meer dan een week. Geen voelbare imagoschade, burgers en partners merken de uitval nauwelijks.' },
-    ],
-  },
-  {
-    key: 'b4',
-    label: 'Wettelijke aansprakelijkheid: Hoe lang kan de informatie niet beschikbaar zijn voordat er wettelijke of contractuele verplichtingen niet kunnen worden nagekomen?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Geen uitval acceptabel. Directe en zware juridische aansprakelijkheid bij elke periode van niet-beschikbaarheid; extreme herstelkosten en mogelijke bestuurlijke crisis.' },
-      { label: ANSWER_LABELS[1], info: 'Tot maximaal 8 uur. Juridische claims zijn waarschijnlijk en bijkomende kosten lopen hoog op, naleving van wettelijke verplichtingen komt ernstig in gevaar.' },
-      { label: ANSWER_LABELS[2], info: 'Tot twee werkdagen. Reële juridische risico\'s ontstaan en de kosten voor herstel en naleving worden aanzienlijk.' },
-      { label: ANSWER_LABELS[3], info: 'Tot één week. Beperkte juridische of contractuele gevolgen; minimale financiële of juridische impact die eenvoudig op te vangen is.' },
-      { label: ANSWER_LABELS[4], info: 'Meer dan een week. Er zijn geen directe wettelijke of contractuele verplichtingen die in gevaar komen bij langdurige uitval.' },
-    ],
-  },
-  {
-    key: 'b5',
-    label: 'Hoe lang kan dit proces maximaal uitvallen voordat de schade onaanvaardbaar wordt? (MTPD/MTD)',
-    tooltip: 'MTPD/MTD: Hoe lang mag het proces uitvallen?\n\nDoel: de absolute bovengrens bepalen waarbinnen herstel moet plaatsvinden.\n\nInterviewvragen:\n• "Stel: dit proces valt morgenochtend volledig uit. Wanneer begint dat écht een probleem te worden — niet alleen vervelend, maar met concrete gevolgen voor klanten, burgers of de organisatie?"\n• "Op welk moment zou jij naar je leidinggevende gaan en zeggen: dit is een crisis die geëscaleerd moet worden?"\n• "Zijn er wettelijke termijnen, contractuele afspraken of SLA\'s die bepalen wanneer het te laat is?"\n• "Wat zijn de concrete gevolgen als die grens wordt overschreden — financieel, juridisch, voor klanten, of voor de reputatie?"',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Uitval van enkele uren is niet acceptabel en kan leiden tot onherstelbare schade en bestuurlijke crisis.' },
-      { label: ANSWER_LABELS[1], info: 'Uitval van maximaal 8 uur kan cruciale processen stilleggen en leidt tot brede maatschappelijke en bestuurlijke gevolgen.' },
-      { label: ANSWER_LABELS[2], info: 'Uitval van maximaal 2 werkdagen heeft aanzienlijke invloed op de dienstverlening en kan leiden tot klachten.' },
-      { label: ANSWER_LABELS[3], info: 'Uitval van maximaal 1 week leidt tot hinder maar heeft geen aanzienlijke invloed op de dienstverlening.' },
-      { label: ANSWER_LABELS[4], info: 'Uitval van meer dan een week kan zonder merkbare schade worden opgevangen. Geen voelbare impact voor burgers of bestuur.' },
-    ],
-  },
-  {
-    key: 'b6',
-    label: 'Binnen hoeveel tijd na een verstoring moet dit proces minimaal draaien om onaanvaardbare schade te voorkomen? (RTO)',
-    tooltip: 'RTO: Wanneer moet het minimaal werken?\n\nDoel: bepalen binnen hoeveel tijd het proces minimaal operationeel moet zijn, en wat dat minimale niveau inhoudt.\n\nInterviewvragen:\n• "Als het proces uitvalt — hoe lang kun je dat opvangen zonder dat de schade onaanvaardbaar wordt? Wat doe je in de tussentijd?"\n• "Zijn er handmatige alternatieven mogelijk? Zo ja: hoe lang houd je dat vol, en wat kun je dan wél en niet?"\n• "Op welk moment moet het proces minimaal weer operationeel zijn, ook al is het nog niet volledig op normaal niveau?"\n• "Wat versta jij onder \'minimaal operationeel\'? Welke stappen moeten dan in elk geval werken, en wat kan nog even wachten?"\n• "Hoe snel moet er worden hersteld? Binnen welke tijdsperiode moet de dienstverlening weer hersteld zijn?"',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Binnen enkele uren: Near real-time herstel vereist. Elke vertraging leidt tot onherstelbare schade.' },
-      { label: ANSWER_LABELS[1], info: 'Binnen 8 uur: Herstel binnen 8 uur is noodzakelijk om stillegging proces te voorkomen.' },
-      { label: ANSWER_LABELS[2], info: 'Binnen 2 werkdagen: Herstel binnen 2 werkdagen voorkomt aanzienlijke verstoring van kernactiviteiten.' },
-      { label: ANSWER_LABELS[3], info: 'Binnen 1 week: Herstel binnen een week voorkomt aanzienlijke hinder aan de dienstverlening.' },
-      { label: ANSWER_LABELS[4], info: 'Meer dan 1 week: Herstel binnen een week is voldoende. Geen merkbare impact bij langere uitval.' },
-    ],
-  },
-  {
-    key: 'b7',
-    label: 'Nadat de systemen weer werken: hoelang duurt het voordat het proces volledig op normaal niveau draait? (WRT)',
-    tooltip: 'WRT: Hoelang duurt volledig herstel?\n\nDoel: bepalen hoeveel tijd nodig is om na technisch herstel ook operationeel volledig te herstellen.\n\nInterviewvragen:\n• "Stel het systeem is weer beschikbaar. Wat moet er daarna nog allemaal gebeuren voordat je zegt: we draaien weer volledig normaal?"\n• "Denk aan achterstallige verwerkingen, handmatige registraties die ingevoerd moeten worden, controles — wat hoort daarbij?"\n• "Hoeveel mensen heb je nodig om die achterstand weg te werken, en zijn die dan beschikbaar?"\n• "Hoelang duurt dat herstelwerk realistisch gezien — niet in het beste geval, maar in een normale situatie?"',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Meerdere werkdagen: Zeer omvangrijk herstelwerk. Volledig operationeel worden vergt meerdere dagen intensieve inspanning.' },
-      { label: ANSWER_LABELS[1], info: '1 werkdag: Omvangrijk herstelwerk. Significante capaciteit en tijd nodig om volledig te herstellen.' },
-      { label: ANSWER_LABELS[2], info: 'Dagdeel (4–8 uur): Merkbaar herstelwerk vereist. Achterstand vraagt gerichte inzet van medewerkers.' },
-      { label: ANSWER_LABELS[3], info: '1–4 uur: Beperkt herstelwerk. Achterstand is snel weggewerkt met beschikbare capaciteit.' },
-      { label: ANSWER_LABELS[4], info: 'Minder dan 1 uur: Nauwelijks herstelwerk nodig. Proces draait direct na systeemherstel weer volledig.' },
-    ],
-  },
-  {
-    key: 'b8',
-    label: 'Hoeveel dataverlies kan dit proces maximaal tolereren zonder onaanvaardbare gevolgen? (RPO)',
-    tooltip: 'RPO: Hoeveel dataverlies is acceptabel?\n\nDoel: bepalen over welk tijdvak gegevensverlies acceptabel is zonder onaanvaardbare gevolgen.\n\nInterviewvragen:\n• "Hoe snel veranderen de gegevens in dit proces — zijn het doorlopende transacties of verwerk je data in batches?"\n• "Stel we herstellen het systeem, maar de gegevens van de afgelopen paar uur zijn weg. Wat betekent dat concreet?"\n• "Kunnen verloren gegevens worden gereconstrueerd — bijvoorbeeld uit papieren documenten, e-mails of koppelingen met andere systemen? Hoe lang duurt dat?"\n• "Zijn er wettelijke of contractuele verplichtingen die bepalen hoe actueel de gegevens moeten zijn?"\n• "Hoeveel dataverlies (RPO) is acceptabel en binnen welke tijdsperiode moet dit hersteld kunnen worden?"',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Enkele uren of minder: Dataverlies van enkele uren kan leiden tot onherstelbare schade en bestuurlijke crisis. Near real-time back-up vereist.' },
-      { label: ANSWER_LABELS[1], info: '4–8 uur: Dataverlies van 4 tot 8 uur kan proces stilleggen. Informatie is moeilijk te reconstrueren.' },
-      { label: ANSWER_LABELS[2], info: '8–24 uur: Dataverlies van 8 tot 24 uur heeft aanzienlijke invloed op de dienstverlening en kernactiviteiten.' },
-      { label: ANSWER_LABELS[3], info: 'Maximaal 24 uur: Dataverlies van maximaal 24 uur leidt tot hinder maar heeft geen aanzienlijke invloed op de dienstverlening.' },
-      { label: ANSWER_LABELS[4], info: '1 week of meer: Dataverlies van een week of langer kan zonder merkbare schade worden opgevangen. Informatie is eenvoudig te reconstrueren.' },
+      { label: ANSWER_LABELS[0], info: 'Uitval van enkele uren is niet acceptabel en kan leiden tot onherstelbare schade en bestuurlijke crisis. De informatie is onvervangbaar en de processen die ermee samenhangen zijn vitaal voor de samenleving. Continuïteit moet permanent worden gewaarborgd. Near real-time beschikbaarheid is noodzakelijk. Uitval raakt direct de kern van de organisatie en kan het vertrouwen van burgers en bestuur onherstelbaar aantasten.' },
+      { label: ANSWER_LABELS[1], info: 'Een dataverlies van 4 tot 8 uur of een systeemuitval van maximaal 8 uur kan strategische processen stilleggen. De informatie is moeilijk te vervangen en herstel vergt veel tijd, middelen en geld. De gevolgen worden breed gevoeld, zowel in de organisatie als daarbuiten, en kunnen leiden tot forse maatschappelijke ontwrichting en bestuurlijke druk.' },
+      { label: ANSWER_LABELS[2], info: 'Een dataverlies van 8 tot 24 uur of een systeemuitval van maximaal 2 werkdagen heeft aanzienlijke invloed op kernactiviteiten en kan leiden tot klachten of verminderde dienstverlening. Het herstel van de informatie of systemen vergt aanzienlijke inspanning en brengt extra kosten met zich mee. De maatschappelijke impact wordt zichtbaar, maar met voldoende inzet in herstel nog goed mogelijk.' },
+      { label: ANSWER_LABELS[3], info: 'Een dataverlies van maximaal 24 uur of een systeemuitval van maximaal 1 week kan leiden tot hinder in processen, maar de dienstverlening blijft grotendeels doorgaan. Herstel vraagt wel enige inspanning en planning, maar is goed uitvoerbaar. Voor burgers is er beperkte merkbare overlast en het vertrouwen in de organisatie blijft in stand.' },
+      { label: ANSWER_LABELS[4], info: 'Een dataverlies van een week of meer of een systeemuitval die oploopt tot meer dan een week kan zonder merkbare schade worden opgevangen. Kernactiviteiten blijven doorgaan, hooguit met lichte vertraging, en de informatie kan eenvoudig worden vervangen of hersteld. Voor burgers of bestuurders is er geen voelbare impact en de continuïteit van de organisatie komt niet in gevaar.' },
     ],
   },
 ]
 
-// ── Integriteit questions (from Excel, rows 3–8) ──────────────────────────────
+// ── Integriteit questions (Template BIA & BIV-Classificatie.xlsx) ─────────────
 
 const I_QUESTIONS: BiaQuestion[] = [
   {
     key: 'i1',
-    label: 'Hoe erg is het als informatie onjuist of onvolledig is, wat zijn de gevolgen als er fouten in zitten of als gegevens zijn gemanipuleerd?',
+    label: 'Wat is de impact wanneer informatie onjuist, onvolledig of gemanipuleerd is?',
     answers: [
-      { label: ANSWER_LABELS[0], info: 'Verkeerde of misleidende informatie veroorzaakt structurele fouten in management- en beleidsbeslissingen. Grootschalige fraude wordt mogelijk. Herstel is nauwelijks mogelijk en de schade is grotendeels onomkeerbaar.' },
-      { label: ANSWER_LABELS[1], info: 'Beslissingen van management of bestuur worden sterk beïnvloed door verkeerde informatie. Fraude is aannemelijk en kan omvangrijk zijn. Kernprocessen komen grotendeels stil te liggen. Juridische claims zijn waarschijnlijk.' },
-      { label: ANSWER_LABELS[2], info: 'Het risico op fraude is significant en kernprocessen kunnen aanzienlijke vertraging oplopen. Managementbeslissingen kunnen worden beïnvloed door onjuiste informatie. Herstel is mogelijk maar kostbaar en tijdsintensief.' },
-      { label: ANSWER_LABELS[3], info: 'Fouten hebben beperkte gevolgen. Beslissingen kunnen incidenteel worden beïnvloed maar niet op een manier die de organisatie langdurig schaadt. Fraude is beperkt in omvang. Herstel is relatief eenvoudig en snel uitvoerbaar.' },
-      { label: ANSWER_LABELS[4], info: 'Fouten of manipulaties hebben geen merkbare gevolgen. Beslissingen blijven correct, het risico op fraude is verwaarloosbaar en processen blijven ongestoord functioneren. Geen juridische of financiële consequenties.' },
-    ],
-  },
-  {
-    key: 'i2',
-    label: 'Managementbeslissingen: Kan onjuiste informatie leiden tot onjuiste beslissingen? Wat zijn de gevolgen?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Onjuiste informatie veroorzaakt structurele en onomkeerbare fouten in besluitvorming op bestuurlijk niveau. Langdurige koerswijzigingen op basis van foutieve data zijn mogelijk. Het vertrouwen in de informatievoorziening van de organisatie gaat blijvend verloren.' },
-      { label: ANSWER_LABELS[1], info: 'Beslissingen van management en bestuur worden sterk beïnvloed. De koers van de organisatie kan ernstig ontsporen. Correctie achteraf is zeer moeilijk en vergt langdurige inspanning.' },
-      { label: ANSWER_LABELS[2], info: 'Managementbeslissingen kunnen merkbaar worden beïnvloed, wat kan leiden tot verkeerd beleid of onjuiste keuzes. Correctie is mogelijk maar tijdrovend en kostbaar.' },
-      { label: ANSWER_LABELS[3], info: 'Beslissingen kunnen incidenteel worden beïnvloed, maar zonder langdurige of structurele schade voor de organisatie. Correctie is eenvoudig en snel uitvoerbaar.' },
-      { label: ANSWER_LABELS[4], info: 'Onjuiste informatie heeft geen invloed op besluitvorming. De betrouwbaarheid van managementinformatie blijft intact en beslissingen blijven correct.' },
-    ],
-  },
-  {
-    key: 'i3',
-    label: 'Fraude potentie: Zijn er frauderisico\'s met deze informatie, en welke gevolgen hebben deze?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Grootschalige fraude wordt mogelijk en is nauwelijks meer te beheersen. De financiële en maatschappelijke schade is onomkeerbaar. Het vertrouwen van burgers en partners gaat blijvend verloren en de organisatie wordt geconfronteerd met extreme herstelkosten en zware juridische aansprakelijkheid.' },
-      { label: ANSWER_LABELS[1], info: 'Fraude is aannemelijk en kan omvangrijk zijn. De financiële schade loopt hoog op en juridische claims zijn waarschijnlijk. Het vertrouwen van burgers en ketenpartners krijgt forse en blijvende schade.' },
-      { label: ANSWER_LABELS[2], info: 'Het risico op fraude is significant. Fraude is mogelijk en kan leiden tot aanzienlijke financiële schade en reputatieschade. Juridische risico\'s zijn reëel en herstelkosten zijn aanzienlijk.' },
-      { label: ANSWER_LABELS[3], info: 'Het frauderisico is aanwezig maar beperkt in omvang en impact. Financiële en juridische gevolgen zijn minimaal en eenvoudig op te vangen.' },
-      { label: ANSWER_LABELS[4], info: 'Het frauderisico is verwaarloosbaar. Onjuiste of gemanipuleerde informatie biedt geen zinvol aanknopingspunt voor fraude en de processen blijven ongestoord functioneren.' },
-    ],
-  },
-  {
-    key: 'i4',
-    label: 'Onderbreking: In hoeverre kan het proces onderbroken worden als gevolg van ongeautoriseerde wijzigingen van, of fouten in informatie?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Proces wordt langdurig onderbroken of volledig lamgelegd. Herstel is nauwelijks mogelijk. De organisatie is niet meer in staat haar kerntaken uit te voeren en de continuïteit komt structureel in gevaar.' },
-      { label: ANSWER_LABELS[1], info: 'Proces komt grotendeels stil te liggen. Herstel vergt zeer veel tijd, middelen en geld. De brede maatschappelijke gevolgen zijn voelbaar en de bestuurlijke druk neemt sterk toe.' },
-      { label: ANSWER_LABELS[2], info: 'Proces loopt aanzienlijke vertraging op. De dienstverlening wordt merkbaar verstoord. Herstel is mogelijk maar kostbaar en tijdsintensief en vraagt extra capaciteit.' },
-      { label: ANSWER_LABELS[3], info: 'Proces ondervindt kortdurende hinder. De dienstverlening blijft grotendeels doorgaan en het herstel is relatief eenvoudig en snel uitvoerbaar zonder grote extra inspanning.' },
-      { label: ANSWER_LABELS[4], info: 'Process blijft ongestoord functioneren. Fouten of manipulaties in de informatie leiden niet tot enige merkbare onderbreking van activiteiten.' },
-    ],
-  },
-  {
-    key: 'i5',
-    label: 'Vertrouwen van het publiek c.q. klanten: Kan het vertrouwen van het publiek geschaad worden door onjuiste informatie?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Het vertrouwen van burgers, partners en medewerkers gaat blijvend verloren. De reputatieschade is onomkeerbaar en de organisatie verliest haar maatschappelijke geloofwaardigheid. Herstel van het publieke vertrouwen is niet of nauwelijks meer mogelijk.' },
-      { label: ANSWER_LABELS[1], info: 'Het vertrouwen van burgers en ketenpartners krijgt forse en blijvende schade. Publieke verontwaardiging is waarschijnlijk en kan leiden tot politieke en bestuurlijke druk. Herstel van vertrouwen vergt langdurige en zware inspanning.' },
-      { label: ANSWER_LABELS[2], info: 'Burgers en ketenpartners verliezen merkbaar vertrouwen in de dienstverlening. Klachten nemen toe en de reputatie van de organisatie lijdt zichtbare schade. Herstel is mogelijk maar vergt gerichte inspanning.' },
-      { label: ANSWER_LABELS[3], info: 'Het vertrouwen van burgers of ketenpartners wordt slechts licht geraakt. Er kan sprake zijn van incidentele klachten, maar het algemene beeld van de organisatie blijft positief. Herstel gaat snel.' },
-      { label: ANSWER_LABELS[4], info: 'Het vertrouwen van burgers, ketenpartners en medewerkers blijft volledig intact. Onjuiste informatie heeft geen voelbare invloed op de publieke perceptie van de organisatie.' },
-    ],
-  },
-  {
-    key: 'i6',
-    label: 'Wettelijke aansprakelijkheid: Wat kunnen de gevolgen zijn van het niet voldoen aan wettelijke of contractuele verplichtingen die veroorzaakt worden door onjuiste informatie?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Zware juridische aansprakelijkheid is onvermijdelijk. De organisatie wordt geconfronteerd met extreme boetes, claims en mogelijke strafrechtelijke gevolgen. Naleving van wet- en regelgeving is structureel en langdurig in gevaar. Herstel van de juridische positie is nauwelijks mogelijk.' },
-      { label: ANSWER_LABELS[1], info: 'Juridische claims zijn waarschijnlijk en de bijkomende kosten lopen hoog op. Wettelijke termijnen en contractuele verplichtingen worden ernstig geschonden. De organisatie staat bloot aan toezichthoudende sancties en bestuurlijke aansprakelijkheid.' },
-      { label: ANSWER_LABELS[2], info: 'Er zijn reële juridische risico\'s en de extra kosten om te herstellen zijn aanzienlijk. Wettelijke of contractuele verplichtingen kunnen niet volledig worden nagekomen, wat kan leiden tot formele klachten of handhavingsmaatregelen.' },
-      { label: ANSWER_LABELS[3], info: 'Juridische of financiële gevolgen zijn minimaal en eenvoudig op te vangen. Er kan sprake zijn van een incidentele tekortkoming, maar zonder structurele of zware consequenties.' },
-      { label: ANSWER_LABELS[4], info: 'Er zijn geen juridische consequenties of extra kosten te verwachten. Wettelijke en contractuele verplichtingen blijven volledig intact, ongeacht de fout of manipulatie.' },
+      { label: ANSWER_LABELS[0], info: 'Verkeerde of misleidende informatie veroorzaakt structurele fouten in management- en beleidsbeslissingen. Grootschalige fraude wordt mogelijk en strategische processen worden langdurig onderbroken of zelfs volledig lamgelegd. Het vertrouwen van burgers, partners en medewerkers gaat blijvend verloren. De organisatie wordt geconfronteerd met zware juridische aansprakelijkheid en extreme herstelkosten. Het moreel van medewerkers wordt ernstig geschaad, waardoor motivatie en loyaliteit verdwijnen. Herstel is nauwelijks nog mogelijk en de schade is grotendeels onomkeerbaar.' },
+      { label: ANSWER_LABELS[1], info: 'Beslissingen van management of bestuur worden sterk beïnvloed door verkeerde informatie, waardoor de koers van de organisatie ernstig kan ontsporen. Fraude is aannemelijk en kan omvangrijk zijn. Kernprocessen komen grotendeels stil te liggen en het vertrouwen van burgers en ketenpartners krijgt forse en blijvende schade. Juridische claims zijn waarschijnlijk en de bijkomende kosten lopen hoog op. Het moreel van medewerkers komt zwaar onder druk te staan. Herstel is zeer moeilijk en vergt langdurige inspanningen.' },
+      { label: ANSWER_LABELS[2], info: 'Managementbeslissingen kunnen duidelijk worden beïnvloed door onjuiste informatie, wat kan leiden tot verkeerd beleid of onjuiste keuzes. Het risico op fraude is significant en kernprocessen kunnen aanzienlijke vertraging oplopen. Burgers en ketenpartners verliezen merkbaar vertrouwen in de dienstverlening. Er zijn reële juridische risico\'s en de extra kosten om te herstellen zijn aanzienlijk. Medewerkers ervaren een daling in motivatie doordat fouten en herstelwerk druk veroorzaken. Herstel is mogelijk, maar kostbaar en tijdsintensief.' },
+      { label: ANSWER_LABELS[3], info: 'Beslissingen kunnen incidenteel worden beïnvloed, maar niet op een manier die de organisatie langdurig schaadt. Het risico op fraude is aanwezig, maar beperkt in omvang. Processen ondervinden hooguit kortdurende hinder en het vertrouwen van burgers of ketenpartners wordt slechts licht geraakt. Juridische of financiële gevolgen zijn minimaal en eenvoudig op te vangen. Medewerkers merken weinig en herstel is relatief eenvoudig en snel uit te voeren.' },
+      { label: ANSWER_LABELS[4], info: 'Managementbeslissingen blijven correct, omdat de betrouwbaarheid van de gegevens niet wordt aangetast. Het risico op fraude is verwaarloosbaar en de processen blijven ongestoord functioneren. Het vertrouwen van burgers, ketenpartners en medewerkers blijft intact. Er zijn geen juridische consequenties of extra kosten te verwachten en het moreel van de medewerkers ondervindt geen enkele negatieve invloed.' },
     ],
   },
 ]
 
-// ── Vertrouwelijkheid questions (from Excel, rows 3–7) ────────────────────────
+// ── Vertrouwelijkheid questions (Template BIA & BIV-Classificatie.xlsx) ───────
 
 const V_QUESTIONS: BiaQuestion[] = [
   {
     key: 'v1',
-    label: 'Hoe gevoelig is deze informatie, wat zijn de gevolgen als onbevoegden toegang krijgen?',
+    label: 'Wat is de impact op de organisatie als informatie ongeautoriseerd wordt ingezien of verspreid?',
     answers: [
-      { label: ANSWER_LABELS[0], info: 'Geheim/zeer geheim: Hoogste vertrouwelijkheidsklasse. Openbaarmaking heeft catastrofale gevolgen voor de samenleving of nationale veiligheid. Beveiliging is zeer zwaar en strikt gereguleerd (ABDO/ABRO). Komt bij gemeenten zeer waarschijnlijk niet voor.' },
-      { label: ANSWER_LABELS[1], info: 'Confidentieel: Zeer gevoelige informatie waarbij openbaarmaking ernstig schadelijk zou zijn. Ongeautoriseerde kennisname moet actief en strikt worden voorkomen. Aanvullende beveiligingsregels (ABDO/ABRO) zijn van toepassing naast BIO2.' },
-      { label: ANSWER_LABELS[2], info: 'Vertrouwelijk: Gevoelige informatie waarbij de organisatie weerstand tegen spionage en misbruik moet organiseren. Ongeautoriseerde openbaarmaking is schadelijk en moet zoveel mogelijk worden voorkomen. Minimaal BIO2 van toepassing.' },
-      { label: ANSWER_LABELS[3], info: 'Intern: Informatie die binnen de organisatie moet blijven. Onbevoegde kennisname is ongewenst maar gevolgen zijn beperkt en doorgaans herstelbaar. Kan lichte reputatieschade of interne verstoring veroorzaken.' },
-      { label: ANSWER_LABELS[4], info: 'Openbaar: Informatie die zonder risico gedeeld kan worden met iedereen. Bedoeld voor openbaarheid, bijvoorbeeld op de gemeentelijke website. Ongeautoriseerde kennisname levert geen schade op. Let op: ook openbare informatie kan integer en beschikbaar moeten zijn.' },
-    ],
-  },
-  {
-    key: 'v2',
-    label: 'Vertrouwen van de burger: Wat zijn de gevolgen voor de organisatie indien de binnen het proces beschikbare informatie te vroeg c.q. niet volgens de regels verspreid wordt?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Blijvend en onherstelbaar verlies van burgervertrouwen. De relatie tussen burger en overheid wordt fundamenteel aangetast. Maatschappelijke crisis en bestuurlijk ingrijpen zijn onvermijdelijk. Herstel is nauwelijks nog mogelijk.' },
-      { label: ANSWER_LABELS[1], info: 'Ernstige en langdurige beschadiging van het burgervertrouwen. Burgers trekken massaal de integriteit van de organisatie in twijfel. Bestuurlijke druk neemt sterk toe en herstel vergt langdurige inspanning en transparantie.' },
-      { label: ANSWER_LABELS[2], info: 'Merkbaar verlies van vertrouwen bij een deel van de burgers. De organisatie krijgt publieke kritiek en moet actief communiceren om de schade te beperken. Herstel is mogelijk maar kost tijd en middelen.' },
-      { label: ANSWER_LABELS[3], info: 'Beperkt effect op het burgervertrouwen. Een kleine groep burgers merkt het op en er kan sprake zijn van lichte ontevredenheid, maar het vertrouwen in de organisatie als geheel blijft intact.' },
-      { label: ANSWER_LABELS[4], info: 'Geen effect op het burgervertrouwen. De verspreiding van deze informatie heeft geen merkbare gevolgen voor de relatie tussen burger en organisatie.' },
-    ],
-  },
-  {
-    key: 'v3',
-    label: 'Vertrouwen van het publiek: Wat zijn de gevolgen voor het publieke imago van de organisatie als vertrouwelijke informatie van de organisatie onterecht wordt verspreid?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Catastrofale en blijvende reputatieschade. De organisatie verliest haar geloofwaardigheid volledig. Nationale media-aandacht en politieke consequenties zijn onvermijdelijk. Het imago is vrijwel niet meer te herstellen.' },
-      { label: ANSWER_LABELS[1], info: 'Zware en langdurige reputatieschade. Brede negatieve media-aandacht en publieke ophef. Het imago van de organisatie krijgt een forse deuk die jaren kan aanhouden. Herstel vereist een intensieve en langdurige communicatiestrategie.' },
-      { label: ANSWER_LABELS[2], info: 'Duidelijke reputatieschade die breed zichtbaar is. Negatieve berichtgeving in lokale en regionale media. Het publieke imago wordt merkbaar aangetast, maar met gerichte communicatie en maatregelen is herstel haalbaar.' },
-      { label: ANSWER_LABELS[3], info: 'Beperkte reputatieschade. Mogelijke negatieve berichtgeving op kleine schaal. Het imago wordt licht geraakt maar de organisatie wordt niet fundamenteel in twijfel getrokken.' },
-      { label: ANSWER_LABELS[4], info: 'Geen reputatieschade. De verspreiding heeft geen invloed op het publieke beeld van de organisatie.' },
-    ],
-  },
-  {
-    key: 'v4',
-    label: 'Vertrouwen van ketenpartners: Wat zijn de gevolgen voor de relatie met de ketenpartners, als vertrouwelijke informatie onterecht wordt verspreid?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Volledig en blijvend verlies van vertrouwen bij ketenpartners. Samenwerkingsverbanden worden onmiddellijk beëindigd. De organisatie wordt uitgesloten van toekomstige samenwerking en gedeelde informatiestromen. Schade is onomkeerbaar.' },
-      { label: ANSWER_LABELS[1], info: 'Ernstige beschadiging van de relatie met ketenpartners. Partners trekken de betrouwbaarheid van de organisatie sterk in twijfel. Lopende samenwerkingen komen onder druk te staan of worden tijdelijk opgeschort. Herstel van vertrouwen vergt langdurige inspanning.' },
-      { label: ANSWER_LABELS[2], info: 'Merkbare verslechtering van de relatie met één of meerdere ketenpartners. Er ontstaat onzekerheid over de betrouwbaarheid van de informatiedeling. Extra afspraken en maatregelen zijn nodig om de samenwerking voort te zetten.' },
-      { label: ANSWER_LABELS[3], info: 'Lichte verstoring van de relatie met ketenpartners. Partners zijn op de hoogte maar de samenwerking blijft doorgaan. Er kunnen aanvullende vragen of zorgen worden geuit, maar de relatie herstelt zich snel.' },
-      { label: ANSWER_LABELS[4], info: 'Geen effect op de relatie met ketenpartners. De verspreiding heeft geen invloed op het vertrouwen of de samenwerking.' },
-    ],
-  },
-  {
-    key: 'v5',
-    label: '(Wettelijke) Aansprakelijkheid: Wat zijn de gevolgen voor (wettelijke) aansprakelijkheid bij het onterecht verspreiden van deze informatie?',
-    answers: [
-      { label: ANSWER_LABELS[0], info: 'Extreme juridische aansprakelijkheid. Strafrechtelijke vervolging en zware civiele claims zijn reëel. Toezichthouders leggen maximale sancties op. De financiële en juridische gevolgen zijn zo groot dat de continuïteit van de organisatie in gevaar komt.' },
-      { label: ANSWER_LABELS[1], info: 'Grote juridische aansprakelijkheid. Hoge boetes van toezichthouders (bijvoorbeeld AP bij AVG-overtredingen) en omvangrijke civiele claims zijn waarschijnlijk. Langdurige juridische procedures zijn te verwachten en de kosten lopen sterk op.' },
-      { label: ANSWER_LABELS[2], info: 'Reële juridische risico\'s. Er kunnen boetes of claims volgen vanuit toezichthouders of gedupeerde partijen. Juridische procedures zijn mogelijk en de herstelkosten zijn aanzienlijk, maar de organisatie kan dit dragen.' },
-      { label: ANSWER_LABELS[3], info: 'Minimale juridische gevolgen. Eventuele aansprakelijkheid is beperkt van omvang en eenvoudig op te vangen. Formele waarschuwingen of lichte maatregelen zijn mogelijk, maar verdere juridische stappen zijn onwaarschijnlijk.' },
-      { label: ANSWER_LABELS[4], info: 'Geen juridische gevolgen. De verspreiding van deze informatie levert geen aansprakelijkheid op. Er zijn geen wettelijke verplichtingen geschonden.' },
+      { label: ANSWER_LABELS[0], info: 'Geheim/zeer geheim: Dit is de hoogste vertrouwelijkheidsklasse en geldt voor informatie waarvan openbaarmaking catastrofale gevolgen heeft voor de samenleving of de nationale veiligheid. Ongeautoriseerde kennisname is volledig onacceptabel. Het verlies van deze informatie zou vitale belangen direct in gevaar brengen en kan leiden tot ernstige maatschappelijke ontwrichting of crisis. Beveiliging op dit niveau is zeer zwaar en strikt gereguleerd (ABDO/ABRO), vaak in combinatie met intensief toezicht door bevoegde veiligheidsdiensten. Dit niveau komt bij gemeenten zeer waarschijnlijk niet voor.' },
+      { label: ANSWER_LABELS[1], info: 'Confidentieel: Dit betreft informatie die van zo\'n grote gevoeligheid is dat openbaarmaking ernstig schadelijk zou zijn. Ongeautoriseerde kennisname moet actief en strikt worden voorkomen. De gevolgen zijn groot: blijvende schade aan vertrouwen in de overheid, aanzienlijke juridische claims en hoge herstelkosten. Op dit niveau gelden altijd aanvullende beveiligingsregels (ABDO/ABRO). BIO2 alleen is niet voldoende, omdat hier nationale veiligheid en staatsbelangen in het geding zijn.' },
+      { label: ANSWER_LABELS[2], info: 'Vertrouwelijk: Bij dit niveau gaat het om informatie die gevoeliger is en waarbij de overheid weerstand tegen spionage en misbruik moet organiseren. Ongeautoriseerde openbaarmaking is schadelijk en moet zoveel mogelijk worden voorkomen. De gevolgen kunnen aanzienlijk zijn: reputatieschade, juridische claims en verstoring van de samenwerking met partners. Bij dit niveau wordt minimaal BIO2 toegepast, aangevuld met risicomanagement en waar nodig extra maatregelen.' },
+      { label: ANSWER_LABELS[3], info: 'Intern: Dit betreft informatie die binnen de organisatie moet blijven, maar waarvan de gevolgen van openbaarmaking nog beperkt zijn. Onbevoegde kennisname is ongewenst, omdat dit hinder kan veroorzaken of herstelwerk nodig maakt. Er kan sprake zijn van lichte reputatieschade of interne verstoring, maar de gevolgen zijn doorgaans herstelbaar.' },
+      { label: ANSWER_LABELS[4], info: 'Openbaar: Het gaat hier om informatie die zonder risico gedeeld kan worden met iedereen. De gegevens zijn bedoeld voor openbaarheid, bijvoorbeeld op de gemeentelijke website of in een folder. Ongeautoriseerde kennisname levert geen schade op. Let op: deze gegevens kunnen nog steeds integer, authentiek en beschikbaar moeten zijn.' },
     ],
   },
 ]
@@ -348,22 +179,16 @@ export default function BiaPage() {
 
   // Auto-calculate final scores: highest severity (= lowest numeric) across all answered questions
   const autoB = useMemo(
-    () => highestSeverity([1,2,3,4,5,6,7,8].map(n => currentForm[`b${n}_score` as keyof BiaAssessment] as number | undefined)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentForm.b1_score, currentForm.b2_score, currentForm.b3_score, currentForm.b4_score,
-     currentForm.b5_score, currentForm.b6_score, currentForm.b7_score, currentForm.b8_score],
+    () => highestSeverity([currentForm.b1_score, currentForm.b2_score] as (number | undefined)[]),
+    [currentForm.b1_score, currentForm.b2_score],
   )
   const autoI = useMemo(
-    () => highestSeverity([1,2,3,4,5,6].map(n => currentForm[`i${n}_score` as keyof BiaAssessment] as number | undefined)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentForm.i1_score, currentForm.i2_score, currentForm.i3_score,
-     currentForm.i4_score, currentForm.i5_score, currentForm.i6_score],
+    () => highestSeverity([currentForm.i1_score] as (number | undefined)[]),
+    [currentForm.i1_score],
   )
   const autoV = useMemo(
-    () => highestSeverity([1,2,3,4,5].map(n => currentForm[`v${n}_score` as keyof BiaAssessment] as number | undefined)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentForm.v1_score, currentForm.v2_score, currentForm.v3_score,
-     currentForm.v4_score, currentForm.v5_score],
+    () => highestSeverity([currentForm.v1_score] as (number | undefined)[]),
+    [currentForm.v1_score],
   )
 
   // Effective form: auto-calculated scores override stored values
@@ -555,28 +380,18 @@ export default function BiaPage() {
               <Card className="mt-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Continuïteitsparameters</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {scope === 'Business Continuïteit' && (
-                    <FormField label="MTPD / MTD">
-                      <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[4], effectiveForm.b5_score)} />
-                    </FormField>
-                  )}
-                  <FormField label="RTO">
-                    <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[5], effectiveForm.b6_score)} />
+                  <FormField label={scope === 'Business Continuïteit' ? 'MTPD / MTD – Max. uitvalduur' : 'RTO – Max. uitvalduur'}>
+                    <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[0], effectiveForm.b1_score)} />
                   </FormField>
-                  {scope === 'Business Continuïteit' && (
-                    <FormField label="WRT">
-                      <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[6], effectiveForm.b7_score)} />
-                    </FormField>
-                  )}
-                  <FormField label="RPO">
-                    <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[7], effectiveForm.b8_score)} />
+                  <FormField label="RPO – Max. dataverlies">
+                    <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[1], effectiveForm.b2_score)} />
                   </FormField>
                 </div>
                 <div className="mt-8 pt-8 border-t border-gray-100">
                   {scope === 'IT-Continuïteit' ? (
                     <ItContinueitTimeline
-                      rto={effectiveForm.b6_score ? BCP_COMPACT_MAP.rto[effectiveForm.b6_score as keyof typeof BCP_COMPACT_MAP.rto] : undefined}
-                      rpo={effectiveForm.b8_score ? BCP_COMPACT_MAP.rpo[effectiveForm.b8_score as keyof typeof BCP_COMPACT_MAP.rpo] : undefined}
+                      rto={effectiveForm.b1_score ? BCP_COMPACT_MAP.mtpd[effectiveForm.b1_score as keyof typeof BCP_COMPACT_MAP.mtpd] : undefined}
+                      rpo={effectiveForm.b2_score ? BCP_COMPACT_MAP.rpo[effectiveForm.b2_score as keyof typeof BCP_COMPACT_MAP.rpo] : undefined}
                     />
                   ) : (
                     <img
