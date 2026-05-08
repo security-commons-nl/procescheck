@@ -16,6 +16,11 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 SCORE_LABELS = {1: "Vitaal", 2: "Hoog", 3: "Midden", 4: "Laag", 5: "Minimaal"}
 
 
+def _has_rto_rpo(p: Process) -> bool:
+    """RTO/RPO is defined when the BIA has b1_score (RPO) and b2_score (RTO) filled in."""
+    return p.bia is not None and p.bia.b1_score is not None and p.bia.b2_score is not None
+
+
 def _check_completeness(p: Process) -> tuple[bool, list[str]]:
     """Return (is_complete, missing_fields) for a process."""
     missing: list[str] = []
@@ -35,7 +40,7 @@ def _check_completeness(p: Process) -> tuple[bool, list[str]]:
         missing.append("Gekoppelde applicaties")
     if p.bia is None:
         missing.append("BIA / BIV")
-    if p.rto_rpo is None:
+    if not _has_rto_rpo(p):
         missing.append("RTO / RPO")
     if p.business_context is None:
         missing.append("Business context")
@@ -80,7 +85,7 @@ def get_completeness(db: Session = Depends(get_db)):
             name=p.name,
             is_critical=p.is_critical,
             has_bia=p.bia is not None,
-            has_rto_rpo=p.rto_rpo is not None,
+            has_rto_rpo=_has_rto_rpo(p),
             has_business_context=p.business_context is not None,
             app_count=len(p.applications),
             is_complete=is_complete,
@@ -152,8 +157,8 @@ def get_risk_overview(db: Session = Depends(get_db)):
         if not p.is_critical:
             continue
         _, missing = _check_completeness(p)
-        rto_val = p.rto_rpo.rto_value if p.rto_rpo else None
-        rto_unit = p.rto_rpo.rto_unit if p.rto_rpo else None
+        rto_val = None
+        rto_unit = None
         critical_list.append(CriticalProcessRisk(
             id=p.id,
             code=p.code,
@@ -162,7 +167,7 @@ def get_risk_overview(db: Session = Depends(get_db)):
             integrity_score=p.bia.integrity_score if p.bia else None,
             confidentiality_score=p.bia.confidentiality_score if p.bia else None,
             has_bia=p.bia is not None,
-            has_rto_rpo=p.rto_rpo is not None,
+            has_rto_rpo=_has_rto_rpo(p),
             rto_value=rto_val,
             rto_unit=rto_unit,
             missing_fields=missing,
@@ -176,7 +181,7 @@ def get_risk_overview(db: Session = Depends(get_db)):
 
     coverage = Coverage(
         bia=_cov(lambda p: p.bia is not None),
-        rto_rpo=_cov(lambda p: p.rto_rpo is not None),
+        rto_rpo=_cov(lambda p: _has_rto_rpo(p)),
         business_context=_cov(lambda p: p.business_context is not None),
         applications=_cov(lambda p: len(p.applications) > 0),
     )
@@ -234,7 +239,7 @@ def get_risk_overview(db: Session = Depends(get_db)):
         if p.is_critical and p.bia is None:
             priority = "critical"
             reason = "Informatie ontbreekt"
-        elif _is_high_risk(p) and p.rto_rpo is None:
+        elif _is_high_risk(p) and not _has_rto_rpo(p):
             priority = "high"
             reason = "Hoog risico: geen RTO/RPO gedefinieerd"
         elif p.is_critical:
