@@ -1,13 +1,10 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.database import engine, Base
+from app.auth import get_current_user
 import app.models  # noqa: F401 – register all models with Base
 
 from app.routers import processes, applications, bia, rto_rpo, business_context, dashboard, export
-
-# Create tables on startup (Alembic preferred in production, this is fine for dev)
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="ProcesCheck API",
@@ -23,14 +20,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+_auth = [Depends(get_current_user)]
+
 PREFIX = "/api/v1"
-app.include_router(processes.router, prefix=PREFIX)
-app.include_router(applications.router, prefix=PREFIX)
-app.include_router(bia.router, prefix=PREFIX)
-app.include_router(rto_rpo.router, prefix=PREFIX)
-app.include_router(business_context.router, prefix=PREFIX)
-app.include_router(dashboard.router, prefix=PREFIX)
-app.include_router(export.router, prefix=PREFIX)
+app.include_router(processes.router, prefix=PREFIX, dependencies=_auth)
+app.include_router(applications.router, prefix=PREFIX, dependencies=_auth)
+app.include_router(bia.router, prefix=PREFIX, dependencies=_auth)
+app.include_router(rto_rpo.router, prefix=PREFIX, dependencies=_auth)
+app.include_router(business_context.router, prefix=PREFIX, dependencies=_auth)
+app.include_router(dashboard.router, prefix=PREFIX, dependencies=_auth)
+app.include_router(export.router, prefix=PREFIX, dependencies=_auth)
 
 
 @app.get("/health")

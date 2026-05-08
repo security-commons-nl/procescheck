@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
+import AuthGuard from './auth/AuthGuard'
 import Dashboard from './pages/Dashboard/index'
 import ProcessList from './pages/Processes/ProcessList'
 import ProcessForm from './pages/Processes/ProcessForm'
@@ -14,6 +15,7 @@ import Ketenarchitectuur from './pages/Ketenarchitectuur'
 
 export default function App() {
   return (
+    <AuthGuard>
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
@@ -36,5 +38,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </AuthGuard>
   )
 }
