@@ -321,24 +321,14 @@ export default function Dashboard() {
       {/* ── KPI Row ── */}
       <div className="grid grid-cols-5 gap-3">
         <KpiCard
-          icon={Shield}
-          iconColorClass="text-blue-400"
-          title="BIA & BIV"
-          pct={risk?.coverage.bia.pct ?? 0}
-          count={risk?.coverage.bia.done ?? 0}
+          icon={GitBranch}
+          iconColorClass="text-gray-500"
+          title="Procesinformatie"
+          pct={risk?.process_fields_coverage.pct ?? 0}
+          count={risk?.process_fields_coverage.done ?? 0}
           total={total}
-          singularLabel="proces beoordeeld"
-          pluralLabel="processen beoordeeld"
-        />
-        <KpiCard
-          icon={FileText}
-          iconColorClass="text-indigo-400"
-          title="Procescontext"
-          pct={risk?.coverage.business_context.pct ?? 0}
-          count={risk?.coverage.business_context.done ?? 0}
-          total={total}
-          singularLabel="proces ingevuld"
-          pluralLabel="processen ingevuld"
+          singularLabel="procesinformatie compleet"
+          pluralLabel="procesinformatie compleet"
         />
         <KpiCard
           icon={Database}
@@ -347,18 +337,28 @@ export default function Dashboard() {
           pct={risk?.coverage.applications.pct ?? 0}
           count={risk?.coverage.applications.done ?? 0}
           total={total}
-          singularLabel="proces gekoppeld"
-          pluralLabel="processen gekoppeld"
+          singularLabel="gekoppelde applicaties"
+          pluralLabel="gekoppelde applicaties"
         />
         <KpiCard
-          icon={CheckCircle2}
-          iconColorClass="text-emerald-500"
-          title="Compleetheid"
-          pct={risk?.process_fields_coverage.pct ?? 0}
-          count={risk?.process_fields_coverage.done ?? 0}
+          icon={Shield}
+          iconColorClass="text-blue-400"
+          title="BIA & BIV-Classificatie"
+          pct={risk?.coverage.bia.pct ?? 0}
+          count={risk?.coverage.bia.done ?? 0}
           total={total}
-          singularLabel="procesinformatie compleet"
-          pluralLabel="procesinformatie compleet"
+          singularLabel="classificatie uitgevoerd"
+          pluralLabel="classificatie uitgevoerd"
+        />
+        <KpiCard
+          icon={FileText}
+          iconColorClass="text-indigo-400"
+          title="Procescontext"
+          pct={risk?.coverage.business_context.pct ?? 0}
+          count={risk?.coverage.business_context.done ?? 0}
+          total={total}
+          singularLabel="informatie ingevuld"
+          pluralLabel="informatie ingevuld"
         />
         <PrivacyInfoCard
           count={risk?.privacy_coverage.done ?? 0}
