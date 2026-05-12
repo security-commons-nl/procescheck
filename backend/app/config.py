@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql://procescheck:procescheck_dev@localhost:5435/procescheck"
+    database_url: str
     cors_origins: str = "http://localhost:3300"
 
     # Azure AD — leeg betekent authenticatie uitgeschakeld (dev-mode)

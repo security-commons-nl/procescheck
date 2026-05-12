@@ -4,6 +4,7 @@ Valideert Bearer tokens via de Azure AD JWKS endpoint.
 Als AZURE_TENANT_ID / AZURE_CLIENT_ID niet geconfigureerd zijn (dev-mode),
 wordt authenticatie overgeslagen.
 """
+import time
 import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -12,15 +13,18 @@ from app.config import settings
 
 _bearer = HTTPBearer(auto_error=False)
 _jwks_cache: dict | None = None
+_jwks_cached_at: float = 0.0
+_JWKS_TTL = 86400  # 24 uur
 
 
 def _get_jwks() -> dict:
-    global _jwks_cache
-    if _jwks_cache is None:
+    global _jwks_cache, _jwks_cached_at
+    if _jwks_cache is None or (time.monotonic() - _jwks_cached_at) > _JWKS_TTL:
         url = f"https://login.microsoftonline.com/{settings.azure_tenant_id}/discovery/v2.0/keys"
         response = httpx.get(url, timeout=10)
         response.raise_for_status()
         _jwks_cache = response.json()
+        _jwks_cached_at = time.monotonic()
     return _jwks_cache
 
 
