@@ -140,6 +140,13 @@ export default function ProcessForm() {
               rows={3}
             />
           </FormField>
+          <FormField label="Reden kritisch" className="md:col-span-2">
+            <Textarea
+              value={form.critical_reason ?? ''}
+              onChange={e => set('critical_reason', e.target.value)}
+              rows={2}
+            />
+          </FormField>
           <FormField label="Notities" className="md:col-span-2">
             <Textarea
               value={form.notes ?? ''}

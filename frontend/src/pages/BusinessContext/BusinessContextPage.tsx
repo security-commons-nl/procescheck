@@ -271,7 +271,7 @@ function BlockFocusModal({
             rows={10}
             value={value}
             onChange={e => onChange(e.target.value)}
-            className="w-full text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-400 rounded-lg p-3 resize-none bg-white/80"
+            className="w-full text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-400 rounded-lg p-3 resize-y bg-white/80"
           />
         </div>
       </div>

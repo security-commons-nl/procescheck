@@ -143,6 +143,16 @@ const BCP_COMPACT_MAP = {
   rpo:  { 1: 'enkele uren',                  2: '4–8 uur',        3: '8–24 uur',             4: 'maximaal 24 uur',   5: 'een week of meer'    },
 } as const
 
+// ── Parameter label maps (Mapping vragenlijst beschikbaarheid → continuiteitsparameters) ─
+// b1 (uitvalduur) → RPO, b2 (dataverlies) → RTO, b3 (herstelwerk) → WRT, b4 (totale uitval) → MTD
+
+const PARAM_MAP = {
+  rpo: { 1: 'Enkele uren', 2: '8 uur', 3: '2 werkdagen', 4: '1 week', 5: '1 week of meer' },
+  rto: { 1: 'Enkele uren', 2: '4 tot 8 uur', 3: '8 tot 24 uur', 4: '24 uur', 5: '1 week of meer' },
+  wrt: { 1: 'Enkele uren', 2: '4 tot 8 uur', 3: '2 werkdagen', 4: '1 week', 5: 'Meer dan een week' },
+  mtd: { 1: 'Enkele uren', 2: '4 tot 8 uur', 3: '2 werkdagen', 4: '1 week', 5: 'Meer dan een week' },
+} as const
+
 type TabKey = 'Algemeen' | 'Beschikbaarheid' | 'Integriteit' | 'Vertrouwelijkheid'
 
 // Highest severity = lowest numeric value (1=Catastrofaal, 5=Verwaarloosbaar)
@@ -406,25 +416,35 @@ export default function BiaPage() {
               <Card className="mt-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Continuïteitsparameters</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <FormField label={scope === 'Business Continuïteit' ? 'MTPD / MTD – Max. uitvalduur' : 'RTO – Max. uitvalduur'}>
+                  <FormField label="RPO – Max. uitvalduur">
                     <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[0], effectiveForm.b1_score)} />
                   </FormField>
-                  <FormField label="RPO – Max. dataverlies">
+                  <FormField label="RTO – Max. dataverlies">
                     <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[1], effectiveForm.b2_score)} />
                   </FormField>
+                  {scope === 'Business Continuïteit' && (
+                    <>
+                      <FormField label="WRT – Herstelwerkzaamheden">
+                        <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[2], effectiveForm.b3_score)} />
+                      </FormField>
+                      <FormField label="MTPD / MTD – Totale uitvalduur">
+                        <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[3], effectiveForm.b4_score)} />
+                      </FormField>
+                    </>
+                  )}
                 </div>
                 <div className="mt-8 pt-8 border-t border-gray-100">
                   {scope === 'IT-Continuïteit' ? (
                     <ItContinueitTimeline
-                      rto={effectiveForm.b1_score ? BCP_COMPACT_MAP.mtpd[effectiveForm.b1_score as keyof typeof BCP_COMPACT_MAP.mtpd] : undefined}
-                      rpo={effectiveForm.b2_score ? BCP_COMPACT_MAP.rpo[effectiveForm.b2_score as keyof typeof BCP_COMPACT_MAP.rpo] : undefined}
+                      rpo={effectiveForm.b1_score ? PARAM_MAP.rpo[effectiveForm.b1_score as keyof typeof PARAM_MAP.rpo] : undefined}
+                      rto={effectiveForm.b2_score ? PARAM_MAP.rto[effectiveForm.b2_score as keyof typeof PARAM_MAP.rto] : undefined}
                     />
                   ) : (
-                    <img
-                      src={businessContinueiteitImg}
-                      alt="Business Continuïteit tijdlijn"
-                      className="w-full h-auto block"
-                      draggable={false}
+                    <BcContinueitTimeline
+                      rpo={effectiveForm.b1_score ? PARAM_MAP.rpo[effectiveForm.b1_score as keyof typeof PARAM_MAP.rpo] : undefined}
+                      rto={effectiveForm.b2_score ? PARAM_MAP.rto[effectiveForm.b2_score as keyof typeof PARAM_MAP.rto] : undefined}
+                      wrt={effectiveForm.b3_score ? PARAM_MAP.wrt[effectiveForm.b3_score as keyof typeof PARAM_MAP.wrt] : undefined}
+                      mtd={effectiveForm.b4_score ? PARAM_MAP.mtd[effectiveForm.b4_score as keyof typeof PARAM_MAP.mtd] : undefined}
                     />
                   )}
                 </div>
@@ -633,8 +653,8 @@ function BcpTimeline({ mtpd, rto, wrt, rpo }: {
 // ── ItContinueitTimeline ──────────────────────────────────────────────────────
 // Uses IT-Continuiteit.png (1872×576) as background; overlays RPO and RTO.
 // Calibration via pixel scan — white box centers:
-//   RPO: x=540 → left=28.8%, y≈202 → top=35.1%
-//   RTO: x=937 → left=50.1%, y≈202 → top=35.1%
+//   RPO: x=540 → left=28.8%, y=245 → top=42.5%
+//   RTO: x=937 → left=50.1%, y=245 → top=42.5%
 
 function ItContinueitTimeline({ rto, rpo }: { rto?: string; rpo?: string }) {
   const dash = '—'
@@ -660,14 +680,58 @@ function ItContinueitTimeline({ rto, rpo }: { rto?: string; rpo?: string }) {
         className="w-full h-auto block"
         draggable={false}
       />
-      {/* RPO — x=540 (28.8%), white zone center y≈202 (35.1%) */}
-      <span style={{ ...base, left: '28.8%', top: '35.1%' }}>
+      {/* RPO — x=540 (28.8%), white box center y=245 (42.5%) */}
+      <span style={{ ...base, left: '28.8%', top: '42.5%' }}>
         {cap(rpo)}
       </span>
-      {/* RTO — x=937 (50.1%), white zone center y≈202 (35.1%) */}
-      <span style={{ ...base, left: '50.1%', top: '35.1%' }}>
+      {/* RTO — x=937 (50.1%), white box center y=245 (42.5%) */}
+      <span style={{ ...base, left: '50.1%', top: '42.5%' }}>
         {cap(rto)}
       </span>
+    </div>
+  )
+}
+
+// ── BcContinueitTimeline ──────────────────────────────────────────────────────
+// Uses Business Continuiteit.png (1872×576) as background; overlays RPO, RTO, WRT, MTD.
+// Calibration via pixel scan — white box centers:
+//   RPO: x=540 → left=28.8%, y=245 → top=42.5%
+//   RTO: x=937 → left=50.1%, y=245 → top=42.5%
+//   WRT: x=1344 → left=71.8%, y=245 → top=42.5%
+//   MTD: x=1114 → left=59.5%, y=86  → top=14.9%
+
+function BcContinueitTimeline({ rpo, rto, wrt, mtd }: { rpo?: string; rto?: string; wrt?: string; mtd?: string }) {
+  const dash = '—'
+  const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : dash
+
+  const base: React.CSSProperties = {
+    position: 'absolute',
+    transform: 'translate(-50%, -50%)',
+    whiteSpace: 'nowrap',
+    fontSize: '0.7rem',
+    fontWeight: 700,
+    lineHeight: 1,
+    color: '#1a1a1a',
+    pointerEvents: 'none',
+    userSelect: 'none',
+  }
+
+  return (
+    <div className="relative w-full" style={{ lineHeight: 0 }}>
+      <img
+        src={businessContinueiteitImg}
+        alt="Business Continuïteit tijdlijn"
+        className="w-full h-auto block"
+        draggable={false}
+      />
+      {/* MTD — bracket center x=59.5%, white box center y=86 (14.9%) */}
+      <span style={{ ...base, left: '59.5%', top: '14.9%' }}>{cap(mtd)}</span>
+      {/* RPO — x=28.8%, white box center y=245 (42.5%) */}
+      <span style={{ ...base, left: '28.8%', top: '42.5%' }}>{cap(rpo)}</span>
+      {/* RTO — x=50.1%, white box center y=245 (42.5%) */}
+      <span style={{ ...base, left: '50.1%', top: '42.5%' }}>{cap(rto)}</span>
+      {/* WRT — x=71.8%, white box center y=245 (42.5%) */}
+      <span style={{ ...base, left: '71.8%', top: '42.5%' }}>{cap(wrt)}</span>
     </div>
   )
 }
