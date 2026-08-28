@@ -53,7 +53,7 @@ De applicatie brengt processen, applicaties en procescontext samen in één dash
 
 1. **Clone de repository**
    ```bash
-   git clone https://github.com/Vas-leiden/ProcesCheck.git
+   git clone https://github.com/security-commons-nl/procescheck.git
    cd ProcesCheck
    ```
 

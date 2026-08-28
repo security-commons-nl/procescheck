@@ -40,7 +40,7 @@
 2. Klik **+ Create** → kies **Flexible server**
 3. **Basics tab:**
    - **Resource group:** `rg-procescheck-prod`
-   - **Server name:** `psql-procescheck-prod`
+   - **Server name:** `[servernaam]`
    - **Region:** `West Europe`
    - **PostgreSQL version:** `15`
    - **Workload type:** `Development`
@@ -69,7 +69,7 @@
 
 | Secret Name | Value |
 |-------------|-------|
-| `DATABASE-URL` | `postgresql://procescheck:<wachtwoord>@psql-procescheck-prod.postgres.database.azure.com:5432/procescheck?sslmode=require` |
+| `DATABASE-URL` | `postgresql://procescheck:<wachtwoord>@[servernaam].postgres.database.azure.com:5432/procescheck?sslmode=require` |
 | `CORS-ORIGINS` | Laat voorlopig leeg — vul je in na stap 1.6 |
 | `AZURE-TENANT-ID` | Laat voorlopig leeg — vul je in na stap 2 |
 | `AZURE-CLIENT-ID` | Laat voorlopig leeg — vul je in na stap 2 |
@@ -136,7 +136,7 @@
    - **Source:** `GitHub`
 4. Klik op **Sign in with GitHub** en autoriseer Azure
 5. Kies:
-   - **Organization:** `Vas-leiden`
+   - **Organization:** `[github-organisatie]`
    - **Repository:** `ProcesCheck`
    - **Branch:** `main`
 6. **Build Details:**
@@ -240,7 +240,7 @@
 
 **GitHub Secrets toevoegen:**
 
-Ga naar **github.com/Vas-leiden/ProcesCheck → Settings → Secrets and variables → Actions**
+Ga naar **github.com/[organisatie]/procescheck → Settings → Secrets and variables → Actions**
 
 Klik **New repository secret** voor elk van de volgende:
 
