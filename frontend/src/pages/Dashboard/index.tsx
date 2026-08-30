@@ -57,7 +57,7 @@ function KpiCard({
         <span className={clsx('text-2xl font-semibold tabular-nums leading-none', pctColor)}>
           {pct}%
         </span>
-        <span className="text-xs text-gray-400 tabular-nums pb-0.5">
+        <span className="text-xs text-ink-subtle tabular-nums pb-0.5">
           {count}/{total}
         </span>
       </div>
@@ -71,7 +71,7 @@ function KpiCard({
       </div>
 
       {/* Subtitel — enkelvoud/meervoud correct */}
-      <p className="text-xs text-gray-400 leading-tight truncate">{label}</p>
+      <p className="text-xs text-ink-subtle leading-tight truncate">{label}</p>
     </Card>
   )
 }
@@ -81,22 +81,22 @@ function KpiCard({
 function PrivacyInfoCard({ count, total }: { count: number; total: number }) {
   const label = count === 1 ? 'proces met persoonsgegevens' : 'processen met persoonsgegevens'
   return (
-    <div className="bg-purple-50 border border-purple-100 rounded-xl p-5 flex flex-col gap-3">
+    <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 flex flex-col gap-3">
       <div className="flex items-center gap-1.5">
-        <Eye size={13} className="text-purple-400 shrink-0" />
-        <p className="text-xs font-semibold text-purple-400 uppercase tracking-wide leading-none">
+        <Eye size={13} className="text-purple-700 shrink-0" />
+        <p className="text-xs font-semibold text-purple-800 uppercase tracking-wide leading-none">
           Privacy-exposure
         </p>
       </div>
       <div className="flex items-end justify-between gap-2">
-        <span className="text-2xl font-semibold text-purple-700 tabular-nums leading-none">
+        <span className="text-2xl font-semibold text-purple-900 tabular-nums leading-none">
           {count}
         </span>
-        <span className="text-xs text-purple-300 tabular-nums pb-0.5">/ {total}</span>
+        <span className="text-xs text-purple-700 tabular-nums pb-0.5">/ {total}</span>
       </div>
       {/* Visuele scheiding i.p.v. balk */}
-      <div className="w-full h-px bg-purple-100" />
-      <p className="text-xs text-purple-400 leading-tight truncate">{label}</p>
+      <div className="w-full h-px bg-purple-200" />
+      <p className="text-xs text-purple-800 leading-tight truncate">{label}</p>
     </div>
   )
 }
@@ -125,12 +125,12 @@ function ReviewKpiPanel({
       </div>
       <div className="flex items-end justify-between gap-2">
         <span className={clsx('text-2xl font-semibold tabular-nums leading-none', pctColor)}>{pct}%</span>
-        <span className="text-xs text-gray-400 tabular-nums pb-0.5">{count}/{total}</span>
+        <span className="text-xs text-ink-subtle tabular-nums pb-0.5">{count}/{total}</span>
       </div>
       <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
         <div className={clsx('h-full rounded-full transition-all', barColor)} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-xs text-gray-400 leading-tight truncate">{label}</p>
+      <p className="text-xs text-ink-subtle leading-tight truncate">{label}</p>
     </div>
   )
 }
@@ -164,8 +164,8 @@ function BivDistPanel({
         <span className={clsx(
           'shrink-0 text-xs font-medium rounded-full px-2 py-0.5 border leading-none',
           dist.not_assessed > 0
-            ? 'bg-amber-50 text-amber-600 border-amber-200'
-            : 'bg-green-50 text-green-600 border-green-200',
+            ? 'bg-amber-50 text-amber-800 border-amber-200'
+            : 'bg-green-50 text-green-800 border-green-200',
         )}>
           Niet beoordeeld: {dist.not_assessed}/{total}
         </span>
@@ -187,7 +187,7 @@ function BivDistPanel({
               </div>
               <span className={clsx(
                 'w-5 text-xs font-bold shrink-0 text-right tabular-nums',
-                count > 0 && score <= 2 ? 'text-red-600' : 'text-gray-400',
+                count > 0 && score <= 2 ? 'text-red-600' : 'text-ink-subtle',
               )}>
                 {count}
               </span>
@@ -216,7 +216,7 @@ function CriticalRow({ process }: { process: CriticalProcessRisk }) {
       onClick={() => navigate(`/processes/${process.id}`)}
     >
       <td className="px-4 py-3">
-        <span className="font-mono text-xs text-gray-400">{process.code}</span>
+        <span className="font-mono text-xs text-ink-subtle">{process.code}</span>
       </td>
       <td className="px-4 py-3 text-sm text-gray-800 font-medium">
         <span className="block truncate">{process.name}</span>
@@ -255,9 +255,9 @@ function ActionRow({ action }: { action: PriorityAction }) {
         <div className="flex items-center gap-3 min-w-0">
           <span className={clsx('w-2 h-2 rounded-full shrink-0', dotColor)} />
           {open
-            ? <ChevronDown size={13} className="text-gray-400 shrink-0" />
-            : <ChevronRight size={13} className="text-gray-400 shrink-0" />}
-          <span className="font-mono text-xs text-gray-400 shrink-0">{action.code}</span>
+            ? <ChevronDown size={13} className="text-ink-subtle shrink-0" />
+            : <ChevronRight size={13} className="text-ink-subtle shrink-0" />}
+          <span className="font-mono text-xs text-ink-subtle shrink-0">{action.code}</span>
           <span className="text-sm font-medium text-gray-800 truncate">{action.name}</span>
         </div>
         <span className="text-xs text-gray-500 shrink-0 ml-3">{action.reason}</span>
@@ -314,12 +314,12 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Security Posture Dashboard</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{dateStr}</p>
+          <p className="text-sm text-ink-subtle mt-0.5">{dateStr}</p>
         </div>
       </div>
 
       {/* ── KPI Row ── */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
         <KpiCard
           icon={GitBranch}
           iconColorClass="text-gray-500"
@@ -373,7 +373,7 @@ export default function Dashboard() {
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">
               Risico-landschap — verdeling per BIV-dimensie
             </h2>
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <BivDistPanel title="Beschikbaarheid" dist={risk.biv_distribution.availability} total={total} />
               <BivDistPanel title="Integriteit" dist={risk.biv_distribution.integrity} total={total} />
               <BivDistPanel title="Vertrouwelijkheid" dist={risk.biv_distribution.confidentiality} total={total} />
@@ -385,7 +385,7 @@ export default function Dashboard() {
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">
               Reviewmonitoring
             </h2>
-            <div className="grid grid-cols-4 divide-x divide-gray-100">
+            <div className="grid grid-cols-2 gap-y-6 xl:grid-cols-4 xl:divide-x divide-gray-100">
               <ReviewKpiPanel
                 icon={GitBranch}
                 iconColorClass="text-gray-500"
@@ -430,13 +430,13 @@ export default function Dashboard() {
             <div className="px-5 py-4 border-b border-gray-100">
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 Kritische processen
-                <span className="ml-2 bg-red-100 text-red-600 rounded-full px-2 py-0.5 normal-case text-xs font-medium">
+                <span className="ml-2 bg-red-100 text-red-800 rounded-full px-2 py-0.5 normal-case text-xs font-medium">
                   {risk.critical_processes.length}
                 </span>
               </h2>
             </div>
             {risk.critical_processes.length === 0 ? (
-              <div className="px-5 py-6 text-sm text-gray-400 text-center">
+              <div className="px-5 py-6 text-sm text-ink-subtle text-center">
                 Geen kritische processen gedefinieerd.
               </div>
             ) : (
@@ -449,9 +449,9 @@ export default function Dashboard() {
                   </colgroup>
                   <thead>
                     <tr className="bg-gray-50 text-left">
-                      <th className="px-4 py-2 text-xs font-medium text-gray-400 uppercase">Code</th>
-                      <th className="px-4 py-2 text-xs font-medium text-gray-400 uppercase">Naam</th>
-                      <th className="px-4 py-2 text-xs font-medium text-gray-400 uppercase">Procesclassificatie</th>
+                      <th className="px-4 py-2 text-xs font-medium text-ink-subtle uppercase">Code</th>
+                      <th className="px-4 py-2 text-xs font-medium text-ink-subtle uppercase">Naam</th>
+                      <th className="px-4 py-2 text-xs font-medium text-ink-subtle uppercase">Procesclassificatie</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -469,7 +469,7 @@ export default function Dashboard() {
             <div>
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                 Prioritaire acties
-                <span className="ml-2 bg-orange-100 text-orange-600 rounded-full px-2 py-0.5 normal-case text-xs font-medium">
+                <span className="ml-2 bg-orange-100 text-orange-800 rounded-full px-2 py-0.5 normal-case text-xs font-medium">
                   {risk.priority_actions.length}
                 </span>
               </h2>
@@ -492,7 +492,7 @@ export default function Dashboard() {
 
       {/* ── Empty state ── */}
       {!hasData && (
-        <Card className="text-center py-12 text-gray-400">
+        <Card className="text-center py-12 text-ink-subtle">
           <GitBranch size={36} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Nog geen processen. Ga naar <strong>Processen</strong> om te beginnen.</p>
         </Card>

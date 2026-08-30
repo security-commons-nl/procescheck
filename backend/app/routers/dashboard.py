@@ -17,7 +17,7 @@ SCORE_LABELS = {1: "Vitaal", 2: "Hoog", 3: "Midden", 4: "Laag", 5: "Minimaal"}
 
 
 def _has_rto_rpo(p: Process) -> bool:
-    """RTO/RPO is defined when the BIA has b1_score (RPO) and b2_score (RTO) filled in."""
+    """RTO/RPO is defined when the BIA has b1_score (RTO) and b2_score (RPO) filled in."""
     return p.bia is not None and p.bia.b1_score is not None and p.bia.b2_score is not None
 
 
@@ -157,8 +157,6 @@ def get_risk_overview(db: Session = Depends(get_db)):
         if not p.is_critical:
             continue
         _, missing = _check_completeness(p)
-        rto_val = None
-        rto_unit = None
         critical_list.append(CriticalProcessRisk(
             id=p.id,
             code=p.code,
@@ -168,8 +166,6 @@ def get_risk_overview(db: Session = Depends(get_db)):
             confidentiality_score=p.bia.confidentiality_score if p.bia else None,
             has_bia=p.bia is not None,
             has_rto_rpo=_has_rto_rpo(p),
-            rto_value=rto_val,
-            rto_unit=rto_unit,
             missing_fields=missing,
         ))
 

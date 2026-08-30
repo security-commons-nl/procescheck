@@ -8,8 +8,6 @@ Interne webapplicatie voor het uitvoeren en beheren van **Business Impact Analys
 
 De applicatie brengt processen, applicaties en procescontext samen in één dashboard dat inzicht geeft in het beveiligingslandschap en de continuïteitsrisico's.
 
-> **Licentie:** GPL v3, afwijkend van de EUPL-1.2 die security-commons-nl standaard hanteert (redactiestatuut B5). Het auteursrecht ligt bij de oorspronkelijke auteur; de licentie is daarom niet gewijzigd.
-
 ## Voor wie
 
 ISO's en proceseigenaren bij publieke organisaties.

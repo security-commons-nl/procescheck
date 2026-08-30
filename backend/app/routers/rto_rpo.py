@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.auth import require_editor
 from app.deps import get_db
 from app.models import Process
 from app.models.rto_rpo import RtoRpo
@@ -18,7 +19,7 @@ def get_rto_rpo(process_id: int, db: Session = Depends(get_db)):
     return rr
 
 
-@router.put("/{process_id}", response_model=RtoRpoResponse)
+@router.put("/{process_id}", response_model=RtoRpoResponse, dependencies=[Depends(require_editor)])
 def upsert_rto_rpo(process_id: int, body: RtoRpoUpsert, db: Session = Depends(get_db)):
     if not db.get(Process, process_id):
         raise HTTPException(404, "Process not found")
@@ -34,7 +35,7 @@ def upsert_rto_rpo(process_id: int, body: RtoRpoUpsert, db: Session = Depends(ge
     return rr
 
 
-@router.delete("/{process_id}", status_code=204)
+@router.delete("/{process_id}", status_code=204, dependencies=[Depends(require_editor)])
 def delete_rto_rpo(process_id: int, db: Session = Depends(get_db)):
     rr = db.query(RtoRpo).filter(RtoRpo.process_id == process_id).first()
     if rr:

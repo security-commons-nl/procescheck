@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react'
-import { Info } from 'lucide-react'
+import { Info, Maximize2, Minimize2, X } from 'lucide-react'
 import type { BusinessContext } from '../../types'
 
 // ── Canvas block config (identical to BusinessContextPage) ────────────────────
@@ -208,6 +208,67 @@ function InfoPopover({ items, onClose }: { items: string[]; onClose: () => void 
   )
 }
 
+// ── Read-only block focus modal (vergroot één blok) ───────────────────────────
+// Read-only tegenhanger van BlockFocusModal op BusinessContextPage.
+
+function ReadOnlyBlockFocusModal({
+  def,
+  value,
+  onClose,
+}: {
+  def: CanvasBlockDef
+  value: string
+  onClose: () => void
+}) {
+  const backdropRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <>
+      <style>{`
+        @keyframes blockFocusIn {
+          from { opacity: 0; transform: scale(0.96); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
+      <div
+        ref={backdropRef}
+        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        onClick={e => { if (e.target === backdropRef.current) onClose() }}
+      >
+        <div
+          className={`${def.color} border ${def.border} rounded-xl shadow-2xl w-full max-w-2xl mx-4 p-6 flex flex-col`}
+          style={{ animation: 'blockFocusIn 0.15s ease-out' }}
+        >
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <div className={`text-sm font-bold uppercase tracking-wide ${def.titleColor}`}>{def.label}</div>
+              <div className="text-xs text-ink-subtle mt-0.5 leading-snug">{def.hint}</div>
+            </div>
+            <button
+              onClick={onClose}
+              className="ml-2 shrink-0 p-1 rounded text-ink-subtle hover:text-gray-600 hover:bg-black/10 transition-colors"
+              title="Sluiten"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="w-full text-sm rounded-lg p-3 bg-white/80 text-gray-700 whitespace-pre-wrap min-h-[10rem] max-h-[60vh] overflow-auto">
+            {value || <span className="text-ink-subtle italic text-xs">Niet ingevuld</span>}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 // ── Read-only canvas block ────────────────────────────────────────────────────
 
 function ReadOnlyCanvasBlock({
@@ -215,11 +276,13 @@ function ReadOnlyCanvasBlock({
   value,
   openInfo,
   onToggleInfo,
+  onOpenFocus,
 }: {
   def: CanvasBlockDef
   value: string
   openInfo: boolean
   onToggleInfo: () => void
+  onOpenFocus: () => void
 }) {
   return (
     <div
@@ -232,17 +295,24 @@ function ReadOnlyCanvasBlock({
         </div>
         <button
           onClick={e => { e.stopPropagation(); onToggleInfo() }}
-          className="ml-1 shrink-0 p-0.5 rounded text-gray-300 hover:text-gray-500 hover:bg-black/5 transition-colors"
+          className="ml-1 shrink-0 p-0.5 rounded text-ink-subtle hover:text-ink-muted hover:bg-black/5 transition-colors"
           title="Meer informatie"
         >
           <Info size={12} strokeWidth={1.75} />
         </button>
         {openInfo && <InfoPopover items={def.info} onClose={onToggleInfo} />}
       </div>
-      <div className="text-xs text-gray-400 mb-2 leading-snug">{def.hint}</div>
-      <div className="flex-1 w-full text-sm rounded p-1.5 bg-white/70 text-gray-700 whitespace-pre-wrap min-h-[88px] overflow-auto">
-        {value || <span className="text-gray-300 italic text-xs">Niet ingevuld</span>}
+      <div className="text-xs text-ink-subtle mb-2 leading-snug">{def.hint}</div>
+      <div className="flex-1 w-full text-sm rounded p-1.5 pb-5 bg-white/70 text-gray-700 whitespace-pre-wrap min-h-[88px] overflow-auto">
+        {value || <span className="text-ink-subtle italic text-xs">Niet ingevuld</span>}
       </div>
+      <button
+        onClick={e => { e.stopPropagation(); onOpenFocus() }}
+        className="absolute bottom-2 right-2 p-0.5 rounded text-ink-subtle hover:text-ink-muted hover:bg-black/5 transition-colors"
+        title="Vergroot blok"
+      >
+        <Maximize2 size={11} strokeWidth={1.75} />
+      </button>
     </div>
   )
 }
@@ -253,8 +323,10 @@ function ReadOnlyCanvasBlock({
 
 export function BusinessContextReadOnly({ bc }: { bc: BusinessContext }) {
   const [openInfo, setOpenInfo] = useState<string | null>(null)
+  const [focusBlock, setFocusBlock] = useState<string | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
 
-  return (
+  const canvasContent = (
     <>
       <div
         style={{
@@ -276,6 +348,7 @@ export function BusinessContextReadOnly({ bc }: { bc: BusinessContext }) {
             value={(bc[b.key] as string) ?? ''}
             openInfo={openInfo === b.key}
             onToggleInfo={() => setOpenInfo(prev => (prev === b.key ? null : b.key))}
+            onOpenFocus={() => setFocusBlock(b.key)}
           />
         ))}
       </div>
@@ -322,6 +395,54 @@ export function BusinessContextReadOnly({ bc }: { bc: BusinessContext }) {
           </div>
         )}
       </div>
+    </>
+  )
+
+  return (
+    <>
+      {/* Vergroot canvas-schakelaar (identiek aan BusinessContextPage) */}
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setFullscreen(f => !f)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 bg-white hover:bg-gray-50 transition-colors"
+        >
+          {fullscreen
+            ? <><Minimize2 size={14} /> Verkleinen</>
+            : <><Maximize2 size={14} /> Vergroot canvas</>}
+        </button>
+      </div>
+
+      {!fullscreen && canvasContent}
+
+      {/* Vergroot één blok */}
+      {focusBlock && (() => {
+        const def = CANVAS_BLOCKS.find(b => b.key === focusBlock)!
+        return (
+          <ReadOnlyBlockFocusModal
+            def={def}
+            value={(bc[def.key] as string) ?? ''}
+            onClose={() => setFocusBlock(null)}
+          />
+        )
+      })()}
+
+      {/* Volledige canvas-weergave */}
+      {fullscreen && (
+        <div className="fixed inset-0 z-50 bg-gray-50 overflow-auto">
+          <div className="max-w-screen-2xl mx-auto px-6 py-5">
+            <div className="flex items-center justify-between mb-5">
+              <h1 className="text-lg font-semibold text-gray-900">Procescontext</h1>
+              <button
+                onClick={() => setFullscreen(false)}
+                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 bg-white hover:bg-gray-50 transition-colors"
+              >
+                <Minimize2 size={14} /> Verkleinen
+              </button>
+            </div>
+            {canvasContent}
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -4,6 +4,7 @@ from app.models.process_application import ProcessApplication
 from app.models.bia import BiaAssessment
 from app.models.rto_rpo import RtoRpo
 from app.models.business_context import BusinessContext
+from app.models.audit import AuditLog
 
 __all__ = [
     "Process",
@@ -12,4 +13,5 @@ __all__ = [
     "BiaAssessment",
     "RtoRpo",
     "BusinessContext",
+    "AuditLog",
 ]

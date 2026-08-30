@@ -3,8 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { processesApi } from '../../api/processes'
 import { applicationsApi } from '../../api/applications'
+import { auditApi } from '../../api/audit'
 import { biaApi } from '../../api/bia'
 import { businessContextApi } from '../../api/businessContext'
+import client, { apiErrorMessage } from '../../api/client'
+import { isReviewExpired } from '../../utils/review'
 import { BiaScoreSummary, BiaAlgemeenReadOnly } from '../Bia/biaShared'
 import { BusinessContextReadOnly } from '../BusinessContext/businessContextShared'
 import PageHeader from '../../components/common/PageHeader'
@@ -12,11 +15,12 @@ import Button from '../../components/common/Button'
 import { Card } from '../../components/common/Card'
 import { ScoreBadge } from '../../components/common/Badge'
 import { FormField, Input, Textarea } from '../../components/common/FormField'
-import { Pencil, Unlink, ArrowLeft, Plus, List, FilePlus } from 'lucide-react'
-import type { Application } from '../../types'
+import { Pencil, Unlink, ArrowLeft, Plus, List, FilePlus, FileDown } from 'lucide-react'
+import { useMe } from '../../hooks/useMe'
+import type { Application, AuditLogEntry } from '../../types'
 
 
-const TABS = ['Overzicht', 'Applicaties', 'BIA & BIV-Classificatie', 'Procescontext'] as const
+const TABS = ['Overzicht', 'Applicaties', 'BIA & BIV-Classificatie', 'Procescontext', 'Historie'] as const
 type ModalView = 'choice' | 'existing' | 'new'
 
 export default function ProcessDetail() {
@@ -29,6 +33,7 @@ export default function ProcessDetail() {
   const [newApp, setNewApp] = useState<Partial<Application>>({ code: '', name: '', description: '', business_owner: '', technical_owner: '', notes: '' })
 
   const pid = Number(id)
+  const { canEdit } = useMe()
 
   const [reviewDate, setReviewDate] = useState('')
 
@@ -53,6 +58,12 @@ export default function ProcessDetail() {
     retry: false,
   })
 
+  const { data: auditEntries = [], isLoading: auditLoading } = useQuery({
+    queryKey: ['audit', pid],
+    queryFn: () => auditApi.list({ process_id: pid, limit: 100 }),
+    enabled: !!pid && tab === 'Historie',
+  })
+
   const procesClassificatie =
     bia?.availability_score != null || bia?.integrity_score != null || bia?.confidentiality_score != null
       ? Math.min(bia.availability_score ?? 5, bia.integrity_score ?? 5, bia.confidentiality_score ?? 5)
@@ -64,31 +75,40 @@ export default function ProcessDetail() {
     enabled: modal === 'existing',
   })
 
+  const [appCodeTouched, setAppCodeTouched] = useState(false)
+
   const { data: suggestedAppCode } = useQuery({
     queryKey: ['applications', 'next-code'],
     queryFn: applicationsApi.nextCode,
     enabled: modal === 'new',
     staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   // Pre-fill code when opening new-app view
   const setNewView = () => {
     setNewApp({ code: '', name: '', description: '', business_owner: '', technical_owner: '', notes: '' })
+    setAppCodeTouched(false)
     setModal('new')
   }
 
-  // Set suggested code into state as soon as it resolves
+  // Vul de gesuggereerde code zolang de gebruiker het veld niet zelf aanpaste
+  // (ook als een verse refetch een nieuwere code oplevert dan de cache)
   useEffect(() => {
-    if (suggestedAppCode && !newApp.code) {
+    if (suggestedAppCode && !appCodeTouched) {
       setNewApp(f => ({ ...f, code: suggestedAppCode }))
     }
-  }, [suggestedAppCode])
+  }, [suggestedAppCode, appCodeTouched])
 
   const closeModal = () => { setModal(null); setAppSearch('') }
 
   const linkMutation = useMutation({
     mutationFn: (appId: number) => processesApi.linkApp(pid, appId),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['processes', pid] }); closeModal() },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['processes', pid] })
+      qc.invalidateQueries({ queryKey: ['applications'] })
+      closeModal()
+    },
   })
 
   const createAndLinkMutation = useMutation({
@@ -106,7 +126,10 @@ export default function ProcessDetail() {
 
   const unlinkMutation = useMutation({
     mutationFn: (appId: number) => processesApi.unlinkApp(pid, appId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['processes', pid] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['processes', pid] })
+      qc.invalidateQueries({ queryKey: ['applications'] })
+    },
   })
 
   const reviewMutation = useMutation({
@@ -114,7 +137,27 @@ export default function ProcessDetail() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['processes', pid] }),
   })
 
-  if (isLoading) return <p className="text-gray-400 p-8">Laden...</p>
+  // Dossier-download via de API-client zodat het Bearer token meegaat
+  const [dossierError, setDossierError] = useState<string | null>(null)
+  const dossierMutation = useMutation({
+    mutationFn: async () => {
+      const res = await client.get(`/export/process/${pid}/docx`, { responseType: 'blob' })
+      const disposition = (res.headers['content-disposition'] as string | undefined) ?? ''
+      const filename = disposition.match(/filename=([^;]+)/)?.[1]?.trim() ?? `procesdossier_${pid}.docx`
+      const url = URL.createObjectURL(res.data as Blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    },
+    onMutate: () => setDossierError(null),
+    onError: (err) => setDossierError(apiErrorMessage(err)),
+  })
+
+  if (isLoading) return <p className="text-ink-subtle p-8">Laden...</p>
   if (!process) return <p className="text-red-500 p-8">Proces niet gevonden.</p>
 
   const setNew = (k: keyof Application, v: string) => setNewApp(f => ({ ...f, [k]: v }))
@@ -127,10 +170,21 @@ export default function ProcessDetail() {
         actions={
           <>
             <Button variant="ghost" onClick={() => navigate('/processes')}><ArrowLeft size={15} /> Terug</Button>
-            <Button variant="secondary" onClick={() => navigate(`/processes/${pid}/edit`)}><Pencil size={15} /> Bewerken</Button>
+            <Button variant="secondary" onClick={() => dossierMutation.mutate()} loading={dossierMutation.isPending}>
+              <FileDown size={15} /> Dossier (Word)
+            </Button>
+            {canEdit && (
+              <Button variant="secondary" onClick={() => navigate(`/processes/${pid}/edit`)}><Pencil size={15} /> Bewerken</Button>
+            )}
           </>
         }
       />
+
+      {dossierError && (
+        <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 inline-block">
+          Dossier-export mislukt: {dossierError}
+        </p>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200">
@@ -155,10 +209,7 @@ export default function ProcessDetail() {
             <Field label="Afdeling" value={process.department} />
             <Field label="Procesclassificatie"><ScoreBadge score={procesClassificatie} /></Field>
             {(() => {
-              const cutoff = new Date()
-              cutoff.setFullYear(cutoff.getFullYear() - 1)
-              const rd = reviewDate ? new Date(reviewDate) : null
-              const isExpired = rd !== null && rd < cutoff
+              const isExpired = isReviewExpired(reviewDate)
               return (
                 <div>
                   <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Laatste review datum</dt>
@@ -199,23 +250,27 @@ export default function ProcessDetail() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-medium text-gray-800">Gekoppelde applicaties ({process.applications.length})</h2>
-            <Button size="sm" onClick={() => setModal('choice')}>
-              <Plus size={14} /> Toevoegen
-            </Button>
+            {canEdit && (
+              <Button size="sm" onClick={() => setModal('choice')}>
+                <Plus size={14} /> Toevoegen
+              </Button>
+            )}
           </div>
           {process.applications.length === 0 ? (
-            <p className="text-gray-400 text-sm py-4">Nog geen applicaties gekoppeld.</p>
+            <p className="text-ink-subtle text-sm py-4">Nog geen applicaties gekoppeld.</p>
           ) : (
             <ul className="divide-y divide-gray-100">
               {process.applications.map(a => (
                 <li key={a.id} className="flex items-center justify-between py-3">
                   <div>
                     <span className="font-medium text-sm">{a.name}</span>
-                    <span className="ml-2 font-mono text-xs text-gray-400">{a.code}</span>
+                    <span className="ml-2 font-mono text-xs text-ink-subtle">{a.code}</span>
                   </div>
-                  <button onClick={() => unlinkMutation.mutate(a.id)} className="p-1.5 rounded hover:bg-red-50 text-red-400 hover:text-red-600">
-                    <Unlink size={14} />
-                  </button>
+                  {canEdit && (
+                    <button onClick={() => unlinkMutation.mutate(a.id)} className="p-1.5 rounded hover:bg-red-50 text-red-400 hover:text-red-600">
+                      <Unlink size={14} />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -226,11 +281,11 @@ export default function ProcessDetail() {
       {/* BIA & BIV-Classificatie */}
       {tab === 'BIA & BIV-Classificatie' && (
         biaLoading ? (
-          <Card><p className="text-sm text-gray-400 text-center py-8">Laden…</p></Card>
+          <Card><p className="text-sm text-ink-subtle text-center py-8">Laden…</p></Card>
         ) : !bia ? (
           <Card>
             <div className="text-center py-8">
-              <p className="text-gray-400 text-sm mb-4">Nog geen BIA ingevuld voor dit proces.</p>
+              <p className="text-ink-subtle text-sm mb-4">Nog geen BIA ingevuld voor dit proces.</p>
               <Button onClick={() => navigate(`/bia/${pid}`)}>BIA invullen</Button>
             </div>
           </Card>
@@ -249,17 +304,35 @@ export default function ProcessDetail() {
       {/* Procescontext */}
       {tab === 'Procescontext' && (
         bcLoading ? (
-          <Card><p className="text-sm text-gray-400 text-center py-8">Laden…</p></Card>
+          <Card><p className="text-sm text-ink-subtle text-center py-8">Laden…</p></Card>
         ) : !businessContext ? (
           <Card>
             <div className="text-center py-8">
-              <p className="text-gray-400 text-sm mb-4">Nog geen procescontext ingevuld.</p>
+              <p className="text-ink-subtle text-sm mb-4">Nog geen procescontext ingevuld.</p>
               <Button onClick={() => navigate(`/business-context/${pid}`)}>Procescontext invullen</Button>
             </div>
           </Card>
         ) : (
           <BusinessContextReadOnly bc={businessContext} />
         )
+      )}
+
+      {/* Historie (audit trail) */}
+      {tab === 'Historie' && (
+        <Card>
+          <h2 className="font-medium text-gray-800 mb-4">Wijzigingshistorie</h2>
+          {auditLoading ? (
+            <p className="text-sm text-ink-subtle text-center py-8">Laden…</p>
+          ) : auditEntries.length === 0 ? (
+            <p className="text-sm text-ink-subtle py-4">
+              Nog geen wijzigingen geregistreerd. De historie wordt bijgehouden vanaf het moment dat de audit trail actief is.
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {auditEntries.map(entry => <AuditEntryRow key={entry.id} entry={entry} />)}
+            </ul>
+          )}
+        </Card>
       )}
 
       {/* ── Modal ── */}
@@ -308,7 +381,7 @@ export default function ProcessDetail() {
             {modal === 'existing' && (
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <button onClick={() => setModal('choice')} className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                  <button onClick={() => setModal('choice')} className="p-1 rounded hover:bg-gray-100 text-ink-subtle">
                     <ArrowLeft size={16} />
                   </button>
                   <h3 className="font-semibold text-gray-900">Bestaande applicatie koppelen</h3>
@@ -322,7 +395,7 @@ export default function ProcessDetail() {
                 />
                 <ul className="max-h-64 overflow-y-auto divide-y divide-gray-100 border border-gray-100 rounded-lg mb-4">
                   {allApps.filter(a => !process.applications.find(pa => pa.id === a.id)).length === 0 ? (
-                    <li className="px-4 py-6 text-sm text-gray-400 text-center">Geen applicaties gevonden.</li>
+                    <li className="px-4 py-6 text-sm text-ink-subtle text-center">Geen applicaties gevonden.</li>
                   ) : (
                     allApps
                       .filter(a => !process.applications.find(pa => pa.id === a.id))
@@ -330,7 +403,7 @@ export default function ProcessDetail() {
                         <li key={a.id} className="flex items-center justify-between px-3 py-2.5 hover:bg-gray-50">
                           <div>
                             <span className="text-sm font-medium text-gray-800">{a.name}</span>
-                            <span className="ml-2 font-mono text-xs text-gray-400">{a.code}</span>
+                            <span className="ml-2 font-mono text-xs text-ink-subtle">{a.code}</span>
                           </div>
                           <Button size="sm" onClick={() => linkMutation.mutate(a.id)} loading={linkMutation.isPending}>
                             Koppelen
@@ -347,7 +420,7 @@ export default function ProcessDetail() {
             {modal === 'new' && (
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <button onClick={() => setModal('choice')} className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                  <button onClick={() => setModal('choice')} className="p-1 rounded hover:bg-gray-100 text-ink-subtle">
                     <ArrowLeft size={16} />
                   </button>
                   <h3 className="font-semibold text-gray-900">Nieuwe applicatie toevoegen</h3>
@@ -355,7 +428,7 @@ export default function ProcessDetail() {
 
                 {createAndLinkMutation.isError && (
                   <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                    {(createAndLinkMutation.error as Error).message}
+                    {apiErrorMessage(createAndLinkMutation.error)}
                   </div>
                 )}
 
@@ -363,7 +436,7 @@ export default function ProcessDetail() {
                   <FormField label="Applicatiecode" required>
                     <Input
                       value={newApp.code ?? ''}
-                      onChange={e => setNew('code', e.target.value)}
+                      onChange={e => { setAppCodeTouched(true); setNew('code', e.target.value) }}
                       placeholder="KAPP-001"
                     />
                   </FormField>
@@ -391,7 +464,7 @@ export default function ProcessDetail() {
                     size="sm"
                     onClick={() => createAndLinkMutation.mutate()}
                     loading={createAndLinkMutation.isPending}
-                    disabled={!newApp.code || !newApp.name}
+                    disabled={!newApp.code?.trim() || !newApp.name?.trim()}
                   >
                     Aanmaken en koppelen
                   </Button>
@@ -405,11 +478,85 @@ export default function ProcessDetail() {
   )
 }
 
+const ENTITY_LABELS: Record<string, string> = {
+  processes: 'Proces',
+  applications: 'Applicatie',
+  bia_assessments: 'BIA',
+  business_contexts: 'Procescontext',
+  rto_rpo: 'RTO/RPO',
+}
+
+const ACTION_LABELS: Record<string, { label: string; className: string }> = {
+  insert: { label: 'Aangemaakt', className: 'bg-green-100 text-green-800' },
+  update: { label: 'Gewijzigd', className: 'bg-blue-100 text-blue-800' },
+  delete: { label: 'Verwijderd', className: 'bg-red-100 text-red-800' },
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Naam', code: 'Code', description: 'Beschrijving', objective: 'Doelstelling',
+  owner: 'Eigenaar', department: 'Afdeling', is_critical: 'Kritiek',
+  critical_reason: 'Reden kritiek', last_assessment_date: 'Laatste beoordeling',
+  notes: 'Notities', applications: 'Gekoppelde applicaties',
+  interviewer_name: 'Interviewer', interview_date: 'Interviewdatum',
+  general_description: 'Algemene beschrijving', chain_dependencies: 'Ketenafhankelijkheden',
+  owner_deviation_motivation: 'Afwijking motivatie', review_date: 'Reviewdatum',
+  availability_score: 'B-score', integrity_score: 'I-score', confidentiality_score: 'V-score',
+  personal_data: 'Persoonsgegevens', special_personal_data: 'Bijz. persoonsgegevens',
+}
+
+function formatAuditValue(v: unknown): string {
+  if (v === null || v === undefined || v === '') return '—'
+  if (typeof v === 'boolean') return v ? 'Ja' : 'Nee'
+  const s = String(v)
+  return s.length > 120 ? `${s.slice(0, 120)}…` : s
+}
+
+function AuditEntryRow({ entry }: { entry: AuditLogEntry }) {
+  const action = ACTION_LABELS[entry.action] ?? { label: entry.action, className: 'bg-gray-100 text-gray-700' }
+  const changes = entry.changes ? Object.entries(entry.changes) : []
+  return (
+    <li className="py-3">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${action.className}`}>
+          {action.label}
+        </span>
+        <span className="font-medium text-gray-800">{ENTITY_LABELS[entry.entity_type] ?? entry.entity_type}</span>
+        <span className="text-ink-subtle text-xs">
+          {new Date(entry.created_at).toLocaleString('nl-NL')}
+          {(entry.user_name || entry.user_email) && ` · ${entry.user_name ?? entry.user_email}`}
+        </span>
+      </div>
+      {changes.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5 text-xs text-gray-600">
+          {changes.map(([field, change]) => (
+            <li key={field}>
+              <span className="font-medium text-gray-700">{FIELD_LABELS[field] ?? field}:</span>{' '}
+              {change.added || change.removed ? (
+                <>
+                  {change.added?.length ? <span className="text-green-700">+ {change.added.join(', ')}</span> : null}
+                  {change.added?.length && change.removed?.length ? ' · ' : null}
+                  {change.removed?.length ? <span className="text-red-700">− {change.removed.join(', ')}</span> : null}
+                </>
+              ) : (
+                <>
+                  <span className="text-ink-subtle line-through">{formatAuditValue(change.old)}</span>
+                  {' → '}
+                  <span className="text-gray-800">{formatAuditValue(change.new)}</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  )
+}
+
 function Field({ label, value, full, children }: { label: string; value?: string | null; full?: boolean; children?: React.ReactNode }) {
   return (
     <div className={full ? 'md:col-span-2' : ''}>
       <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</dt>
-      <dd className="text-gray-800">{children ?? (value || <span className="text-gray-300">—</span>)}</dd>
+      <dd className="text-gray-800">{children ?? (value || <span className="text-ink-subtle">—</span>)}</dd>
     </div>
   )
 }

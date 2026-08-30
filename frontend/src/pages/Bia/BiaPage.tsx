@@ -1,12 +1,16 @@
-import bcpTimelineImg from '../../assets/bcp-timeline.png'
 import itContinueiteitImg from '../../assets/it-continuiteit.png'
 import businessContinueiteitImg from '../../assets/business-continuiteit.png'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Info, ChevronDown } from 'lucide-react'
 import { processesApi } from '../../api/processes'
 import { biaApi } from '../../api/bia'
+import { apiErrorMessage } from '../../api/client'
+import { isReviewExpired } from '../../utils/review'
+import { useMe } from '../../hooks/useMe'
+import { PARAM_MAP, paramLabel } from './biaShared'
 import PageHeader from '../../components/common/PageHeader'
 import { Card } from '../../components/common/Card'
 import { FormField, Input, Textarea } from '../../components/common/FormField'
@@ -134,24 +138,9 @@ const SCORE_LABELS: Record<number, string> = {
   5: 'Verwaarloosbaar',
 }
 
-// ── BCP compact value mapping (source: Word doc, score 1–5 → compact label) ──
-
-const BCP_COMPACT_MAP = {
-  mtpd: { 1: 'enkele uren niet acceptabel', 2: 'maximaal 8 uur', 3: 'maximaal 2 werkdagen', 4: 'maximaal 1 week',   5: 'langer dan een week' },
-  rto:  { 1: 'binnen enkele uren',          2: 'binnen 8 uur',   3: 'binnen 2 werkdagen',   4: 'binnen een week',   5: 'langer dan een week' },
-  wrt:  { 1: 'meerdere werkdagen',           2: '1 werkdag',      3: '4–8 uur',              4: '1–4 uur',           5: 'minder dan 1 uur'    },
-  rpo:  { 1: 'enkele uren',                  2: '4–8 uur',        3: '8–24 uur',             4: 'maximaal 24 uur',   5: 'een week of meer'    },
-} as const
-
-// ── Parameter label maps (Mapping vragenlijst beschikbaarheid → continuiteitsparameters) ─
-// b1 (uitvalduur) → RPO, b2 (dataverlies) → RTO, b3 (herstelwerk) → WRT, b4 (totale uitval) → MTD
-
-const PARAM_MAP = {
-  rpo: { 1: 'Enkele uren', 2: '8 uur', 3: '2 werkdagen', 4: '1 week', 5: '1 week of meer' },
-  rto: { 1: 'Enkele uren', 2: '4 tot 8 uur', 3: '8 tot 24 uur', 4: '24 uur', 5: '1 week of meer' },
-  wrt: { 1: 'Enkele uren', 2: '4 tot 8 uur', 3: '2 werkdagen', 4: '1 week', 5: 'Meer dan een week' },
-  mtd: { 1: 'Enkele uren', 2: '4 tot 8 uur', 3: '2 werkdagen', 4: '1 week', 5: 'Meer dan een week' },
-} as const
+// Parameter-labels per score komen uit PARAM_MAP in biaShared:
+// b1 (max. uitvalduur) → RTO, b2 (max. dataverlies) → RPO,
+// b3 (herstelwerk) → WRT, b4 (totale uitval) → MTPD/MTD
 
 type TabKey = 'Algemeen' | 'Beschikbaarheid' | 'Integriteit' | 'Vertrouwelijkheid'
 
@@ -192,16 +181,16 @@ export default function BiaPage() {
   const qc = useQueryClient()
   const [tab, setTab] = useState<TabKey>('Algemeen')
   const [scope, setScope] = useState<'IT-Continuïteit' | 'Business Continuïteit'>('IT-Continuïteit')
-  const [selectedPid, setSelectedPid] = useState<number | undefined>(
-    processId ? Number(processId) : undefined,
-  )
+  const { canEdit } = useMe()
+
+  // pid volgt de URL, zodat ook browser-terug/vooruit het juiste proces toont
+  const pid = processId ? Number(processId) : undefined
 
   const { data: processes = [] } = useQuery({
     queryKey: ['processes'],
     queryFn: () => processesApi.list(),
   })
 
-  const pid = selectedPid
   const { data: bia } = useQuery({
     queryKey: ['bia', pid],
     queryFn: () => biaApi.get(pid!),
@@ -212,6 +201,9 @@ export default function BiaPage() {
   const [form, setForm] = useState<Partial<BiaAssessment>>({})
   const currentForm: Partial<BiaAssessment> = bia ? { ...bia, ...form } : form
   const setField = (k: keyof BiaAssessment, v: unknown) => setForm(f => ({ ...f, [k]: v }))
+
+  // Bij proceswissel hoort het formulier leeg te beginnen
+  useEffect(() => { setForm({}) }, [pid])
 
   // Auto-calculate final scores: highest severity (= lowest numeric) across all answered questions
   const autoB = useMemo(
@@ -227,30 +219,65 @@ export default function BiaPage() {
     [currentForm.v1_score],
   )
 
-  // Effective form: auto-calculated scores override stored values
+  // Effective form: de B/I/V-scores worden altijd afgeleid uit de vragen.
+  // Null (niet undefined) als er geen vraag beantwoord is, zodat de waarde
+  // ook echt naar de backend wordt gestuurd en daar gewist wordt — anders
+  // blijft een oude classificatie hangen nadat alle antwoorden zijn gewist.
   const effectiveForm: Partial<BiaAssessment> = {
     ...currentForm,
-    ...(autoB !== undefined && { availability_score: autoB }),
-    ...(autoI !== undefined && { integrity_score: autoI }),
-    ...(autoV !== undefined && { confidentiality_score: autoV }),
+    availability_score: autoB ?? null,
+    integrity_score: autoI ?? null,
+    confidentiality_score: autoV ?? null,
   }
 
+  // Conflictdetectie: iemand anders sloeg dezelfde BIA op terwijl wij bewerkten
+  const [conflict, setConflict] = useState(false)
+
   const mutation = useMutation({
-    mutationFn: () => biaApi.upsert(pid!, effectiveForm),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['bia', pid] })
+    mutationFn: ({ pid: targetPid, data }: { pid: number; data: Partial<BiaAssessment> }) =>
+      biaApi.upsert(targetPid, { ...data, expected_updated_at: bia?.updated_at }),
+    onSuccess: (_result, { pid: savedPid, data }) => {
+      setConflict(false)
+      qc.invalidateQueries({ queryKey: ['bia', savedPid] })
       qc.invalidateQueries({ queryKey: ['processes'] })
-      setForm({})
+      // Wis alleen velden die ongewijzigd zijn opgeslagen; toetsaanslagen die
+      // tijdens de save binnenkwamen blijven zo behouden.
+      setForm(f => {
+        const next: Partial<BiaAssessment> = { ...f }
+        for (const key of Object.keys(f) as (keyof BiaAssessment)[]) {
+          if (next[key] === data[key]) delete next[key]
+        }
+        return next
+      })
+    },
+    onError: (err) => {
+      // 409 = optimistic-locking-conflict: verse data ophalen; de autosave
+      // hieronder probeert het daarna opnieuw bovenop de nieuwste versie.
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        setConflict(true)
+        qc.invalidateQueries({ queryKey: ['bia', pid] })
+      }
     },
   })
 
-  // Autosave: debounce 600ms after any form change
+  // Autosave: debounce 600ms na elke formulierwijziging. bia?.updated_at zit
+  // in de deps zodat na een conflict-refetch de merge opnieuw wordt opgeslagen.
   useEffect(() => {
-    if (!pid || Object.keys(form).length === 0) return
-    const t = setTimeout(() => mutation.mutate(), 600)
+    if (!pid || !canEdit || Object.keys(form).length === 0) return
+    const t = setTimeout(() => mutation.mutate({ pid, data: effectiveForm }), 600)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, pid])
+  }, [form, pid, bia?.updated_at, canEdit])
+
+  // Proceswissel via de zijbalk: eventuele nog niet opgeslagen wijzigingen
+  // eerst wegschrijven (naar het oude proces), dan navigeren.
+  const goToProcess = (targetId: number) => {
+    if (targetId === pid) return
+    if (pid && canEdit && Object.keys(form).length > 0) {
+      mutation.mutate({ pid, data: effectiveForm })
+    }
+    navigate(`/bia/${targetId}`)
+  }
 
   return (
     <div className="flex gap-6">
@@ -262,15 +289,15 @@ export default function BiaPage() {
             {processes.map(p => (
               <li key={p.id}>
                 <button
-                  onClick={() => { setSelectedPid(p.id); setForm({}); navigate(`/bia/${p.id}`) }}
+                  onClick={() => goToProcess(p.id)}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors ${
                     pid === p.id ? 'bg-brand-50 text-brand-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <div className="font-medium truncate">{p.name}</div>
-                  <div className="text-xs text-gray-400 mt-0.5 flex gap-1">
+                  <div className="text-xs text-ink-subtle mt-0.5 flex gap-1">
                     <span>{p.code}</span>
-                    {p.has_bia && <span className="text-green-500">✓</span>}
+                    {p.has_bia && <span className="text-green-700">✓</span>}
                   </div>
                 </button>
               </li>
@@ -286,30 +313,52 @@ export default function BiaPage() {
         />
 
         {!pid && (
-          <Card className="text-center py-12 text-gray-400">
+          <Card className="text-center py-12 text-ink-subtle">
             <p>Selecteer een proces aan de linkerkant om de BIA in te vullen.</p>
           </Card>
         )}
 
-        {/* Scope Selector */}
-        <div className="flex items-center gap-3 mb-5">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Scope</span>
-          <div className="relative flex items-center bg-gray-100 rounded-full p-0.5">
-            {(['IT-Continuïteit', 'Business Continuïteit'] as const).map(option => (
-              <button
-                key={option}
-                onClick={() => setScope(option)}
-                className={`relative z-10 px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
-                  scope === option
-                    ? 'bg-white text-brand-700 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
+        {pid && (
+          <>
+          {/* Scope Selector + autosave status */}
+          <div className="flex items-center gap-3 mb-5">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Scope</span>
+            <div className="relative flex items-center bg-gray-100 rounded-full p-0.5">
+              {(['IT-Continuïteit', 'Business Continuïteit'] as const).map(option => (
+                <button
+                  key={option}
+                  onClick={() => setScope(option)}
+                  className={`relative z-10 px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                    scope === option
+                      ? 'bg-white text-brand-700 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            <span className="ml-auto text-xs">
+              {!canEdit && (
+                <span className="text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2 py-0.5">
+                  Alleen-lezen — je hebt de rol lezer, wijzigingen worden niet opgeslagen
+                </span>
+              )}
+              {mutation.isPending && <span className="text-ink-subtle">Opslaan…</span>}
+              {conflict && !mutation.isPending && (
+                <span className="text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                  Iemand anders heeft deze BIA gewijzigd — gegevens ververst, jouw wijzigingen worden opnieuw toegepast
+                </span>
+              )}
+              {mutation.isError && !conflict && (
+                <span className="text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                  Opslaan mislukt: {apiErrorMessage(mutation.error)}
+                </span>
+              )}
+            </span>
           </div>
-        </div>
+          </>
+        )}
 
         {pid && (
           <>
@@ -326,10 +375,10 @@ export default function BiaPage() {
                   {/* Parent: Procesclassificatie */}
                   <div className={`rounded-xl border border-gray-200 shadow-sm overflow-hidden ${procScore ? SCORE_STRIP_BG[procScore] : 'bg-gray-50'}`}>
                     <div className="flex flex-col items-center py-4 px-6 text-center">
-                      <div className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-widest text-ink-subtle mb-1.5">
                         Procesclassificatie
                       </div>
-                      <div className={`text-base font-bold ${procScore ? SCORE_STRIP_TEXT[procScore] : 'text-gray-400'}`}>
+                      <div className={`text-base font-bold ${procScore ? SCORE_STRIP_TEXT[procScore] : 'text-ink-subtle'}`}>
                         {procScore ? SCORE_LABELS[procScore] : 'Nog niet bepaald'}
                       </div>
                     </div>
@@ -338,7 +387,7 @@ export default function BiaPage() {
                   {/* Hierarchy connector */}
                   <div className="flex flex-col items-center py-1">
                     <div className="w-px h-3 bg-gray-300" />
-                    <ChevronDown size={13} className="text-gray-300 -mt-0.5" />
+                    <ChevronDown size={13} className="text-ink-subtle -mt-0.5" />
                   </div>
 
                   {/* Children: B / I / V */}
@@ -380,10 +429,7 @@ export default function BiaPage() {
                   </FormField>
                   <FormField label="Laatste review datum">
                     {(() => {
-                      const cutoff = new Date()
-                      cutoff.setFullYear(cutoff.getFullYear() - 1)
-                      const reviewDate = currentForm.interview_date ? new Date(currentForm.interview_date) : null
-                      const isExpired = reviewDate !== null && reviewDate < cutoff
+                      const isExpired = isReviewExpired(currentForm.interview_date)
                       return (
                         <>
                           <input
@@ -416,10 +462,11 @@ export default function BiaPage() {
               <Card className="mt-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Continuïteitsparameters</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <FormField label="RPO – Max. uitvalduur">
+                  {/* b1 (max. uitvalduur) → RTO, b2 (max. dataverlies) → RPO */}
+                  <FormField label="RTO – Max. uitvalduur">
                     <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[0], effectiveForm.b1_score)} />
                   </FormField>
-                  <FormField label="RTO – Max. dataverlies">
+                  <FormField label="RPO – Max. dataverlies">
                     <BcpValueDisplay value={bcpAnswerInfo(B_QUESTIONS[1], effectiveForm.b2_score)} />
                   </FormField>
                   {scope === 'Business Continuïteit' && (
@@ -436,15 +483,15 @@ export default function BiaPage() {
                 <div className="mt-8 pt-8 border-t border-gray-100">
                   {scope === 'IT-Continuïteit' ? (
                     <ItContinueitTimeline
-                      rpo={effectiveForm.b1_score ? PARAM_MAP.rpo[effectiveForm.b1_score as keyof typeof PARAM_MAP.rpo] : undefined}
-                      rto={effectiveForm.b2_score ? PARAM_MAP.rto[effectiveForm.b2_score as keyof typeof PARAM_MAP.rto] : undefined}
+                      rto={paramLabel(PARAM_MAP.rto, effectiveForm.b1_score)}
+                      rpo={paramLabel(PARAM_MAP.rpo, effectiveForm.b2_score)}
                     />
                   ) : (
                     <BcContinueitTimeline
-                      rpo={effectiveForm.b1_score ? PARAM_MAP.rpo[effectiveForm.b1_score as keyof typeof PARAM_MAP.rpo] : undefined}
-                      rto={effectiveForm.b2_score ? PARAM_MAP.rto[effectiveForm.b2_score as keyof typeof PARAM_MAP.rto] : undefined}
-                      wrt={effectiveForm.b3_score ? PARAM_MAP.wrt[effectiveForm.b3_score as keyof typeof PARAM_MAP.wrt] : undefined}
-                      mtd={effectiveForm.b4_score ? PARAM_MAP.mtd[effectiveForm.b4_score as keyof typeof PARAM_MAP.mtd] : undefined}
+                      rto={paramLabel(PARAM_MAP.rto, effectiveForm.b1_score)}
+                      rpo={paramLabel(PARAM_MAP.rpo, effectiveForm.b2_score)}
+                      wrt={paramLabel(PARAM_MAP.wrt, effectiveForm.b3_score)}
+                      mtd={paramLabel(PARAM_MAP.mtd, effectiveForm.b4_score)}
                     />
                   )}
                 </div>
@@ -518,7 +565,7 @@ export default function BiaPage() {
 function BcpValueDisplay({ value }: { value: string | undefined }) {
   if (!value) {
     return (
-      <div className="flex items-center px-3 py-2 rounded-lg border border-dashed border-gray-300 text-sm text-gray-400 min-h-[36px]">
+      <div className="flex items-center px-3 py-2 rounded-lg border border-dashed border-gray-300 text-sm text-ink-subtle min-h-[36px]">
         Nog niet bepaald
       </div>
     )
@@ -528,17 +575,6 @@ function BcpValueDisplay({ value }: { value: string | undefined }) {
       {value}
     </div>
   )
-}
-
-// ── AutoScoreDisplay ──────────────────────────────────────────────────────────
-
-// Score color classes matching severity (1=most severe, 5=least severe)
-const SCORE_COLORS: Record<number, string> = {
-  1: 'bg-red-50 border-red-300 text-red-700',
-  2: 'bg-orange-50 border-orange-300 text-orange-700',
-  3: 'bg-yellow-50 border-yellow-300 text-yellow-700',
-  4: 'bg-blue-50 border-blue-300 text-blue-700',
-  5: 'bg-green-50 border-green-300 text-green-700',
 }
 
 // Solid background + text for the Procesclassificatie strip
@@ -556,100 +592,6 @@ const SCORE_STRIP_TEXT: Record<number, string> = {
   4: 'text-blue-700',
   5: 'text-green-700',
 }
-const SCORE_CIRCLE: Record<number, string> = {
-  1: 'bg-red-100 text-red-700 ring-red-200',
-  2: 'bg-orange-100 text-orange-700 ring-orange-200',
-  3: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
-  4: 'bg-blue-100 text-blue-700 ring-blue-200',
-  5: 'bg-green-100 text-green-700 ring-green-200',
-}
-
-function AutoScoreDisplay({ score, fallback }: { score: number | undefined; fallback: string }) {
-  if (score === undefined) {
-    return (
-      <div className="flex items-center h-9 px-3 rounded-lg border border-dashed border-gray-300 text-sm text-gray-400">
-        {fallback}
-      </div>
-    )
-  }
-  return (
-    <div className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium ${SCORE_COLORS[score] ?? 'bg-gray-50 border-gray-300 text-gray-700'}`}>
-      <span>{SCORE_LABELS[score]}</span>
-      <span className="ml-auto text-xs font-normal opacity-60">automatisch</span>
-    </div>
-  )
-}
-
-// ── BcpTimeline ───────────────────────────────────────────────────────────────
-// Uses Visual BC-Parameters.png (1872×576) as a fixed background template.
-// Only the 4 dynamic values (mtpd, rto, wrt, rpo) are overlaid via absolute positioning.
-//
-// Calibration against Visual BC-Parameters.png (1872×576 px) — pixel-scanned:
-//   Arrows at y=210 (36.5%) define RPO/RTO/WRT horizontal spans:
-//     RPO:  x=374–705,  center=540  → left=28.8%
-//     RTO:  x=728–1145, center=936  → left=50.0%
-//     WRT:  x=1167–1522,center=1344 → left=71.8%
-//   MTD bracket lines at y=66 and y=107:
-//     Horizontal span: x=978–1251, center=1114 → left=59.5%
-//   Value text Y zones (% of height):
-//     MTD value:        14.9% (y≈86, center of white zone y=67–105 inside bracket)
-//     RPO/RTO/WRT:      42.5% (y≈245, center of white zone y=226–264 below arrows)
-
-function BcpTimeline({ mtpd, rto, wrt, rpo }: {
-  mtpd?: string; rto?: string; wrt?: string; rpo?: string
-}) {
-  const dash = '—'
-  const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : dash
-
-  // Base overlay style: no background, no border — text appears to be part of the image.
-  // left/top mark the CENTER of the text element (via translate -50% -50%).
-  // Positions calibrated from pixel scan of Visual BC-Parameters.png (1872×576):
-  //   Each label is centered in its largest unobstructed white run within the image.
-  const base: React.CSSProperties = {
-    position: 'absolute',
-    transform: 'translate(-50%, -50%)',
-    whiteSpace: 'nowrap',
-    fontSize: '0.7rem',
-    fontWeight: 700,
-    lineHeight: 1,
-    color: '#1a1a1a',
-    pointerEvents: 'none',
-    userSelect: 'none',
-  }
-
-  return (
-    <div className="relative w-full" style={{ lineHeight: 0 }}>
-      {/* ── Static template image ── */}
-      <img
-        src={bcpTimelineImg}
-        alt="Business Continuity tijdlijn: Business As Usual → Dataverlies → Systeemuitval → Hervatting Productie → Business As Usual"
-        className="w-full h-auto block"
-        draggable={false}
-      />
-
-      {/* MTD/MTPD — bracket x=978–1251 (center=1114 → 59.5%), white zone y=67–105 (center=86 → 14.9%) */}
-      <span style={{ ...base, left: '59.5%', top: '14.9%' }}>
-        {cap(mtpd)}
-      </span>
-
-      {/* RPO — arrow x=374–705 (center=540 → 28.8%), white zone y=226–264 (center=245 → 42.5%) */}
-      <span style={{ ...base, left: '28.8%', top: '42.5%' }}>
-        {cap(rpo)}
-      </span>
-
-      {/* RTO — arrow x=728–1145 (center=936 → 50.0%), white zone y=226–264 (center=245 → 42.5%) */}
-      <span style={{ ...base, left: '50.0%', top: '42.5%' }}>
-        {cap(rto)}
-      </span>
-
-      {/* WRT — arrow x=1167–1522 (center=1344 → 71.8%), white zone y=226–264 (center=245 → 42.5%) */}
-      <span style={{ ...base, left: '71.8%', top: '42.5%' }}>
-        {cap(wrt)}
-      </span>
-    </div>
-  )
-}
-
 // ── ItContinueitTimeline ──────────────────────────────────────────────────────
 // Uses IT-Continuiteit.png (1872×576) as background; overlays RPO and RTO.
 // Calibration via pixel scan — white box centers:
@@ -757,7 +699,7 @@ function QuestionBlock({ question, score, arg, onScore, onArg }: {
           <div className="relative shrink-0 mt-0.5">
             <button
               onClick={e => { e.stopPropagation(); setOpenQuestionInfo(v => !v) }}
-              className="p-0.5 rounded text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+              className="p-0.5 rounded text-ink-subtle hover:text-ink-muted hover:bg-gray-100 transition-colors"
               title="Meer informatie"
             >
               <Info size={14} strokeWidth={1.75} />
@@ -788,7 +730,7 @@ function QuestionBlock({ question, score, arg, onScore, onArg }: {
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setOpenAnswerInfo(prev => prev === val ? null : val) }}
-                  className="p-0.5 rounded text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                  className="p-0.5 rounded text-ink-subtle hover:text-ink-muted hover:bg-gray-100 transition-colors"
                   title="Toelichting antwoord"
                 >
                   <Info size={12} strokeWidth={1.75} />

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { applicationsApi } from '../../api/applications'
+import { apiErrorMessage } from '../../api/client'
+import { isReviewExpired } from '../../utils/review'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import { Card } from '../../components/common/Card'
@@ -25,19 +27,24 @@ export default function ApplicationForm() {
     queryFn: applicationsApi.nextCode,
     enabled: !isEdit,
     staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const [form, setForm] = useState<Partial<Application>>({ code: '', name: '' })
+  const [codeTouched, setCodeTouched] = useState(false)
 
   useEffect(() => { if (existing) setForm(existing) }, [existing])
 
+  // Pre-fill auto-generated code zolang de gebruiker het veld niet zelf aanpaste
   useEffect(() => {
-    if (!isEdit && suggestedCode && !form.code) {
+    if (!isEdit && suggestedCode && !codeTouched) {
       setForm(f => ({ ...f, code: suggestedCode }))
     }
-  }, [suggestedCode])
+  }, [suggestedCode, isEdit, codeTouched])
 
   const set = (k: keyof Application, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  const canSave = Boolean(form.code?.trim() && form.name?.trim())
 
   const mutation = useMutation({
     mutationFn: () => isEdit ? applicationsApi.update(Number(id), form) : applicationsApi.create(form),
@@ -51,14 +58,19 @@ export default function ApplicationForm() {
         actions={
           <>
             <Button variant="secondary" onClick={() => navigate(-1)}>Annuleren</Button>
-            <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>Opslaan</Button>
+            <Button onClick={() => mutation.mutate()} loading={mutation.isPending} disabled={!canSave}>Opslaan</Button>
           </>
         }
       />
+      {mutation.isError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {apiErrorMessage(mutation.error)}
+        </div>
+      )}
       <Card>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <FormField label="Applicatiecode" required>
-            <Input value={form.code ?? ''} onChange={e => set('code', e.target.value)} placeholder="KAPP-001" />
+            <Input value={form.code ?? ''} onChange={e => { setCodeTouched(true); set('code', e.target.value) }} placeholder="KAPP-001" />
           </FormField>
           <FormField label="Applicatienaam" required>
             <Input value={form.name ?? ''} onChange={e => set('name', e.target.value)} />
@@ -71,10 +83,7 @@ export default function ApplicationForm() {
           </FormField>
           <FormField label="Laatste review datum">
             {(() => {
-              const cutoff = new Date()
-              cutoff.setFullYear(cutoff.getFullYear() - 1)
-              const rd = form.review_date ? new Date(form.review_date) : null
-              const isExpired = rd !== null && rd < cutoff
+              const isExpired = isReviewExpired(form.review_date)
               return (
                 <>
                   <input
