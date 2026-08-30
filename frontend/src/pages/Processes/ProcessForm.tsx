@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { processesApi } from '../../api/processes'
+import { apiErrorMessage } from '../../api/client'
+import { isReviewExpired } from '../../utils/review'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import { Card } from '../../components/common/Card'
@@ -21,11 +23,14 @@ export default function ProcessForm() {
     enabled: isEdit,
   })
 
-  // Fetch next available code for new processes
+  // Fetch next available code for new processes (altijd vers, anders krijgen
+  // twee snel na elkaar aangemaakte processen dezelfde code)
   const { data: suggestedCode } = useQuery({
     queryKey: ['processes', 'next-code'],
     queryFn: processesApi.nextCode,
     enabled: !isEdit,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const [form, setForm] = useState<Partial<Process>>({
@@ -37,13 +42,14 @@ export default function ProcessForm() {
     department: '',
     notes: '',
   })
+  const [codeTouched, setCodeTouched] = useState(false)
 
-  // Pre-fill auto-generated code for new process
+  // Pre-fill auto-generated code zolang de gebruiker het veld niet zelf aanpaste
   useEffect(() => {
-    if (!isEdit && suggestedCode && !form.code) {
+    if (!isEdit && suggestedCode && !codeTouched) {
       setForm(f => ({ ...f, code: suggestedCode }))
     }
-  }, [suggestedCode, isEdit])
+  }, [suggestedCode, isEdit, codeTouched])
 
   // Load existing data when editing
   useEffect(() => {
@@ -51,6 +57,8 @@ export default function ProcessForm() {
   }, [existing])
 
   const set = (k: keyof Process, v: unknown) => setForm(f => ({ ...f, [k]: v }))
+
+  const canSave = Boolean(form.name?.trim())
 
   const mutation = useMutation({
     mutationFn: () => isEdit
@@ -69,14 +77,14 @@ export default function ProcessForm() {
         actions={
           <>
             <Button variant="secondary" onClick={() => navigate(-1)}>Annuleren</Button>
-            <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>Opslaan</Button>
+            <Button onClick={() => mutation.mutate()} loading={mutation.isPending} disabled={!canSave}>Opslaan</Button>
           </>
         }
       />
 
       {mutation.isError && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {(mutation.error as Error).message}
+          {apiErrorMessage(mutation.error)}
         </div>
       )}
 
@@ -85,7 +93,7 @@ export default function ProcessForm() {
           <FormField label="Procescode" required>
             <Input
               value={form.code ?? ''}
-              onChange={e => set('code', e.target.value)}
+              onChange={e => { setCodeTouched(true); set('code', e.target.value) }}
               placeholder="b.v. KP-001"
             />
           </FormField>
@@ -100,10 +108,7 @@ export default function ProcessForm() {
           </FormField>
           <FormField label="Laatste review datum">
             {(() => {
-              const cutoff = new Date()
-              cutoff.setFullYear(cutoff.getFullYear() - 1)
-              const rd = form.last_assessment_date ? new Date(form.last_assessment_date) : null
-              const isExpired = rd !== null && rd < cutoff
+              const isExpired = isReviewExpired(form.last_assessment_date)
               return (
                 <>
                   <input

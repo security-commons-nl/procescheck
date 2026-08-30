@@ -32,7 +32,7 @@ const SCORE_VARIANTS: Record<number, Variant> = {
 }
 
 export function ScoreBadge({ score }: { score?: number | null }) {
-  if (!score) return <span className="text-gray-400 text-xs">—</span>
+  if (!score) return <span className="text-ink-subtle text-xs">—</span>
   return <Badge variant={SCORE_VARIANTS[score] ?? 'gray'}>{SCORE_LABELS[score]}</Badge>
 }
 

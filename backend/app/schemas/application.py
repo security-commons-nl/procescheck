@@ -1,10 +1,13 @@
 from datetime import datetime, date
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, StringConstraints
+
+NonEmptyStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class ApplicationBase(BaseModel):
-    code: str
-    name: str
+    code: NonEmptyStr
+    name: NonEmptyStr
     description: str | None = None
     business_owner: str | None = None
     technical_owner: str | None = None
@@ -17,8 +20,8 @@ class ApplicationCreate(ApplicationBase):
 
 
 class ApplicationUpdate(BaseModel):
-    code: str | None = None
-    name: str | None = None
+    code: NonEmptyStr | None = None
+    name: NonEmptyStr | None = None
     description: str | None = None
     business_owner: str | None = None
     technical_owner: str | None = None

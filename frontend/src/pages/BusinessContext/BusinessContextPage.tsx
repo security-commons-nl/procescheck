@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { processesApi } from '../../api/processes'
 import { businessContextApi } from '../../api/businessContext'
+import { apiErrorMessage } from '../../api/client'
+import { isReviewExpired } from '../../utils/review'
+import { useMe } from '../../hooks/useMe'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import { Maximize2, Minimize2, Info, X } from 'lucide-react'
@@ -256,11 +259,11 @@ function BlockFocusModal({
           <div className="flex items-start justify-between mb-3">
             <div>
               <div className={`text-sm font-bold uppercase tracking-wide ${def.titleColor}`}>{def.label}</div>
-              <div className="text-xs text-gray-400 mt-0.5 leading-snug">{def.hint}</div>
+              <div className="text-xs text-ink-subtle mt-0.5 leading-snug">{def.hint}</div>
             </div>
             <button
               onClick={onClose}
-              className="ml-2 shrink-0 p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-black/10 transition-colors"
+              className="ml-2 shrink-0 p-1 rounded text-ink-subtle hover:text-gray-600 hover:bg-black/10 transition-colors"
               title="Sluiten"
             >
               <X size={16} />
@@ -309,14 +312,14 @@ function CanvasBlock({
         </div>
         <button
           onClick={e => { e.stopPropagation(); onToggleInfo() }}
-          className="ml-1 shrink-0 p-0.5 rounded text-gray-300 hover:text-gray-500 hover:bg-black/5 transition-colors"
+          className="ml-1 shrink-0 p-0.5 rounded text-ink-subtle hover:text-ink-muted hover:bg-black/5 transition-colors"
           title="Meer informatie"
         >
           <Info size={12} strokeWidth={1.75} />
         </button>
         {openInfo && <InfoPopover items={def.info} onClose={onToggleInfo} />}
       </div>
-      <div className="text-xs text-gray-400 mb-2 leading-snug">{def.hint}</div>
+      <div className="text-xs text-ink-subtle mb-2 leading-snug">{def.hint}</div>
       <textarea
         rows={fullscreen ? 6 : 4}
         value={value}
@@ -325,7 +328,7 @@ function CanvasBlock({
       />
       <button
         onClick={e => { e.stopPropagation(); onOpenFocus() }}
-        className="absolute bottom-2 right-2 p-0.5 rounded text-gray-300 hover:text-gray-500 hover:bg-black/5 transition-colors"
+        className="absolute bottom-2 right-2 p-0.5 rounded text-ink-subtle hover:text-ink-muted hover:bg-black/5 transition-colors"
         title="Vergroot blok"
       >
         <Maximize2 size={11} strokeWidth={1.75} />
@@ -340,16 +343,19 @@ export default function BusinessContextPage() {
   const { processId } = useParams<{ processId?: string }>()
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const [selectedPid, setSelectedPid] = useState<number | undefined>(
-    processId ? Number(processId) : undefined,
-  )
   const [form, setForm] = useState<Partial<BusinessContext>>({})
   const [fullscreen, setFullscreen] = useState(false)
   const [openInfo, setOpenInfo] = useState<string | null>(null)
   const [focusBlock, setFocusBlock] = useState<string | null>(null)
+  const { canEdit } = useMe()
 
   const { data: processes = [] } = useQuery({ queryKey: ['processes'], queryFn: () => processesApi.list() })
-  const pid = selectedPid
+
+  // pid volgt de URL, zodat ook browser-terug/vooruit het juiste proces toont
+  const pid = processId ? Number(processId) : undefined
+
+  // Bij proceswissel hoort het formulier leeg te beginnen
+  useEffect(() => { setForm({}) }, [pid])
 
   const { data: existing } = useQuery({
     queryKey: ['business-context', pid],
@@ -361,6 +367,14 @@ export default function BusinessContextPage() {
   const current: Partial<BusinessContext> = existing ? { ...existing, ...form } : form
   const setStr = (k: keyof BusinessContext, v: string) => setForm(f => ({ ...f, [k]: v }))
   const setBool = (k: keyof BusinessContext, v: boolean) => setForm(f => ({ ...f, [k]: v }))
+
+  const isDirty = Object.keys(form).length > 0
+
+  const goToProcess = (targetId: number) => {
+    if (targetId === pid) return
+    if (isDirty && !window.confirm('Je hebt niet-opgeslagen wijzigingen. Doorgaan zonder opslaan?')) return
+    navigate(`/business-context/${targetId}`)
+  }
 
   const mutation = useMutation({
     mutationFn: () => businessContextApi.upsert(pid!, current),
@@ -460,15 +474,15 @@ export default function BusinessContextPage() {
             {processes.map(p => (
               <li key={p.id}>
                 <button
-                  onClick={() => { setSelectedPid(p.id); setForm({}); navigate(`/business-context/${p.id}`) }}
+                  onClick={() => goToProcess(p.id)}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors ${
                     pid === p.id ? 'bg-brand-50 text-brand-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <div className="truncate">{p.name}</div>
-                  <div className="text-xs text-gray-400 mt-0.5 flex gap-1">
+                  <div className="text-xs text-ink-subtle mt-0.5 flex gap-1">
                     <span>{p.code}</span>
-                    {p.has_business_context && <span className="text-green-500">✓</span>}
+                    {p.has_business_context && <span className="text-green-700">✓</span>}
                   </div>
                 </button>
               </li>
@@ -492,23 +506,29 @@ export default function BusinessContextPage() {
                     ? <><Minimize2 size={14} /> Verkleinen</>
                     : <><Maximize2 size={14} /> Vergroot canvas</>}
                 </button>
-                <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>Opslaan</Button>
+                {canEdit
+                  ? <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>Opslaan</Button>
+                  : <span className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2 py-1">Alleen-lezen</span>}
               </div>
             ) : undefined
           }
         />
 
         {!pid && (
-          <div className="bg-white border border-gray-200 rounded-xl text-center py-12 text-gray-400">
+          <div className="bg-white border border-gray-200 rounded-xl text-center py-12 text-ink-subtle">
             Selecteer een proces aan de linkerkant.
           </div>
         )}
 
+        {pid && mutation.isError && (
+          <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            Opslaan mislukt: {apiErrorMessage(mutation.error)}
+          </div>
+        )}
+
         {pid && (() => {
-          const cutoff = new Date()
-          cutoff.setFullYear(cutoff.getFullYear() - 1)
-          const reviewDate = current.review_date ? new Date(current.review_date) : null
-          const isExpired = reviewDate !== null && reviewDate < cutoff
+          const isExpired = isReviewExpired(current.review_date)
+          const hasReviewDate = Boolean(current.review_date)
           return (
             <div className="mb-3 bg-white border border-gray-200 rounded-xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
               <span className="text-xs font-bold uppercase tracking-wide text-gray-500 shrink-0">
@@ -523,7 +543,7 @@ export default function BusinessContextPage() {
                     'h-8 rounded-lg border px-3 text-sm focus:outline-none focus:ring-2',
                     isExpired
                       ? 'border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
-                      : reviewDate
+                      : hasReviewDate
                         ? 'border-green-300 bg-green-50 text-green-700 focus:ring-green-300'
                         : 'border-gray-200 bg-white text-gray-700 focus:ring-brand-300',
                   ].join(' ')}
@@ -568,7 +588,9 @@ export default function BusinessContextPage() {
                 >
                   <Minimize2 size={14} /> Verkleinen
                 </button>
-                <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>Opslaan</Button>
+                {canEdit
+                  ? <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>Opslaan</Button>
+                  : <span className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2 py-1">Alleen-lezen</span>}
               </div>
             </div>
             {canvasContent}

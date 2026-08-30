@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     azure_tenant_id: str = ""
     azure_client_id: str = ""
 
+    # Rolgebaseerde autorisatie. Uit (default) = iedere ingelogde gebruiker
+    # mag alles (bestaand gedrag). Aan = de rollen uit de Azure AD
+    # roles-claim worden afgedwongen: lezer / redacteur / beheerder.
+    rbac_enforced: bool = False
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]

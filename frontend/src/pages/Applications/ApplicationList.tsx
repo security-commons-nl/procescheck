@@ -41,9 +41,9 @@ export default function ApplicationList() {
           <Input placeholder="Zoek op naam of code..." value={search} onChange={e => setSearch(e.target.value)} className="max-w-sm" />
         </div>
         {isLoading ? (
-          <p className="text-gray-400 text-sm py-8 text-center">Laden...</p>
+          <p className="text-ink-subtle text-sm py-8 text-center">Laden...</p>
         ) : data.length === 0 ? (
-          <p className="text-gray-400 text-sm py-8 text-center">Geen applicaties gevonden.</p>
+          <p className="text-ink-subtle text-sm py-8 text-center">Geen applicaties gevonden.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.auth import require_editor
 from app.deps import get_db
 from app.models import Process
 from app.models.business_context import BusinessContext
@@ -18,7 +19,7 @@ def get_business_context(process_id: int, db: Session = Depends(get_db)):
     return bc
 
 
-@router.put("/{process_id}", response_model=BusinessContextResponse)
+@router.put("/{process_id}", response_model=BusinessContextResponse, dependencies=[Depends(require_editor)])
 def upsert_business_context(process_id: int, body: BusinessContextUpsert, db: Session = Depends(get_db)):
     if not db.get(Process, process_id):
         raise HTTPException(404, "Process not found")
@@ -34,7 +35,7 @@ def upsert_business_context(process_id: int, body: BusinessContextUpsert, db: Se
     return bc
 
 
-@router.delete("/{process_id}", status_code=204)
+@router.delete("/{process_id}", status_code=204, dependencies=[Depends(require_editor)])
 def delete_business_context(process_id: int, db: Session = Depends(get_db)):
     bc = db.query(BusinessContext).filter(BusinessContext.process_id == process_id).first()
     if bc:

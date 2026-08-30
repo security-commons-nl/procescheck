@@ -43,6 +43,7 @@ function applyLayout(nodes: Node[], edges: Edge[], rankdir: 'LR' | 'TB'): { node
 
 // --- Custom nodes ---
 function ProcessNode({ data, selected }: NodeProps) {
+  const sourcePos = data.dir === 'TB' ? Position.Bottom : Position.Right
   return (
     <div
       className={clsx(
@@ -51,7 +52,7 @@ function ProcessNode({ data, selected }: NodeProps) {
       )}
       style={{ width: NODE_W, cursor: 'pointer' }}
     >
-      <Handle type="source" position={Position.Right} style={{ background: '#93c5fd', width: 8, height: 8 }} />
+      <Handle type="source" position={sourcePos} style={{ background: '#93c5fd', width: 8, height: 8 }} />
       <div className="flex items-center gap-2 min-w-0">
         <GitBranch size={14} className="shrink-0 text-blue-500" />
         <div className="min-w-0">
@@ -66,6 +67,7 @@ function ProcessNode({ data, selected }: NodeProps) {
 }
 
 function ApplicationNode({ data, selected }: NodeProps) {
+  const targetPos = data.dir === 'TB' ? Position.Top : Position.Left
   return (
     <div
       className={clsx(
@@ -74,7 +76,7 @@ function ApplicationNode({ data, selected }: NodeProps) {
       )}
       style={{ width: NODE_W, cursor: 'pointer' }}
     >
-      <Handle type="target" position={Position.Left} style={{ background: '#6ee7b7', width: 8, height: 8 }} />
+      <Handle type="target" position={targetPos} style={{ background: '#6ee7b7', width: 8, height: 8 }} />
       <div className="flex items-center gap-2 min-w-0">
         <Monitor size={14} className="shrink-0 text-emerald-600" />
         <div className="min-w-0">
@@ -197,7 +199,7 @@ function MultiSelect({
           </div>
           <div className="max-h-52 overflow-y-auto p-2 space-y-0.5">
             {options.length === 0 ? (
-              <p className="text-xs text-gray-400 px-2 py-2 italic">Geen opties beschikbaar</p>
+              <p className="text-xs text-ink-subtle px-2 py-2 italic">Geen opties beschikbaar</p>
             ) : (
               options.map(opt => (
                 <label
@@ -210,7 +212,7 @@ function MultiSelect({
                     onChange={() => toggle(opt.id)}
                     className={clsx('rounded shrink-0', isBlue ? 'accent-blue-600' : 'accent-emerald-600')}
                   />
-                  <span className="text-[10px] font-mono text-gray-400 shrink-0">{opt.code}</span>
+                  <span className="text-[10px] font-mono text-ink-subtle shrink-0">{opt.code}</span>
                   <span className="text-sm text-gray-700 truncate">{opt.label}</span>
                 </label>
               ))
@@ -345,7 +347,7 @@ export default function Ketenarchitectuur() {
           id: `p-${p.id}`,
           type: 'process',
           position: { x: 0, y: 0 },
-          data: { code: p.code, name: p.name, processId: p.id, applications: p.applications },
+          data: { code: p.code, name: p.name, processId: p.id, applications: p.applications, dir: direction },
         })
       })
     }
@@ -358,7 +360,7 @@ export default function Ketenarchitectuur() {
           id: `a-${appId}`,
           type: 'application',
           position: { x: 0, y: 0 },
-          data: { code: a.code, name: a.name, appId },
+          data: { code: a.code, name: a.name, appId, dir: direction },
         })
       })
     }
@@ -476,7 +478,7 @@ export default function Ketenarchitectuur() {
           <div className="flex items-center gap-3 mr-auto">
             <h1 className="text-xl font-bold text-gray-900">Ketenarchitectuur</h1>
             {!isLoading && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-ink-subtle">
                 {nodeCount} nodes · {edgeCount} relaties
               </span>
             )}
@@ -484,7 +486,7 @@ export default function Ketenarchitectuur() {
 
           {/* Search */}
           <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -501,7 +503,7 @@ export default function Ketenarchitectuur() {
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
                 showProcesses
                   ? 'bg-blue-50 border-blue-300 text-blue-700'
-                  : 'bg-white border-gray-200 text-gray-400',
+                  : 'bg-white border-gray-200 text-ink-subtle',
               )}
             >
               <GitBranch size={13} />
@@ -513,7 +515,7 @@ export default function Ketenarchitectuur() {
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
                 showApplications
                   ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                  : 'bg-white border-gray-200 text-gray-400',
+                  : 'bg-white border-gray-200 text-ink-subtle',
               )}
             >
               <Monitor size={13} />
@@ -529,7 +531,7 @@ export default function Ketenarchitectuur() {
                 'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors',
                 direction === 'LR'
                   ? 'bg-gray-100 text-gray-800'
-                  : 'bg-white text-gray-400 hover:bg-gray-50',
+                  : 'bg-white text-ink-subtle hover:bg-gray-50',
               )}
               title="Verticaal (kolommen)"
             >
@@ -542,7 +544,7 @@ export default function Ketenarchitectuur() {
                 'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-gray-200',
                 direction === 'TB'
                   ? 'bg-gray-100 text-gray-800'
-                  : 'bg-white text-gray-400 hover:bg-gray-50',
+                  : 'bg-white text-ink-subtle hover:bg-gray-50',
               )}
               title="Horizontaal (rijen)"
             >
@@ -554,7 +556,7 @@ export default function Ketenarchitectuur() {
 
         {/* Row 2: filter dropdowns + reset */}
         <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-          <span className="text-xs text-gray-400 font-medium mr-1">Filter:</span>
+          <span className="text-xs text-ink-subtle font-medium mr-1">Filter:</span>
 
           <MultiSelect
             label="Processen"
@@ -590,14 +592,14 @@ export default function Ketenarchitectuur() {
         <div className="flex-1 relative">
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-gray-400">
+              <div className="text-center text-ink-subtle">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2" />
                 <div className="text-sm">Laden…</div>
               </div>
             </div>
           ) : nodes.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-gray-400">
+              <div className="text-center text-ink-subtle">
                 <p className="text-sm mb-2">Geen nodes om te tonen.</p>
                 {hasActiveFilters && (
                   <button
@@ -670,7 +672,7 @@ export default function Ketenarchitectuur() {
               </div>
               <button
                 onClick={() => setDetail(null)}
-                className="p-1 rounded hover:bg-black/5 text-gray-400 shrink-0"
+                className="p-1 rounded hover:bg-black/5 text-ink-subtle shrink-0"
               >
                 <X size={15} />
               </button>
@@ -684,7 +686,7 @@ export default function Ketenarchitectuur() {
                     Procesclassificatie
                   </div>
                   {biaLoading ? (
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <div className="flex items-center gap-2 text-xs text-ink-subtle">
                       <div className="w-3 h-3 rounded-full border-b border-blue-400 animate-spin" />
                       Laden…
                     </div>
@@ -698,7 +700,7 @@ export default function Ketenarchitectuur() {
                       )
                     })()
                   ) : (
-                    <p className="text-xs text-gray-400 italic">Geen BIA ingevuld voor dit proces.</p>
+                    <p className="text-xs text-ink-subtle italic">Geen BIA ingevuld voor dit proces.</p>
                   )}
                 </div>
               )}
@@ -707,12 +709,12 @@ export default function Ketenarchitectuur() {
               <div className="p-4">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                   {detail.type === 'process' ? 'Gekoppelde applicaties' : 'Gekoppelde processen'}
-                  <span className="ml-1.5 font-normal normal-case text-gray-400">
+                  <span className="ml-1.5 font-normal normal-case text-ink-subtle">
                     ({detail.linked.length})
                   </span>
                 </div>
                 {detail.linked.length === 0 ? (
-                  <div className="text-sm text-gray-400 italic">Geen koppelingen</div>
+                  <div className="text-sm text-ink-subtle italic">Geen koppelingen</div>
                 ) : (
                   <ul className="space-y-1.5">
                     {detail.linked.map(item => (

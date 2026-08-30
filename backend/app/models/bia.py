@@ -1,11 +1,7 @@
 from datetime import datetime, date
-from sqlalchemy import SmallInteger, Text, String, Date, DateTime, ForeignKey, func, CheckConstraint
+from sqlalchemy import SmallInteger, Text, String, Date, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
-
-
-def _score_col(name: str) -> Mapped[int | None]:
-    return mapped_column(SmallInteger, CheckConstraint(f"{name} BETWEEN 1 AND 5"), nullable=True)
 
 
 class BiaAssessment(Base):

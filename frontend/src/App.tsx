@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import AuthGuard from './auth/AuthGuard'
@@ -11,7 +12,9 @@ import ApplicationForm from './pages/Applications/ApplicationForm'
 import BiaPage from './pages/Bia/BiaPage'
 import BusinessContextPage from './pages/BusinessContext/BusinessContextPage'
 import ExportPage from './pages/Export/ExportPage'
-import Ketenarchitectuur from './pages/Ketenarchitectuur'
+
+// Lazy: reactflow + dagre zijn groot en alleen op deze pagina nodig
+const Ketenarchitectuur = lazy(() => import('./pages/Ketenarchitectuur'))
 
 export default function App() {
   return (
@@ -34,7 +37,14 @@ export default function App() {
           <Route path="/business-context" element={<BusinessContextPage />} />
           <Route path="/business-context/:processId" element={<BusinessContextPage />} />
           <Route path="/export" element={<ExportPage />} />
-          <Route path="/ketenarchitectuur" element={<Ketenarchitectuur />} />
+          <Route
+            path="/ketenarchitectuur"
+            element={
+              <Suspense fallback={<p className="text-ink-subtle p-8">Laden…</p>}>
+                <Ketenarchitectuur />
+              </Suspense>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

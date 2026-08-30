@@ -1,9 +1,12 @@
 from datetime import datetime, date
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, StringConstraints, field_validator
+
+NonEmptyStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class ProcessBase(BaseModel):
-    name: str
+    name: NonEmptyStr
     description: str | None = None
     objective: str | None = None
     owner: str | None = None
@@ -18,10 +21,18 @@ class ProcessCreate(ProcessBase):
     # code is optional; backend auto-generates KP-NNN if not provided
     code: str | None = None
 
+    @field_validator("code")
+    @classmethod
+    def _empty_code_is_none(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        return v or None
+
 
 class ProcessUpdate(BaseModel):
-    code: str | None = None
-    name: str | None = None
+    code: NonEmptyStr | None = None
+    name: NonEmptyStr | None = None
     description: str | None = None
     objective: str | None = None
     owner: str | None = None

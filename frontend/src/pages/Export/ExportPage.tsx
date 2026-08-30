@@ -5,6 +5,7 @@ import {
   Square, ChevronRight,
 } from 'lucide-react'
 import PageHeader from '../../components/common/PageHeader'
+import client, { apiErrorMessage } from '../../api/client'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -24,8 +25,6 @@ interface Module {
 }
 
 // ── Config ────────────────────────────────────────────────────────────────────
-
-const API_BASE = `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}/api/v1/export`
 
 const MODULES: Module[] = [
   {
@@ -140,6 +139,8 @@ export default function ExportPage() {
     Object.fromEntries(MODULES.map(m => [m.id, new Set(m.sections.map(s => s.id))]))
   )
   const [selectedFormat, setSelectedFormat] = useState<Format>('xlsx')
+  const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   const activeModule = MODULES.find(m => m.id === activeModuleId)!
   const activeSections = selectedSections[activeModuleId]
@@ -165,16 +166,35 @@ export default function ExportPage() {
     }))
   }
 
-  function handleExport() {
+  // Download via de API-client zodat het Bearer token meegaat (directe
+  // <a href>-links naar de API krijgen een 401 zodra Azure AD auth aanstaat).
+  async function handleExport() {
     const secs = Array.from(activeSections)
-    if (secs.length === 0) return
-    const url = `${API_BASE}/${activeModuleId}/${selectedFormat}?sections=${secs.join(',')}`
-    const a = document.createElement('a')
-    a.href = url
-    a.download = ''
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    if (secs.length === 0 || downloading) return
+    setDownloading(true)
+    setDownloadError(null)
+    try {
+      const res = await client.get(`/export/${activeModuleId}/${selectedFormat}`, {
+        params: { sections: secs.join(',') },
+        responseType: 'blob',
+      })
+      const disposition = (res.headers['content-disposition'] as string | undefined) ?? ''
+      const filename =
+        disposition.match(/filename=([^;]+)/)?.[1]?.trim() ??
+        `procescheck_${activeModuleId}.${selectedFormat}`
+      const url = URL.createObjectURL(res.data as Blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      setDownloadError(apiErrorMessage(err))
+    } finally {
+      setDownloading(false)
+    }
   }
 
   const allSelected = activeModule.sections.every(s => activeSections.has(s.id))
@@ -205,7 +225,7 @@ export default function ExportPage() {
                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50',
                 ].join(' ')}
               >
-                <span className={activeModuleId === m.id ? 'text-brand-600' : 'text-gray-400'}>
+                <span className={activeModuleId === m.id ? 'text-brand-600' : 'text-ink-subtle'}>
                   {m.icon}
                 </span>
                 <span className="text-center leading-tight">{m.label}</span>
@@ -220,7 +240,7 @@ export default function ExportPage() {
             <StepLabel step={2} label={`Selecteer secties – ${activeModule.label}`} />
             <button
               onClick={toggleAll}
-              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-brand-600 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-ink-muted hover:text-brand-600 transition-colors"
             >
               {allSelected ? <CheckSquare size={14} className="text-brand-500" /> : <Square size={14} />}
               <span>{allSelected ? 'Deselecteer alles' : 'Alles selecteren'}</span>
@@ -241,14 +261,14 @@ export default function ExportPage() {
                       : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50',
                   ].join(' ')}
                 >
-                  <span className={['mt-0.5 shrink-0', checked ? 'text-brand-500' : 'text-gray-300'].join(' ')}>
+                  <span className={['mt-0.5 shrink-0', checked ? 'text-brand-500' : 'text-ink-subtle'].join(' ')}>
                     {checked ? <CheckSquare size={16} /> : <Square size={16} />}
                   </span>
                   <div>
                     <div className={['text-sm font-medium', checked ? 'text-brand-800' : 'text-gray-700'].join(' ')}>
                       {section.label}
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                    <div className="text-xs text-ink-muted mt-0.5 leading-relaxed">
                       {section.description}
                     </div>
                   </div>
@@ -273,14 +293,14 @@ export default function ExportPage() {
                     : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50',
                 ].join(' ')}
               >
-                <span className={selectedFormat === fmt.id ? fmt.color : 'text-gray-400'}>
+                <span className={selectedFormat === fmt.id ? fmt.color : 'text-ink-subtle'}>
                   {fmt.icon}
                 </span>
                 <div className="text-center">
                   <div className={['text-sm font-semibold', selectedFormat === fmt.id ? fmt.color : 'text-gray-700'].join(' ')}>
                     {fmt.label}
                   </div>
-                  <div className="text-[11px] text-gray-400 mt-0.5 leading-tight">{fmt.description}</div>
+                  <div className="text-[11px] text-ink-subtle mt-0.5 leading-tight">{fmt.description}</div>
                 </div>
               </button>
             ))}
@@ -292,16 +312,16 @@ export default function ExportPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={handleExport}
-              disabled={noneSelected}
+              disabled={noneSelected || downloading}
               className={[
                 'flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150',
-                noneSelected
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                noneSelected || downloading
+                  ? 'bg-gray-100 text-ink-subtle cursor-not-allowed'
                   : 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow',
               ].join(' ')}
             >
               <Download size={16} />
-              Download {activeFormatMeta.label}
+              {downloading ? 'Bezig met exporteren…' : `Download ${activeFormatMeta.label}`}
               <span className="font-normal opacity-75">{activeFormatMeta.ext}</span>
             </button>
 
@@ -313,11 +333,16 @@ export default function ExportPage() {
             )}
 
             {!noneSelected && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-ink-muted">
                 {activeSections.size} van {activeModule.sections.length} sectie{activeSections.size !== 1 ? 's' : ''} geselecteerd
               </p>
             )}
           </div>
+          {downloadError && (
+            <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 inline-block">
+              Export mislukt: {downloadError}
+            </p>
+          )}
         </section>
 
       </div>

@@ -14,6 +14,7 @@ export interface Process {
   updated_at: string
   applications: ApplicationSummary[]
   has_bia: boolean
+  has_rto_rpo: boolean
   has_business_context: boolean
 }
 
@@ -46,9 +47,9 @@ export interface ProcessSummary {
 export interface BiaAssessment {
   id: number
   process_id: number
-  availability_score?: number
-  integrity_score?: number
-  confidentiality_score?: number
+  availability_score?: number | null
+  integrity_score?: number | null
+  confidentiality_score?: number | null
   b1_score?: number; b1_arg?: string
   b2_score?: number; b2_arg?: string
   b3_score?: number; b3_arg?: string
@@ -104,6 +105,26 @@ export interface BusinessContext {
   review_date?: string
   created_at: string
   updated_at: string
+}
+
+export interface AuditFieldChange {
+  old: unknown
+  new: unknown
+  added?: string[]
+  removed?: string[]
+}
+
+export interface AuditLogEntry {
+  id: number
+  entity_type: string
+  entity_id?: number | null
+  entity_label?: string | null
+  process_id?: number | null
+  action: 'insert' | 'update' | 'delete'
+  changes?: Record<string, AuditFieldChange> | null
+  user_email?: string | null
+  user_name?: string | null
+  created_at: string
 }
 
 export interface DashboardSummary {
@@ -166,8 +187,6 @@ export interface CriticalProcessRisk {
   confidentiality_score: number | null
   has_bia: boolean
   has_rto_rpo: boolean
-  rto_value: number | null
-  rto_unit: string | null
   missing_fields: string[]
 }
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { applicationsApi } from '../../api/applications'
 import { processesApi } from '../../api/processes'
+import { isReviewExpired } from '../../utils/review'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import { Card } from '../../components/common/Card'
@@ -34,7 +35,10 @@ export default function ApplicationDetail() {
 
   const linkMutation = useMutation({
     mutationFn: (processId: number) => processesApi.linkApp(processId, aid),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['applications', aid] }) },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['applications', aid] })
+      qc.invalidateQueries({ queryKey: ['processes'] })
+    },
   })
 
   const reviewMutation = useMutation({
@@ -42,7 +46,7 @@ export default function ApplicationDetail() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['applications', aid] }) },
   })
 
-  if (isLoading) return <p className="text-gray-400 p-8">Laden...</p>
+  if (isLoading) return <p className="text-ink-subtle p-8">Laden...</p>
   if (!app) return <p className="text-red-500 p-8">Applicatie niet gevonden.</p>
 
   return (
@@ -69,10 +73,7 @@ export default function ApplicationDetail() {
               <Field label="Functioneel eigenaar" value={app.business_owner} />
               <Field label="Technisch eigenaar" value={app.technical_owner} />
               {(() => {
-                const cutoff = new Date()
-                cutoff.setFullYear(cutoff.getFullYear() - 1)
-                const rd = reviewDate ? new Date(reviewDate) : null
-                const isExpired = rd !== null && rd < cutoff
+                const isExpired = isReviewExpired(reviewDate)
                 return (
                   <div>
                     <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Laatste review datum</dt>
@@ -121,7 +122,7 @@ export default function ApplicationDetail() {
               </button>
             </div>
             {!app.processes?.length ? (
-              <p className="text-sm text-gray-400">Niet gekoppeld aan een proces.</p>
+              <p className="text-sm text-ink-subtle">Niet gekoppeld aan een proces.</p>
             ) : (
               <ul className="divide-y divide-gray-100">
                 {app.processes.map(p => (
@@ -130,10 +131,10 @@ export default function ApplicationDetail() {
                       onClick={() => navigate(`/processes/${p.id}`)}
                       className="w-full flex items-center gap-3 py-2.5 text-left hover:text-brand-600 transition-colors group"
                     >
-                      <GitBranch size={14} className="text-gray-300 group-hover:text-brand-400 shrink-0" />
+                      <GitBranch size={14} className="text-ink-subtle group-hover:text-brand-400 shrink-0" />
                       <div>
                         <div className="text-sm font-medium text-gray-800 group-hover:text-brand-600">{p.name}</div>
-                        <div className="font-mono text-xs text-gray-400">{p.code}</div>
+                        <div className="font-mono text-xs text-ink-subtle">{p.code}</div>
                       </div>
                     </button>
                   </li>
@@ -157,7 +158,7 @@ export default function ApplicationDetail() {
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <h3 className="font-semibold text-gray-900 text-sm">Proces koppelen</h3>
-                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => setShowModal(false)} className="text-ink-subtle hover:text-gray-600">
                   <X size={16} />
                 </button>
               </div>
@@ -171,17 +172,17 @@ export default function ApplicationDetail() {
               </div>
               <ul className="max-h-72 overflow-y-auto divide-y divide-gray-100">
                 {filtered.length === 0 ? (
-                  <li className="px-5 py-6 text-sm text-gray-400 text-center">Geen processen gevonden.</li>
+                  <li className="px-5 py-6 text-sm text-ink-subtle text-center">Geen processen gevonden.</li>
                 ) : filtered.map(p => (
                   <li key={p.id}>
                     <button
                       onClick={() => { linkMutation.mutate(p.id); setShowModal(false) }}
                       className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-gray-50"
                     >
-                      <GitBranch size={14} className="text-gray-300 shrink-0" />
+                      <GitBranch size={14} className="text-ink-subtle shrink-0" />
                       <div>
                         <div className="text-sm font-medium text-gray-800">{p.name}</div>
-                        <div className="font-mono text-xs text-gray-400">{p.code}</div>
+                        <div className="font-mono text-xs text-ink-subtle">{p.code}</div>
                       </div>
                     </button>
                   </li>
@@ -199,7 +200,7 @@ function Field({ label, value, full }: { label: string; value?: string | null; f
   return (
     <div className={full ? 'md:col-span-2' : ''}>
       <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</dt>
-      <dd className="text-gray-800 text-sm">{value || <span className="text-gray-300">—</span>}</dd>
+      <dd className="text-gray-800 text-sm">{value || <span className="text-ink-subtle">—</span>}</dd>
     </div>
   )
 }

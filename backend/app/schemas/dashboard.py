@@ -62,8 +62,6 @@ class CriticalProcessRisk(BaseModel):
     confidentiality_score: int | None
     has_bia: bool
     has_rto_rpo: bool
-    rto_value: float | None
-    rto_unit: str | None
     missing_fields: list[str]
 
 
