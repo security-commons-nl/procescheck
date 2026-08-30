@@ -1,11 +1,10 @@
 name: Backend — Build & Deploy naar Azure Container Apps
 
+# Handmatig starten. De Azure-secrets horen bij een specifieke omgeving; automatisch draaien bij
+# elke push laat de workflow permanent rood staan bij iedereen die deze repo niet naar diezelfde
+# omgeving uitrolt.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: procescheck-backend

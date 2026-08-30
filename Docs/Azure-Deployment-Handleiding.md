@@ -275,7 +275,7 @@ Klik **New repository secret** voor elk van de volgende:
 Voer dit eenmalig uit in de terminal om beide pipelines te starten:
 
 ```bash
-cd /Users/vasilis_theocharis/Documents/ProcesCheck
+cd /pad/naar/procescheck
 git commit --allow-empty -m "trigger: eerste Azure deploy"
 git push origin main
 ```
