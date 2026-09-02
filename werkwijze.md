@@ -67,12 +67,12 @@ RTO/RPO en businesscontext.
 
 Daaruit volgt de prioriteit in het dashboard, in deze volgorde van beoordelen:
 
-1. **critical** — kritiek proces zonder BIA. Je weet niet hoe erg het is bij het proces waar het het
+1. **critical**: kritiek proces zonder BIA. Je weet niet hoe erg het is bij het proces waar het het
    meest toe doet.
-2. **high** — hoog risico (een van B, I, V is 1 of 2) zonder RTO en RPO.
-3. **high** — kritiek proces dat verder onvolledig is.
-4. **medium** — vier of meer velden ontbreken.
-5. **low** — een tot drie velden ontbreken.
+2. **high**: hoog risico (een van B, I, V is 1 of 2) zonder RTO en RPO.
+3. **high**: kritiek proces dat verder onvolledig is.
+4. **medium**: vier of meer velden ontbreken.
+5. **low**: een tot drie velden ontbreken.
 
 ## Op tijd beoordeeld
 

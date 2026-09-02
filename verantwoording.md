@@ -52,7 +52,7 @@ de referentie uitrekent.
 
 Twee dingen wijken bewust af van de applicatie:
 
-1. **Het gedachtestreepje wordt een komma.** De reden `Kritisch proces — onvolledig gedocumenteerd`
+1. **Het gedachtestreepje wordt een komma.** De reden die in de code als `Kritisch proces`, gedachtestreepje, `onvolledig gedocumenteerd` staat,
    heet hier `Kritisch proces, onvolledig gedocumenteerd`; de commons schrijft geen gedachtestreepjes.
 2. **De lichtste prioriteit heet `low` en niet `medium`.** In de applicatie kregen "vier of meer
    velden ontbreken" en "een tot drie velden ontbreken" allebei het label `medium`, met alleen een
