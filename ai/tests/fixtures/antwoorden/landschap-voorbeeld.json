@@ -1,0 +1,356 @@
+{
+ "onzeker": [
+  "De relatie tussen 'Website gemeente' (APP-007) en 'extern (SaaS)' is niet als node opgenomen, omdat 'extern (SaaS)' geen id of type heeft in de invoer.",
+  "De licentie (LIC-101) en het contract (CON-501) hebben geen duidelijke relaties in de invoer, dus zijn ze niet gekoppeld aan andere nodes.",
+  "De type-aanduiding 'installatie' voor APP-006 is omgezet naar 'app' om consistentie te behouden, maar dit kan afwijken van de bedoeling.",
+  "De type-aanduiding 'besturing' voor CTL-401 is omgezet naar 'ci' (als besturingssysteem of controller), maar dit kan afwijken van de bedoeling."
+ ],
+ "waarschuwingen": [],
+ "nodes": [
+  {
+   "id": "app-001",
+   "label": "Zaaksysteem",
+   "type": "app",
+   "kritiek": true,
+   "bronregel": "APP-001 | Zaaksysteem | applicatie | Zaakgericht werken voor vergunningen en meldingen | ... | ja"
+  },
+  {
+   "id": "app-002",
+   "label": "BRP-applicatie",
+   "type": "app",
+   "kritiek": true,
+   "bronregel": "APP-002 | BRP-applicatie | applicatie | Bijhouding basisregistratie personen | ... | ja"
+  },
+  {
+   "id": "app-003",
+   "label": "Uitkeringsadministratie",
+   "type": "app",
+   "kritiek": true,
+   "bronregel": "APP-003 | Uitkeringsadministratie | applicatie | Berekening en betaling van uitkeringen | ... | ja"
+  },
+  {
+   "id": "app-004",
+   "label": "Financieel systeem",
+   "type": "app",
+   "kritiek": true,
+   "bronregel": "APP-004 | Financieel systeem | applicatie | Grootboek, crediteuren, debiteuren en belastingen | ... | ja"
+  },
+  {
+   "id": "app-005",
+   "label": "Documentmanagementsysteem",
+   "type": "app",
+   "kritiek": false,
+   "bronregel": "APP-005 | Documentmanagementsysteem | applicatie | Opslag en archivering van documenten | ... | nee"
+  },
+  {
+   "id": "app-006",
+   "label": "Toegangscontrole stadhuis",
+   "type": "app",
+   "kritiek": false,
+   "bronregel": "APP-006 | Toegangscontrole stadhuis | installatie | Elektronische deuren en pasjes van het stadhuis | ... | nee"
+  },
+  {
+   "id": "app-007",
+   "label": "Website gemeente",
+   "type": "app",
+   "kritiek": false,
+   "bronregel": "APP-007 | Website gemeente | applicatie | Publiekswebsite en digitale formulieren | ... | nee"
+  },
+  {
+   "id": "lic-101",
+   "label": "Microsoft 365 licenties",
+   "type": "ci",
+   "kritiek": false,
+   "bronregel": "LIC-101 | Microsoft 365 licenties | licentie | Jaarlicentie werkplekken | team ICT |  | nee"
+  },
+  {
+   "id": "srv-201",
+   "label": "srv-zaak01",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "SRV-201 | srv-zaak01 | server | Applicatieserver zaaksysteem |  | team ICT | ja"
+  },
+  {
+   "id": "srv-202",
+   "label": "srv-brp01",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "SRV-202 | srv-brp01 | server | Applicatieserver BRP |  | team ICT | ja"
+  },
+  {
+   "id": "srv-203",
+   "label": "srv-wi01",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "SRV-203 | srv-wi01 | server | Applicatieserver Werk en Inkomen |  | team ICT | ja"
+  },
+  {
+   "id": "srv-204",
+   "label": "srv-fin01",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "SRV-204 | srv-fin01 | server | Applicatieserver financieel systeem |  | team ICT | ja"
+  },
+  {
+   "id": "srv-205",
+   "label": "srv-dms01",
+   "type": "ci",
+   "kritiek": false,
+   "bronregel": "SRV-205 | srv-dms01 | server | Applicatieserver DMS |  | team ICT | nee"
+  },
+  {
+   "id": "srv-206",
+   "label": "db-centraal01",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "SRV-206 | db-centraal01 | database | Centrale databaseserver voor zaaksysteem, BRP en financieel |  | team ICT | ja"
+  },
+  {
+   "id": "net-301",
+   "label": "netwerk-core",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "NET-301 | netwerk-core | netwerk | Kernswitch serverruimte |  | team ICT | ja"
+  },
+  {
+   "id": "net-302",
+   "label": "auth-proxy",
+   "type": "ci",
+   "kritiek": true,
+   "bronregel": "NET-302 | auth-proxy | koppeling | DigiD-koppelvlak |  | team ICT | ja"
+  },
+  {
+   "id": "ctl-401",
+   "label": "ctl-toegang01",
+   "type": "ci",
+   "kritiek": false,
+   "bronregel": "CTL-401 | ctl-toegang01 | besturing | Controller toegangscontrole |  | leverancier SecuDoor | nee"
+  },
+  {
+   "id": "vergunningverlening",
+   "label": "Vergunningverlening",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-001 | Zaaksysteem | ... | ondersteunt | Vergunningverlening; Toezicht en handhaving | ja"
+  },
+  {
+   "id": "toezicht_en_handhaving",
+   "label": "Toezicht en handhaving",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-001 | Zaaksysteem | ... | ondersteunt | Vergunningverlening; Toezicht en handhaving | ja"
+  },
+  {
+   "id": "paspoort_en_rijbewijsuitgifte",
+   "label": "Paspoort- en rijbewijsuitgifte",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-002 | BRP-applicatie | ... | ondersteunt | Paspoort- en rijbewijsuitgifte; Verhuizingen en inschrijvingen | ja"
+  },
+  {
+   "id": "verhuizingen_en_inschrijvingen",
+   "label": "Verhuizingen en inschrijvingen",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-002 | BRP-applicatie | ... | ondersteunt | Paspoort- en rijbewijsuitgifte; Verhuizingen en inschrijvingen | ja"
+  },
+  {
+   "id": "uitkeringsverstrekking",
+   "label": "Uitkeringsverstrekking",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-003 | Uitkeringsadministratie | ... | ondersteunt | Uitkeringsverstrekking | ja"
+  },
+  {
+   "id": "financiele_administratie_en_betalingen",
+   "label": "Financiele administratie en betalingen",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-004 | Financieel systeem | ... | ondersteunt | Financiele administratie en betalingen | ja"
+  },
+  {
+   "id": "archiefbeheer",
+   "label": "Archiefbeheer",
+   "type": "proces",
+   "kritiek": false,
+   "bronregel": "APP-005 | Documentmanagementsysteem | ... | ondersteunt | Archiefbeheer | nee"
+  },
+  {
+   "id": "con-501",
+   "label": "Onderhoudscontract ZaakSoft",
+   "type": "ci",
+   "kritiek": false,
+   "bronregel": "CON-501 | Onderhoudscontract ZaakSoft | contract | SLA zaaksysteem, looptijd tot 2028 | inkoop |  | nee"
+  }
+ ],
+ "edges": [
+  {
+   "from": "srv-201",
+   "to": "app-001",
+   "relatie": "draait op",
+   "bronregel": "APP-001 | Zaaksysteem | ... | draait_op | srv-zaak01 |"
+  },
+  {
+   "from": "srv-202",
+   "to": "app-002",
+   "relatie": "draait op",
+   "bronregel": "APP-002 | BRP-applicatie | ... | draait_op | srv-brp01 |"
+  },
+  {
+   "from": "srv-203",
+   "to": "app-003",
+   "relatie": "draait op",
+   "bronregel": "APP-003 | Uitkeringsadministratie | ... | draait_op | srv-wi01 |"
+  },
+  {
+   "from": "srv-204",
+   "to": "app-004",
+   "relatie": "draait op",
+   "bronregel": "APP-004 | Financieel systeem | ... | draait_op | srv-fin01 |"
+  },
+  {
+   "from": "srv-205",
+   "to": "app-005",
+   "relatie": "draait op",
+   "bronregel": "APP-005 | Documentmanagementsysteem | ... | draait_op | srv-dms01 |"
+  },
+  {
+   "from": "ctl-401",
+   "to": "app-006",
+   "relatie": "draait op",
+   "bronregel": "APP-006 | Toegangscontrole stadhuis | ... | draait_op | ctl-toegang01 |"
+  },
+  {
+   "from": "app-001",
+   "to": "vergunningverlening",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-001 | Zaaksysteem | ... | ondersteunt | Vergunningverlening; Toezicht en handhaving |"
+  },
+  {
+   "from": "app-001",
+   "to": "toezicht_en_handhaving",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-001 | Zaaksysteem | ... | ondersteunt | Vergunningverlening; Toezicht en handhaving |"
+  },
+  {
+   "from": "app-002",
+   "to": "paspoort_en_rijbewijsuitgifte",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-002 | BRP-applicatie | ... | ondersteunt | Paspoort- en rijbewijsuitgifte; Verhuizingen en inschrijvingen |"
+  },
+  {
+   "from": "app-002",
+   "to": "verhuizingen_en_inschrijvingen",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-002 | BRP-applicatie | ... | ondersteunt | Paspoort- en rijbewijsuitgifte; Verhuizingen en inschrijvingen |"
+  },
+  {
+   "from": "app-003",
+   "to": "uitkeringsverstrekking",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-003 | Uitkeringsadministratie | ... | ondersteunt | Uitkeringsverstrekking |"
+  },
+  {
+   "from": "app-004",
+   "to": "financiele_administratie_en_betalingen",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-004 | Financieel systeem | ... | ondersteunt | Financiele administratie en betalingen |"
+  },
+  {
+   "from": "app-005",
+   "to": "archiefbeheer",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-005 | Documentmanagementsysteem | ... | ondersteunt | Archiefbeheer |"
+  },
+  {
+   "from": "app-007",
+   "to": "vergunningverlening",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-007 | Website gemeente | ... | ondersteunt | Vergunningverlening; Paspoort- en rijbewijsuitgifte |"
+  },
+  {
+   "from": "app-007",
+   "to": "paspoort_en_rijbewijsuitgifte",
+   "relatie": "ondersteunt",
+   "bronregel": "APP-007 | Website gemeente | ... | ondersteunt | Vergunningverlening; Paspoort- en rijbewijsuitgifte |"
+  },
+  {
+   "from": "net-301",
+   "to": "srv-201",
+   "relatie": "draait op",
+   "bronregel": "SRV-201 | srv-zaak01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "srv-202",
+   "relatie": "draait op",
+   "bronregel": "SRV-202 | srv-brp01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "srv-203",
+   "relatie": "draait op",
+   "bronregel": "SRV-203 | srv-wi01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "srv-204",
+   "relatie": "draait op",
+   "bronregel": "SRV-204 | srv-fin01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "srv-205",
+   "relatie": "draait op",
+   "bronregel": "SRV-205 | srv-dms01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "srv-206",
+   "relatie": "draait op",
+   "bronregel": "SRV-206 | db-centraal01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "ctl-401",
+   "relatie": "draait op",
+   "bronregel": "CTL-401 | ctl-toegang01 | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "net-301",
+   "to": "net-302",
+   "relatie": "draait op",
+   "bronregel": "NET-302 | auth-proxy | ... | draait_op | netwerk-core |"
+  },
+  {
+   "from": "srv-206",
+   "to": "srv-201",
+   "relatie": "ondersteunt",
+   "bronregel": "SRV-206 | db-centraal01 | ... | ondersteunt | srv-zaak01; srv-brp01; srv-fin01 |"
+  },
+  {
+   "from": "srv-206",
+   "to": "srv-202",
+   "relatie": "ondersteunt",
+   "bronregel": "SRV-206 | db-centraal01 | ... | ondersteunt | srv-zaak01; srv-brp01; srv-fin01 |"
+  },
+  {
+   "from": "srv-206",
+   "to": "srv-204",
+   "relatie": "ondersteunt",
+   "bronregel": "SRV-206 | db-centraal01 | ... | ondersteunt | srv-zaak01; srv-brp01; srv-fin01 |"
+  },
+  {
+   "from": "net-302",
+   "to": "app-002",
+   "relatie": "ondersteunt",
+   "bronregel": "NET-302 | auth-proxy | ... | ondersteunt | APP-002; APP-007 |"
+  },
+  {
+   "from": "net-302",
+   "to": "app-007",
+   "relatie": "ondersteunt",
+   "bronregel": "NET-302 | auth-proxy | ... | ondersteunt | APP-002; APP-007 |"
+  }
+ ]
+}

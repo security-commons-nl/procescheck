@@ -3,3 +3,4 @@ dist/
 instrument/dist/
 __pycache__/
 .pytest_cache/
+ai/dist/

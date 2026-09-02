@@ -54,6 +54,12 @@ jobs:
           cp dist/index.html dist/procescheck.html
           cp procescheck.json dist/procescheck.json
 
+      - name: De AI-hulp bouwen
+        run: |
+          python ai/bouw.py dist/ai
+          test -s dist/ai/index.html
+          cp ai/opdrachten.json dist/ai/opdrachten.json
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

@@ -23,6 +23,9 @@ import sys
 HIER = pathlib.Path(__file__).resolve().parent
 REPO = HIER.parent
 BRON = HIER / "bron"
+# De kern van de AI-hulp (vergelijken en toepassen van een voorstel) gaat mee in de tool. Dat bestand
+# kent geen netwerk; de aanroep van een leverancier zit alleen in ai/bron/ai.js, op de AI-pagina.
+KERN_JS = REPO / "ai" / "bron" / "kern.js"
 
 # De sleutels waarover de vingerafdruk gaat: de inhoud die het antwoord bepaalt. Herkomst, versie en
 # het voorbeeldlandschap horen er niet bij; die mogen wijzigen zonder dat een dossier veroudert.
@@ -50,11 +53,13 @@ def bouw(doel: pathlib.Path) -> pathlib.Path:
 
     css = (BRON / "app.css").read_text(encoding="utf-8").strip()
     js = (BRON / "app.js").read_text(encoding="utf-8").strip()
+    kern = KERN_JS.read_text(encoding="utf-8").strip()
+    assert "fetch(" not in kern and "fetch(" not in js, "de tool mag geen netwerk kennen"
     sjabloon = (BRON / "index.html").read_text(encoding="utf-8")
 
     # </script> in de data zou de scripttag vroegtijdig sluiten; JSON mag die slash escapen.
     json_bron = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    script = "window.__BRON__ = " + json_bron + ";\n" + js
+    script = "window.__BRON__ = " + json_bron + ";\n" + kern + "\n" + js
 
     html = (sjabloon
             .replace("__CSS__", css)

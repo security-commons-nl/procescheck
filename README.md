@@ -45,6 +45,10 @@ uitvalt. Je hebt niets nodig behalve een browser.
    zien wat de analyse doet. Het formaat staat in
    [de verantwoording](https://security-commons-nl.github.io/procescheck/uitleg/#verantwoording).
 7. Kijk op het **Dashboard** wat als eerste aandacht vraagt en druk de **Uitdraai** af.
+8. Heb je een procesoverzicht of een CMDB-export liggen? De **[AI-hulp](https://security-commons-nl.github.io/procescheck/ai/)**
+   zet die met je eigen API-sleutel (Mistral, een lokale Ollama, of een andere leverancier) om naar
+   een voorstel; met *Voorstel laden* kies je per regel wat je overneemt. De tool zelf praat nooit
+   met een leverancier.
 
 Sla je dossier tussendoor op met *Dossier opslaan*. De browser onthoudt je werk ook zelf, maar een
 opgeslagen bestand is wat je deelt, archiveert en de volgende ronde terugzet.
@@ -58,7 +62,9 @@ eronder. Dat is precies stap 1 van
 ```bash
 python instrument/haal_bron.py --check   # procescheck.json loopt gelijk met tag v0-applicatie
 python instrument/bouw.py                # schrijft instrument/dist/index.html
-python -m pytest instrument/tests -v     # 78 tests, inclusief een doorloop in Chromium
+python -m pytest instrument/tests -v     # 82 tests, inclusief een doorloop in Chromium
+python ai/bouw.py                        # de AI-hulp, ai/dist/index.html
+python -m pytest ai/tests -v             # 41 tests, de leverancier nagespeeld: geen sleutel nodig
 ```
 
 Python 3.12 of nieuwer, alleen standaardbibliotheek. Voor de browsertests: `pip install pytest

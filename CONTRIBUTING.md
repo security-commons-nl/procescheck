@@ -33,6 +33,8 @@ Een [issue](../../issues/new/choose) of
   `instrument/bron/app.js` onder dezelfde naam, en draai
   `python instrument/tests/fixtures/maak_doorloop.py` opnieuw. De diff van de fixture laat zien welke
   uitkomsten je hebt veranderd.
+- Verander je een prompt of schema van de AI-hulp, neem dan het voorbeeldantwoord opnieuw op
+  (`ai/tests/fixtures/neem_op.py`, één keer met een echte sleutel) en kijk het na; zie `ai/LEESMIJ.md`.
 - Lees `instrument/LEESMIJ.md` voor de valkuilen: de omgekeerde schaal, half omhoog afronden, lege
   keuzes die `null` moeten worden en de voorvoegsels in de graaf.
 

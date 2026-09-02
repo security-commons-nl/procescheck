@@ -1,0 +1,97 @@
+{
+ "onzeker": [
+  "De afdeling van Archiefbeheer is niet expliciet genoemd in de tekst.",
+  "De doelstelling van Toezicht en handhaving is niet expliciet genoemd in de tekst."
+ ],
+ "waarschuwingen": [],
+ "items": [
+  {
+   "code": "P01",
+   "naam": "Paspoort- en rijbewijsuitgifte",
+   "beschrijving": "Inwoners vragen aan de balie of online een paspoort, identiteitskaart of rijbewijs aan; de afdeling controleert de identiteit, verwerkt de aanvraag in de basisregistratie en reikt het document uit.",
+   "doelstelling": "elke inwoner binnen de wettelijke termijn van een geldig reisdocument of rijbewijs voorzien",
+   "eigenaar": "teamleider Burgerzaken",
+   "afdeling": "Burgerzaken",
+   "kritiek": true,
+   "reden_kritiek": "zonder documenten kunnen inwoners niet reizen en niet stemmen, en de wettelijke leveringstermijn wordt overschreden",
+   "bronregel": "Inwoners vragen aan de balie of online een paspoort, identiteitskaart of rijbewijs aan; de afdeling controleert de identiteit, verwerkt de aanvraag in de basisregistratie en reikt het document uit. Doel: elke inwoner binnen de wettelijke termijn van een geldig reisdocument of rijbewijs voorzien. Dit proces mag niet langer dan een werkdag stilliggen: zonder documenten kunnen inwoners niet reizen en niet stemmen, en de wettelijke leveringstermijn wordt overschreden."
+  },
+  {
+   "code": "P02",
+   "naam": "Verhuizingen en inschrijvingen",
+   "beschrijving": "Het verwerken van aangiften van verhuizing, vestiging vanuit het buitenland en emigratie in de basisregistratie personen.",
+   "doelstelling": "een actuele en juiste registratie van alle inwoners",
+   "eigenaar": "teamleider Burgerzaken",
+   "afdeling": "Burgerzaken",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "bronregel": "Verhuizingen en inschrijvingen. Het verwerken van aangiften van verhuizing, vestiging vanuit het buitenland en emigratie in de basisregistratie personen. Doel: een actuele en juiste registratie van alle inwoners."
+  },
+  {
+   "code": "P03",
+   "naam": "Uitkeringsverstrekking",
+   "beschrijving": "Het beoordelen van aanvragen voor bijstand en het maandelijks uitbetalen van uitkeringen aan ongeveer 1.400 huishoudens.",
+   "doelstelling": "inwoners zonder inkomen tijdig van een bestaansminimum voorzien",
+   "eigenaar": "afdelingshoofd Werk en Inkomen",
+   "afdeling": "Werk en Inkomen",
+   "kritiek": true,
+   "reden_kritiek": "Een verstoring van de maandelijkse betaalrun heeft direct gevolgen voor huishoudens die van deze uitkering afhankelijk zijn",
+   "bronregel": "Uitkeringsverstrekking. Het beoordelen van aanvragen voor bijstand en het maandelijks uitbetalen van uitkeringen aan ongeveer 1.400 huishoudens. Doel: inwoners zonder inkomen tijdig van een bestaansminimum voorzien. Een verstoring van de maandelijkse betaalrun heeft direct gevolgen voor huishoudens die van deze uitkering afhankelijk zijn; dit proces is daarom aangemerkt als vitaal."
+  },
+  {
+   "code": "P04",
+   "naam": "Re-integratie en begeleiding",
+   "beschrijving": "Het begeleiden van werkzoekenden naar werk of participatie, in samenwerking met het regionale werkbedrijf.",
+   "doelstelling": "zoveel mogelijk inwoners duurzaam aan het werk",
+   "eigenaar": "afdelingshoofd Werk en Inkomen",
+   "afdeling": "Werk en Inkomen",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "bronregel": "Re-integratie en begeleiding. Het begeleiden van werkzoekenden naar werk of participatie, in samenwerking met het regionale werkbedrijf. Doel: zoveel mogelijk inwoners duurzaam aan het werk."
+  },
+  {
+   "code": "P05",
+   "naam": "Vergunningverlening",
+   "beschrijving": "Het behandelen van aanvragen voor omgevingsvergunningen, evenementen en horeca, inclusief de wettelijke publicatie en de bezwaartermijn.",
+   "doelstelling": "aanvragen binnen de termijn van de Omgevingswet afhandelen",
+   "eigenaar": "teamleider Vergunningen",
+   "afdeling": "Vergunningen, Toezicht en Handhaving",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "bronregel": "Vergunningverlening. Het behandelen van aanvragen voor omgevingsvergunningen, evenementen en horeca, inclusief de wettelijke publicatie en de bezwaartermijn. Doel: aanvragen binnen de termijn van de Omgevingswet afhandelen."
+  },
+  {
+   "code": "P06",
+   "naam": "Toezicht en handhaving",
+   "beschrijving": "Het controleren van naleving van vergunningen en regels in de openbare ruimte en het optreden bij overtredingen.",
+   "doelstelling": "",
+   "eigenaar": "teamleider Toezicht",
+   "afdeling": "Vergunningen, Toezicht en Handhaving",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "bronregel": "Toezicht en handhaving. Het controleren van naleving van vergunningen en regels in de openbare ruimte en het optreden bij overtredingen."
+  },
+  {
+   "code": "P07",
+   "naam": "Financiële administratie en betalingen",
+   "beschrijving": "Het verwerken van inkomende facturen, het uitvoeren van betalingen aan leveranciers en het innen van gemeentelijke belastingen.",
+   "doelstelling": "een rechtmatige en tijdige financiële afwikkeling",
+   "eigenaar": "concerncontroller",
+   "afdeling": "Financien",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "bronregel": "Financiele administratie en betalingen. Het verwerken van inkomende facturen, het uitvoeren van betalingen aan leveranciers en het innen van gemeentelijke belastingen. Doel: een rechtmatige en tijdige financiele afwikkeling."
+  },
+  {
+   "code": "P08",
+   "naam": "Archiefbeheer",
+   "beschrijving": "Het bewaren en op termijn vernietigen of overbrengen van archiefbescheiden volgens de Archiefwet.",
+   "doelstelling": "",
+   "eigenaar": "gemeentearchivaris",
+   "afdeling": "",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "bronregel": "Archiefbeheer. Het bewaren en op termijn vernietigen of overbrengen van archiefbescheiden volgens de Archiefwet."
+  }
+ ]
+}

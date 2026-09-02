@@ -26,6 +26,9 @@
       <input type="file" id="bestand-laden" accept=".json,application/json" hidden>
       <button type="button" id="knop-afdrukken">Afdrukken</button>
       <button type="button" id="knop-wissen">Wissen</button>
+      <button type="button" id="knop-voorstel-laden">Voorstel laden</button>
+      <input type="file" id="bestand-voorstel" accept=".json,application/json" hidden>
+      <a href="ai/" id="knop-ai">AI-hulp</a>
       <a href="uitleg/">Werkwijze en verantwoording</a>
     </div>
     <p id="dossier-status">Nog geen processen ingevuld.</p>
@@ -271,6 +274,24 @@
     <p class="leid">De stand van het dossier: hoeveel processen compleet zijn, waar de zwaarste
     klassen zitten, en wat als eerste aandacht vraagt.</p>
     <div id="dashboard-inhoud"></div>
+  </section>
+
+  <section class="scherm" id="scherm-voorstel" hidden>
+    <h1>Voorstel uit de AI-hulp</h1>
+    <p class="leid">Dit is een voorstel, geen feit. Per regel zie je of het nieuw is, al bestaat of botst met wat
+    er staat, en of het citaat echt in je invoer stond. Kies per regel wat je doet; niets verandert voordat je
+    op <em>Overnemen</em> klikt.</p>
+    <div class="kaart">
+      <p class="klein" id="voorstel-kop"></p>
+      <div class="knoppen">
+        <button type="button" id="knop-alles-overnemen">Alles op overnemen</button>
+        <button type="button" id="knop-alles-overslaan">Alles op overslaan</button>
+      </div>
+      <div class="rol" tabindex="0"><table class="regels" id="tabel-vergelijk"></table></div>
+      <p class="klein" id="voorstel-onzeker"></p>
+      <button type="button" id="knop-overnemen">Overnemen</button>
+      <button type="button" id="knop-voorstel-sluiten">Sluiten zonder over te nemen</button>
+    </div>
   </section>
 
   <section class="scherm" id="scherm-uitdraai" hidden>

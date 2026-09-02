@@ -1,0 +1,19 @@
+id,naam,type,omschrijving,functioneel_beheer,technisch_beheer,draait_op,ondersteunt,kritiek
+APP-001,Zaaksysteem,applicatie,Zaakgericht werken voor vergunningen en meldingen,coordinator dienstverlening,leverancier ZaakSoft,srv-zaak01,"Vergunningverlening; Toezicht en handhaving",ja
+APP-002,BRP-applicatie,applicatie,Bijhouding basisregistratie personen,teamleider Burgerzaken,applicatiebeheerder BRP,srv-brp01,"Paspoort- en rijbewijsuitgifte; Verhuizingen en inschrijvingen",ja
+APP-003,Uitkeringsadministratie,applicatie,Berekening en betaling van uitkeringen,afdelingshoofd Werk en Inkomen,leverancier SocialeZaken BV,srv-wi01,Uitkeringsverstrekking,ja
+APP-004,Financieel systeem,applicatie,"Grootboek, crediteuren, debiteuren en belastingen",concerncontroller,applicatiebeheerder Financien,srv-fin01,Financiele administratie en betalingen,ja
+APP-005,Documentmanagementsysteem,applicatie,Opslag en archivering van documenten,gemeentearchivaris,team ICT,srv-dms01,Archiefbeheer,nee
+APP-006,Toegangscontrole stadhuis,installatie,Elektronische deuren en pasjes van het stadhuis,facilitair manager,leverancier SecuDoor,ctl-toegang01,,nee
+APP-007,Website gemeente,applicatie,Publiekswebsite en digitale formulieren,communicatieadviseur,leverancier WebGem,extern (SaaS),"Vergunningverlening; Paspoort- en rijbewijsuitgifte",nee
+LIC-101,Microsoft 365 licenties,licentie,Jaarlicentie werkplekken,team ICT,,,,nee
+SRV-201,srv-zaak01,server,Applicatieserver zaaksysteem,,team ICT,netwerk-core,,ja
+SRV-202,srv-brp01,server,Applicatieserver BRP,,team ICT,netwerk-core,,ja
+SRV-203,srv-wi01,server,Applicatieserver Werk en Inkomen,,team ICT,netwerk-core,,ja
+SRV-204,srv-fin01,server,Applicatieserver financieel systeem,,team ICT,netwerk-core,,ja
+SRV-205,srv-dms01,server,Applicatieserver DMS,,team ICT,netwerk-core,,nee
+SRV-206,db-centraal01,database,"Centrale databaseserver voor zaaksysteem, BRP en financieel",,team ICT,netwerk-core,"srv-zaak01; srv-brp01; srv-fin01",ja
+NET-301,netwerk-core,netwerk,Kernswitch serverruimte,,team ICT,,,ja
+NET-302,auth-proxy,koppeling,DigiD-koppelvlak,,team ICT,netwerk-core,"APP-002; APP-007",ja
+CTL-401,ctl-toegang01,besturing,Controller toegangscontrole,,leverancier SecuDoor,netwerk-core,,nee
+CON-501,Onderhoudscontract ZaakSoft,contract,"SLA zaaksysteem, looptijd tot 2028",inkoop,,,,nee

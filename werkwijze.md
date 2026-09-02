@@ -106,6 +106,32 @@ de systemen eronder. Dat is de tabel waar
 in stap 1 om vraagt. Staat er meer dan tien in, kies er dan tien; de risicoanalyse werkt met een korte
 lijst, anders wordt het een inventarisatie in plaats van een analyse.
 
+## De AI-hulp
+
+Een procesoverzicht van tachtig processen typ je niet over. De [AI-hulp](ai/) zet zo'n document, of een
+CMDB-export, om naar een **voorstel** in het datamodel van de tool: processen met naam, beschrijving,
+doelstelling en eigenaar; applicaties met eigenaren en soort; componenten met de relaties ertussen.
+
+Wat hij nooit doet: scores, klassen of prioriteiten bepalen. Dat rekent de tool, uit jouw antwoorden.
+
+Zo werkt het:
+
+1. Je vult op de AI-pagina je eigen API-sleutel in. Mistral is de standaard (Europese partij, hosting in
+   de EU); een lokale Ollama of een andere leverancier met een OpenAI-compatibele endpoint kan ook. De
+   sleutel blijft in die tab en verdwijnt als je hem sluit.
+2. Je kiest een opdracht en plakt tekst of kiest een bestand (txt, md, csv, xlsx). De pagina zegt wat er
+   waarheen gaat en vraagt per sessie je toestemming. Stuur geen persoonsgegevens mee die daar niet
+   horen; de [anonimizer](https://security-commons-nl.github.io/anonimizer-browser/) staat ernaast.
+3. Het model levert per item een letterlijk citaat uit je invoer. Staat dat citaat er niet in, dan wordt
+   het item gemarkeerd en staat het standaard op overslaan. Wat het model niet zeker wist, staat eronder.
+4. Je slaat het voorstel op en laadt het in de tool met *Voorstel laden*. Per regel zie je of het nieuw is,
+   al bestaat of botst met wat er staat, en kies je overnemen, samenvoegen (alleen lege velden vullen) of
+   overslaan. Niets verandert voordat je op *Overnemen* klikt; wat je overneemt, staat in de uitdraai onder
+   *Verantwoording* met leverancier, model en datum.
+
+De tool zelf doet geen enkele netwerkaanroep, ook niet als je de AI-hulp gebruikt; alleen de AI-pagina
+praat naar buiten, en een test bewaakt dat.
+
 ## Je dossier
 
 Alles blijft in je browser. *Dossier opslaan* geeft je een JSON-bestand

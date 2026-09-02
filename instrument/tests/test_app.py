@@ -436,6 +436,67 @@ def test_uitdraai_bevat_alles(pagina, doorloop_data):
         assert kop in tekst
 
 
+def test_voorstel_laden_in_de_tool(pagina, tmp_path, doorloop_data):
+    laad_dossier(pagina, doorloop_data)
+    antwoord = json.loads((ROOT / "ai" / "tests" / "fixtures" / "antwoorden" / "processen-voorbeeld.json").read_text(encoding="utf-8"))
+    voorstel = {"formaat": "procescheck-voorstel", "versie": 1, "tool": "procescheck", "opdrachten_versie": "2026-09",
+                "opdracht": "processen", "gemaakt": "2026-09-03", "leverancier": "mistral", "model": "mistral-medium-latest",
+                "invoer": {"naam": "voorbeeld-processen.md", "sha256": "a" * 64, "tekens": 100, "aanroepen": 1},
+                "items": antwoord["items"], "onzeker": antwoord["onzeker"], "waarschuwingen": []}
+    # Een item dat botst met het dossier: P01 bestaat daar met een andere naam.
+    voorstel["items"][0]["code"] = "P02"
+    voorstel["items"][0]["naam"] = "Heel iets anders"
+    bestand = tmp_path / "voorstel.json"
+    bestand.write_text(json.dumps(voorstel, ensure_ascii=False), encoding="utf-8")
+    pagina.set_input_files("#bestand-voorstel", str(bestand))
+    pagina.wait_for_selector("#scherm-voorstel:not([hidden])")
+    assert pagina.locator("tr[data-voorstel]").count() == len(voorstel["items"])
+    assert "conflict" in pagina.text_content('tr[data-voorstel="P02"] td.status')
+    assert pagina.input_value('select[data-keuze="P02"]') == "overslaan"
+    sys.path.insert(0, str(ROOT / "ai"))
+    import kern as ai_kern
+    vergelijking = ai_kern.vergelijk(doorloop_data, voorstel)
+    nieuw = [r["sleutel"] for r in vergelijking if r["status"] == "nieuw"]
+    assert nieuw, "de fixture hoort minstens een nieuw proces te bevatten"
+    for regel in vergelijking:
+        assert pagina.input_value(f'select[data-keuze="{regel["sleutel"]}"]') == ai_kern.standaardkeuze(regel["status"])
+
+    pagina.click("#knop-overnemen")
+    pagina.wait_for_selector("#scherm-processen:not([hidden])")
+    dossier = dossier_uit(pagina)
+    codes = {p["code"] for p in dossier["processen"]}
+    assert set(nieuw) <= codes
+    assert [p for p in dossier["processen"] if p["code"] == "P02"][0]["naam"] == "Uitkeringen Werk en Inkomen"
+    assert len(dossier["herkomst_ai"]) == 1
+    assert dossier["herkomst_ai"][0]["opdracht"] == "processen"
+    assert dossier["herkomst_ai"][0]["overgenomen"] == len(nieuw)
+    assert "overgenomen" in pagina.text_content("#dossier-status")
+    naar(pagina, "uitdraai")
+    assert "Overgenomen uit de AI-hulp" in pagina.text_content("#uitdraai-inhoud")
+
+
+def test_voorstel_weigert_andere_tool(pagina, tmp_path):
+    bestand = tmp_path / "ander.json"
+    bestand.write_text(json.dumps({"formaat": "procescheck-voorstel", "versie": 1, "tool": "csir", "opdracht": "processen",
+                                   "items": []}), encoding="utf-8")
+    pagina.set_input_files("#bestand-voorstel", str(bestand))
+    pagina.wait_for_selector("#dossier-status.let-op")
+    assert "andere tool" in pagina.text_content("#dossier-status")
+    assert pagina.is_hidden("#scherm-voorstel")
+
+
+def test_tool_doet_geen_netwerk(pagina, doorloop_data):
+    verzoeken = []
+    pagina.on("request", lambda r: verzoeken.append(r.url) if not r.url.startswith("file:") and not r.url.startswith("data:") else None)
+    laad_dossier(pagina, doorloop_data)
+    for tab in ("processen", "applicaties", "bia", "context", "blast", "dashboard", "uitdraai"):
+        naar(pagina, tab)
+    naar(pagina, "blast")
+    pagina.click("#knop-landschap-voorbeeld")
+    assert verzoeken == [], verzoeken
+    assert pagina.get_attribute("#knop-ai", "href") == "ai/"
+
+
 def test_afdrukken_toont_uitdraai(pagina):
     nieuw_proces(pagina, "P01")
     naar(pagina, "processen")

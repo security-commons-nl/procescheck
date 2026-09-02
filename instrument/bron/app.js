@@ -494,11 +494,13 @@
       bron_sha256: BRON.vingerafdruk, bijgewerkt: '',
       organisatie: { naam: '', peildatum: '' },
       processen: [], applicaties: [], componenten: [], component_edges: [],
-      landschap_bron: { bestand: '', geimporteerd: '' }
+      landschap_bron: { bestand: '', geimporteerd: '' },
+      herkomst_ai: []
     };
   }
 
   var dossier = leegDossier();
+  var voorstel = null;
   var gekozenProces = null;
   var gekozenContext = null;
   var bewerktProces = null;
@@ -1537,6 +1539,90 @@
       ['Herkomst van de blast radius', BRON.bron.blast_radius],
       ['Landschap geimporteerd uit', dossier.landschap_bron.bestand],
       ['Dossier bijgewerkt', dossier.bijgewerkt]]);
+    if ((dossier.herkomst_ai || []).length) {
+      doel.appendChild(maak('h3', 'Overgenomen uit de AI-hulp'));
+      var herkomst = maak('table');
+      tabel(herkomst, ['Opdracht', 'Leverancier', 'Model', 'Datum', 'Invoer (sha256)', 'Overgenomen', 'Samengevoegd', 'Overgeslagen'],
+        dossier.herkomst_ai.map(function (h) {
+          return rij([h.opdracht, h.leverancier, h.model, h.gemaakt, String(h.invoer_sha256 || '').slice(0, 12), h.overgenomen, h.samengevoegd, h.overgeslagen]);
+        }));
+      doel.appendChild(herkomst);
+    }
+  }
+
+
+  // ── Voorstel uit de AI-hulp ───────────────────────────────────────────────
+  // De AI-pagina schrijft nooit in het dossier. Hier legt de gebruiker het voorstel naast wat er staat
+  // en kiest per regel; window.kern (uit ai/bron/kern.js) doet het vergelijken en toepassen.
+
+  function laadVoorstel(tekst) {
+    var data;
+    try { data = JSON.parse(tekst); } catch (fout) { meldStatus('Dit bestand is geen leesbare JSON.', true); return; }
+    if (!data || data.formaat !== 'procescheck-voorstel') { meldStatus('Dit is geen voorstel van de AI-hulp van procescheck.', true); return; }
+    if (data.tool !== 'procescheck') { meldStatus('Dit voorstel hoort bij een andere tool (' + data.tool + ').', true); return; }
+    if (['processen', 'applicaties', 'landschap'].indexOf(data.opdracht) < 0) { meldStatus('Onbekende opdracht: ' + data.opdracht, true); return; }
+    if (data.tool_vingerafdruk && data.tool_vingerafdruk !== BRON.vingerafdruk) {
+      meldStatus('Let op: dit voorstel is gemaakt met een andere versie van de tool; loop de regels na.', true);
+    }
+    voorstel = data;
+    tekenVoorstel();
+    alle('.scherm').forEach(function (scherm) { scherm.hidden = true; });
+    el('scherm-voorstel').hidden = false;
+  }
+
+  function tekenVoorstel() {
+    var vergelijking = window.kern.vergelijk(dossier, voorstel);
+    el('voorstel-kop').textContent = 'Opdracht ' + voorstel.opdracht + ' · ' + voorstel.leverancier + ' (' + voorstel.model + ') · ' +
+      voorstel.gemaakt + ' · invoer ' + ((voorstel.invoer || {}).naam || '') + ' (' + String((voorstel.invoer || {}).sha256 || '').slice(0, 12) + ')';
+    var records = voorstel.items || voorstel.nodes || [];
+    var kolommen = records.length ? Object.keys(records[0]).filter(function (k) { return k !== 'bronregel'; }) : [];
+    var rijen = vergelijking.map(function (regel) {
+      var item = regel.item;
+      var statusCel = maak('td', null, { 'class': 'status' });
+      statusCel.appendChild(vlag({ nieuw: 'nieuw', bestaand: 'bestaand', conflict: 'conflict', niet_in_bron: 'niet in bron' }[regel.status],
+        { nieuw: 'klasse-5', bestaand: 'klasse-4', conflict: 'klasse-2', niet_in_bron: 'klasse-3' }[regel.status]));
+      var keuze = maak('select', null, { 'data-keuze': regel.sleutel });
+      ['overnemen', 'overslaan'].concat(regel.status === 'bestaand' ? ['samenvoegen'] : []).forEach(function (k) {
+        keuze.appendChild(maak('option', k, { value: k }));
+      });
+      keuze.value = window.kern.standaardkeuze(regel.status);
+      if (keuze.value === 'samenvoegen' && regel.status !== 'bestaand') keuze.value = 'overnemen';
+      var keuzeCel = maak('td'); keuzeCel.appendChild(keuze);
+      var huidig = '';
+      if (regel.huidig_code && (voorstel.opdracht === 'processen' || voorstel.opdracht === 'applicaties')) {
+        var bestaand = (dossier[voorstel.opdracht] || []).filter(function (p) { return p.code === regel.huidig_code; })[0];
+        huidig = bestaand ? bestaand.code + ' · ' + (bestaand.naam || '') : '';
+      }
+      var cellen = [statusCel];
+      if ('type' in item || 'code' in item) {
+        kolommen.forEach(function (k) { cellen.push(typeof item[k] === 'boolean' ? (item[k] ? 'ja' : 'nee') : (item[k] === undefined ? '' : item[k])); });
+      } else {
+        cellen.push(item.from + ' → ' + item.to); while (cellen.length < kolommen.length + 1) cellen.push('');
+      }
+      cellen.push(huidig, keuzeCel);
+      return rij(cellen, { 'data-voorstel': regel.sleutel });
+    });
+    tabel(el('tabel-vergelijk'), ['Status'].concat(kolommen, ['Staat nu in het dossier', 'Keuze']), rijen);
+    el('voorstel-onzeker').textContent = (voorstel.onzeker && voorstel.onzeker.length) ?
+      'Het model wist niet zeker: ' + voorstel.onzeker.join(' · ') : '';
+  }
+
+  function zetAlleKeuzes(keuze) {
+    alle('#tabel-vergelijk select[data-keuze]').forEach(function (select) {
+      if (Array.prototype.some.call(select.options, function (o) { return o.value === keuze; })) select.value = keuze;
+    });
+  }
+
+  function neemVoorstelOver() {
+    var keuzes = {};
+    alle('#tabel-vergelijk select[data-keuze]').forEach(function (select) { keuzes[select.getAttribute('data-keuze')] = select.value; });
+    var uitkomst = window.kern.pas_toe(dossier, voorstel, keuzes);
+    dossier = uitkomst.dossier;
+    voorstel = null;
+    bewaar();
+    toonScherm({ processen: 'scherm-processen', applicaties: 'scherm-applicaties', landschap: 'scherm-blast' }[uitkomst.dossier.herkomst_ai[uitkomst.dossier.herkomst_ai.length - 1].opdracht]);
+    meldStatus(uitkomst.telling.overgenomen + ' overgenomen, ' + uitkomst.telling.samengevoegd + ' samengevoegd, ' +
+      uitkomst.telling.overgeslagen + ' overgeslagen.', false);
   }
 
   // ── Dossier opslaan, laden, wissen ────────────────────────────────────────
@@ -1723,6 +1809,19 @@
       window.print();
     });
     el('knop-wissen').addEventListener('click', wisAlles);
+    el('knop-voorstel-laden').addEventListener('click', function () { el('bestand-voorstel').click(); });
+    el('bestand-voorstel').addEventListener('change', function (gebeurtenis) {
+      var bestand = gebeurtenis.target.files[0];
+      if (!bestand) return;
+      var lezer = new FileReader();
+      lezer.onload = function () { laadVoorstel(String(lezer.result)); };
+      lezer.readAsText(bestand);
+      gebeurtenis.target.value = '';
+    });
+    el('knop-alles-overnemen').addEventListener('click', function () { zetAlleKeuzes('overnemen'); });
+    el('knop-alles-overslaan').addEventListener('click', function () { zetAlleKeuzes('overslaan'); });
+    el('knop-overnemen').addEventListener('click', neemVoorstelOver);
+    el('knop-voorstel-sluiten').addEventListener('click', function () { voorstel = null; toonScherm('scherm-processen'); });
 
     herstel();
     tekenAlles();

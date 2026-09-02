@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-__SCRIPT_HASH__'; style-src 'sha256-__STYLE_HASH__'; connect-src __CONNECT_SRC__; img-src data:; form-action 'none'; base-uri 'none'">
+<title>procescheck · AI-hulp</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJTZWN1cml0eSBDb21tb25zIE5MIj4KICA8dGl0bGU+U2VjdXJpdHkgQ29tbW9ucyBOTDwvdGl0bGU+CiAgPHBhdGggZD0iTTE2IDIgNCA2LjV2MTAuMkM0IDI0IDkuMiAyOC42IDE2IDMwLjUgMjIuOCAyOC42IDI4IDI0IDI4IDE2LjdWNi41TDE2IDJ6IiBmaWxsPSIjMTU0MjczIi8+CiAgPHBhdGggZD0iTTE2IDIgNCA2LjV2My4yTDE2IDUuMmwxMiA0LjVWNi41TDE2IDJ6IiBmaWxsPSIjZTE3MDAwIi8+CiAgPGNpcmNsZSBjeD0iMTYiIGN5PSIxNSIgcj0iMy42IiBmaWxsPSIjZmZmIi8+CiAgPHBhdGggZD0iTTE0LjYgMTcuNGgyLjhsMS4xIDYuMmgtNWwxLjEtNi4yeiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K" type="image/svg+xml">
+<meta name="description" content="Zet een procesdocument of CMDB-export met je eigen AI-sleutel om naar een voorstel voor procescheck. Jij kiest wat je overneemt.">
+<style>__CSS__</style>
+</head>
+<body>
+<header>
+  <div class="binnen">
+    <nav class="kruimel" aria-label="Kruimelpad"><a href="https://security-commons-nl.github.io/">Security Commons NL</a> &rsaquo; <a href="../">procescheck</a> &rsaquo; <span>AI-hulp</span></nav>
+    <div class="naam">procescheck &middot; AI-hulp</div>
+    <div class="sub">Eigen sleutel, eigen leverancier &nbsp;|&nbsp; de AI stelt voor, jij beslist per regel</div>
+  </div>
+</header>
+
+<main class="binnen">
+  <noscript>
+    <section class="kaart">
+      <h1>AI-hulp</h1>
+      <p>Deze pagina roept met jouw eigen API-sleutel een taalmodel aan en heeft daarvoor JavaScript nodig.
+      De opdrachten, prompts en schema's staan open in <code>ai/opdrachten.json</code> in de repository.</p>
+    </section>
+  </noscript>
+
+  <h1>AI-hulp voor procescheck</h1>
+  <p class="leid">Deze pagina zet een procesdocument of een CMDB-export om naar een <strong>voorstel</strong> in het
+  datamodel van procescheck. Het voorstel is een bestand dat je in de tool laadt; daar kies je per regel wat je
+  overneemt. De tool zelf praat nooit met een leverancier; alleen deze pagina, alleen als jij dat zegt, en alleen
+  met de sleutel die jij hier invult.</p>
+
+  <section class="stap" id="stap-leverancier" data-actief="ja">
+    <h2><span class="nummer">1</span>Leverancier en sleutel</h2>
+    <div id="lev-keuzes"></div>
+    <div class="raster">
+      <label>Basis-URL<input type="text" id="lev-basis" placeholder="https://api.mistral.ai"></label>
+      <label>Model<input type="text" id="lev-model" placeholder="mistral-medium-latest"></label>
+      <label>API-sleutel<input type="password" id="lev-sleutel" autocomplete="off"></label>
+    </div>
+    <p class="klein" id="lev-uitleg"></p>
+    <p class="klein">De sleutel blijft in deze tab (sessionStorage) en verdwijnt zodra je de tab sluit. Hij komt
+    niet in het voorstel, niet in de tool en niet in een adresbalk.</p>
+    <button type="button" id="knop-verbinding">Verbinding testen</button>
+    <button type="button" id="knop-sleutel-vergeten">Sleutel vergeten</button>
+    <span id="lev-status"></span>
+  </section>
+
+  <section class="stap" id="stap-opdracht" data-actief="nee">
+    <h2><span class="nummer">2</span>Opdracht</h2>
+    <label>Wat wil je omzetten?<select id="opdracht-keuze"></select></label>
+    <p class="klein" id="opdracht-uitleg"></p>
+  </section>
+
+  <section class="stap" id="stap-invoer" data-actief="nee">
+    <h2><span class="nummer">3</span>Invoer</h2>
+    <p class="klein">Plak tekst, of kies een bestand: <span id="invoer-soorten"></span>. Een xlsx wordt in je
+    browser gelezen (eerste werkblad); een pdf of docx niet, plak daarvan de tekst.</p>
+    <label class="breed">Tekst<textarea id="invoer-tekst" rows="10"></textarea></label>
+    <div class="knoppen">
+      <button type="button" id="knop-invoer-bestand">Bestand kiezen</button>
+      <input type="file" id="invoer-bestand" hidden>
+      <span class="klein" id="invoer-info"></span>
+    </div>
+  </section>
+
+  <section class="stap" id="stap-toestemming" data-actief="nee">
+    <h2><span class="nummer">4</span>Toestemming</h2>
+    <div class="toestemming" id="toestemming-tekst"></div>
+    <label class="vink"><input type="checkbox" id="toestemming"> Ik begrijp wat er waarheen gaat en stuur geen
+    persoonsgegevens mee die daar niet horen.</label>
+    <p class="klein">Staan er namen in je export? Haal ze er eerst uit met de
+    <a href="https://security-commons-nl.github.io/anonimizer-browser/" rel="noopener">anonimizer</a>.</p>
+  </section>
+
+  <section class="stap" id="stap-uitvoeren" data-actief="nee">
+    <h2><span class="nummer">5</span>Uitvoeren</h2>
+    <button type="button" id="knop-uitvoeren">Voorstel maken</button>
+    <button type="button" id="knop-stoppen" disabled>Stoppen</button>
+    <p id="voortgang"></p>
+  </section>
+
+  <section class="stap" id="stap-voorstel" data-actief="nee">
+    <h2><span class="nummer">6</span>Voorstel</h2>
+    <p class="klein" id="voorstel-samenvatting"></p>
+    <div class="rol" tabindex="0"><table class="regels" id="tabel-voorstel"></table></div>
+    <h3>Wat het model niet zeker wist</h3>
+    <ul id="onzeker"></ul>
+    <div id="waarschuwingen"></div>
+    <button type="button" id="knop-voorstel-opslaan">Voorstel opslaan</button>
+  </section>
+
+  <section class="stap" id="stap-verder" data-actief="nee">
+    <h2><span class="nummer">7</span>Verder in de tool</h2>
+    <p>Ga terug naar <a href="../">procescheck</a>, kies <em>Voorstel laden</em> in de dossierbalk en kies het
+    bestand dat je net hebt opgeslagen. Je ziet dan per regel wat nieuw is, wat al bestaat en wat botst, en
+    je vinkt aan wat je overneemt. Niets verandert in je dossier voordat je op <em>Overnemen</em> klikt.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="binnen">
+    <p>procescheck &middot; AI-hulp &middot; <span id="versie"></span> &middot;
+    <a href="https://github.com/security-commons-nl/procescheck" rel="noopener">bron en opdrachten op GitHub</a> &middot;
+    licentie <a href="https://github.com/security-commons-nl/procescheck/blob/main/LICENSE" rel="noopener">EUPL-1.2</a>.
+    Deze pagina stuurt alleen wat jij invoert naar de leverancier die jij kiest, met jouw sleutel. Het model krijgt
+    nooit je dossier en nooit de rekenregels.</p>
+  </div>
+</footer>
+
+<script>__SCRIPT__</script>
+</body>
+</html>

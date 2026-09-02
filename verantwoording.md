@@ -114,6 +114,21 @@ Zestien vraagslots uit het oorspronkelijke sjabloon (`b5` tot en met `b8`, `i2` 
 tot en met `v7`) zijn niet meegegaan: ze werden nergens gesteld. Wie ze nodig heeft, voegt ze toe aan
 `procescheck.json`; de pagina toont wat er in de bron staat.
 
+## De AI-hulp
+
+De opdrachten (systeemprompts, JSON-schema's, toegestane invoer) staan als data in `ai/opdrachten.json`;
+de rekenregels van de tool en het dossier gaan nooit naar het model. Elke prompt eist dat het model niets
+verzint, lege velden leeg laat en per item een letterlijk citaat uit de invoer geeft; die citaten
+controleert de pagina zelf. Geen prompt vraagt om een score, klasse of prioriteit. De vorm (aparte pagina
+met eigen Content-Security-Policy, sleutel alleen per sessie, voorstel in plaats van schrijven) staat in
+het bouwplan *AI-hulp* van 03-09-2026 en in het redactiestatuut, B14.
+
+Mistral is de standaardleverancier omdat het een Europese partij is met hosting in de EU; wie soevereiner
+wil, draait een model lokaal met Ollama. De keuze is aan de gebruiker, en de bewaartermijnen van de eigen
+leverancier ook. De voorbeeldantwoorden in `ai/tests/fixtures/antwoorden/` zijn één keer met Mistral
+(`mistral-medium-latest`) opgenomen op verzonnen invoer en daarna vastgelegd; de tests spelen ze na en
+hebben geen sleutel.
+
 ## Wat dit niet is
 
 Geen technische verificatie en geen risicoanalyse. De uitkomst komt uit je eigen antwoorden. De klasse

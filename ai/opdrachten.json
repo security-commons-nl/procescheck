@@ -1,0 +1,163 @@
+{
+ "versie": "2026-09",
+ "tool": "procescheck",
+ "voorstel_formaat": "procescheck-voorstel",
+ "toelichting": "De opdrachten van de AI-hulp: per opdracht de systeemprompt, het JSON-schema van de uitkomst, de toegestane invoer en een voorbeeld. Dit bestand is data, geen code: wie een prompt wil verbeteren, wijzigt dit bestand, legt een nieuw voorbeeldantwoord vast en draait de tests. Geen opdracht vraagt het model om een score, klasse of prioriteit; dat rekent de tool.",
+ "leveranciers": [
+  {
+   "id": "mistral",
+   "naam": "Mistral",
+   "basis": "https://api.mistral.ai",
+   "model": "mistral-medium-latest",
+   "uitleg": "Europese partij, hosting in de EU. De standaard. Ken de bewaartermijnen van je eigen abonnement."
+  },
+  {
+   "id": "ollama",
+   "naam": "Ollama (lokaal)",
+   "basis": "http://localhost:11434",
+   "model": "",
+   "uitleg": "Draait op je eigen machine; niets verlaat je netwerk. Start Ollama met OLLAMA_ORIGINS gezet op deze site, anders weigert hij de aanroep."
+  },
+  {
+   "id": "anders",
+   "naam": "Andere leverancier",
+   "basis": "",
+   "model": "",
+   "uitleg": "Elke endpoint met /v1/chat/completions (OpenAI-compatibel). Vul basis-URL en model zelf in."
+  }
+ ],
+ "vaste_regels": "Verzin niets: een veld dat niet in de tekst staat, laat je leeg (lege tekst, niet null). Gebruik de bewoordingen van de tekst. Zet in bronregel een letterlijk citaat uit de invoer waar het item vandaan komt, hoogstens twee zinnen; dat citaat moet woordelijk in de invoer voorkomen. Noteer in onzeker, in gewone taal, wat je niet zeker weet of hebt weggelaten. Geef geen scores, klassen of prioriteiten; dat doet de gebruiker. Antwoord uitsluitend met JSON volgens het schema, zonder tekst ervoor of erna en zonder markdown.",
+ "opdrachten": [
+  {
+   "id": "processen",
+   "titel": "Processen uit een document",
+   "uitleg": "Plak een procesoverzicht, een dienstencatalogus, een organisatiebeschrijving of een hoofdstuk uit een beleidsdocument. Het model haalt er de afzonderlijke bedrijfsprocessen uit met naam, beschrijving, doelstelling, eigenaar en afdeling, en zegt bij elk proces waar het dat in de tekst vond.",
+   "invoer": ["tekst", "txt", "md", "csv", "xlsx"],
+   "doel": "processen",
+   "systeemprompt": "Je bent een assistent van een informatiebeveiliger bij een Nederlandse overheidsorganisatie. Je krijgt tekst over de organisatie en haar werk. Haal daar de afzonderlijke bedrijfsprocessen uit: een samenhangend geheel van activiteiten met een herkenbaar resultaat voor burgers, bedrijven of de organisatie zelf (bijvoorbeeld paspoortuitgifte, uitkeringsverstrekking, vergunningverlening). Een afdeling, een systeem of een taak van een persoon is geen proces. Geef elk proces een code in de vorm P01, P02, enzovoort, in de volgorde waarin ze in de tekst staan. Vul naam, beschrijving (wat het proces doet), doelstelling (waarvoor), eigenaar (de functie of persoon die de tekst als verantwoordelijke noemt) en afdeling. Zet kritiek alleen op true als de tekst zegt of duidelijk maakt dat de dienstverlening stilvalt of een wettelijke termijn wordt overschreden als dit proces uitvalt, en zet dan de reden in reden_kritiek; anders false en een lege reden_kritiek.",
+   "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["items", "onzeker"],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": ["code", "naam", "beschrijving", "doelstelling", "eigenaar", "afdeling", "kritiek", "reden_kritiek", "bronregel"],
+       "properties": {
+        "code": {"type": "string"},
+        "naam": {"type": "string"},
+        "beschrijving": {"type": "string"},
+        "doelstelling": {"type": "string"},
+        "eigenaar": {"type": "string"},
+        "afdeling": {"type": "string"},
+        "kritiek": {"type": "boolean"},
+        "reden_kritiek": {"type": "string"},
+        "bronregel": {"type": "string"}
+       }
+      }
+     },
+     "onzeker": {"type": "array", "items": {"type": "string"}}
+    }
+   },
+   "voorbeeld": {
+    "invoer": "fixtures/voorbeeld-processen.md",
+    "antwoord": "fixtures/antwoorden/processen-voorbeeld.json"
+   }
+  },
+  {
+   "id": "applicaties",
+   "titel": "Applicaties uit een CMDB-export of applicatielijst",
+   "uitleg": "Een export of lijst met kolommen die niet op het datamodel passen. Het model zet elke rij die een applicatie is om naar code, naam, beschrijving, eigenaren en soort, en slaat rijen over die geen applicatie zijn (licenties, contracten, servers).",
+   "invoer": ["tekst", "csv", "xlsx"],
+   "doel": "applicaties",
+   "systeemprompt": "Je bent een assistent van een informatiebeveiliger bij een Nederlandse overheidsorganisatie. Je krijgt een lijst of tabel uit een CMDB, een applicatieregister of een inkoopoverzicht. Haal daar de applicaties uit: software die een bedrijfsproces ondersteunt (een zaaksysteem, een financieel pakket, een basisregistratie, een SaaS-dienst). Servers, databases, netwerkonderdelen, licenties, contracten en leveranciers zijn geen applicaties; die sla je over en noem je in onzeker met de reden. Neem de code uit de invoer over als die er is; anders maak je er een in de vorm A01, A02, enzovoort. Vul naam, beschrijving, eigenaar_business (de functionele of proceseigenaar) en eigenaar_technisch (de technisch beheerder of leverancierscontact) zoals de invoer ze noemt. Zet soort op 'object met industriële automatisering' alleen als het duidelijk een fysiek object met besturing is (gemaal, brug, sluis, toegangscontrole, klimaatinstallatie, verkeersregelinstallatie); anders 'applicatie'.",
+   "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["items", "onzeker"],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": ["code", "naam", "beschrijving", "eigenaar_business", "eigenaar_technisch", "soort", "bronregel"],
+       "properties": {
+        "code": {"type": "string"},
+        "naam": {"type": "string"},
+        "beschrijving": {"type": "string"},
+        "eigenaar_business": {"type": "string"},
+        "eigenaar_technisch": {"type": "string"},
+        "soort": {"type": "string", "enum": ["applicatie", "object met industriële automatisering"]},
+        "bronregel": {"type": "string"}
+       }
+      }
+     },
+     "onzeker": {"type": "array", "items": {"type": "string"}}
+    }
+   },
+   "voorbeeld": {
+    "invoer": "fixtures/voorbeeld-cmdb.csv",
+    "antwoord": "fixtures/antwoorden/applicaties-voorbeeld.json"
+   }
+  },
+  {
+   "id": "landschap",
+   "titel": "Componenten en relaties uit een CMDB-export",
+   "uitleg": "Servers, databases, netwerkonderdelen en wat ze dragen. Het model levert het landschapsformaat dat de tool al importeert: nodes (component, applicatie, proces) en relaties van drager naar gedragene. Alleen relaties die de invoer noemt.",
+   "invoer": ["tekst", "csv", "xlsx"],
+   "doel": "landschap",
+   "systeemprompt": "Je bent een assistent van een informatiebeveiliger bij een Nederlandse overheidsorganisatie. Je krijgt een lijst of tabel uit een CMDB met infrastructuurcomponenten, applicaties en eventueel processen, en de afhankelijkheden ertussen. Maak daar een landschap van. Elke node heeft een id (neem het id of de hostnaam uit de invoer over, kleine letters, zonder spaties), een label (de naam zoals de invoer hem noemt), een type uit ci (server, database, netwerk, opslag, koppeling), app (applicatie) of proces (bedrijfsproces), en kritiek (true alleen als de invoer dat zegt). Elke relatie loopt van drager naar gedragene: van een server naar de applicatie die erop draait, van een applicatie naar het proces dat hij ondersteunt, van een netwerkonderdeel naar wat erachter hangt. Neem alleen relaties op die de invoer noemt of die uit een kolom als 'draait op' of 'ondersteunt' volgen; verzin geen relaties. Rijen die je niet kunt plaatsen, noem je in onzeker.",
+   "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["nodes", "edges", "onzeker"],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": ["id", "label", "type", "kritiek", "bronregel"],
+       "properties": {
+        "id": {"type": "string"},
+        "label": {"type": "string"},
+        "type": {"type": "string", "enum": ["ci", "app", "proces"]},
+        "kritiek": {"type": "boolean"},
+        "bronregel": {"type": "string"}
+       }
+      }
+     },
+     "edges": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": ["from", "to", "relatie", "bronregel"],
+       "properties": {
+        "from": {"type": "string"},
+        "to": {"type": "string"},
+        "relatie": {"type": "string"},
+        "bronregel": {"type": "string"}
+       }
+      }
+     },
+     "onzeker": {"type": "array", "items": {"type": "string"}}
+    }
+   },
+   "voorbeeld": {
+    "invoer": "fixtures/voorbeeld-cmdb.xlsx",
+    "antwoord": "fixtures/antwoorden/landschap-voorbeeld.json"
+   }
+  }
+ ],
+ "grenzen": {
+  "max_tekens_per_aanroep": 24000,
+  "max_aanroepen_per_opdracht": 12,
+  "timeout_seconden": 90,
+  "wachttijden_bij_429_seconden": [2, 4, 8]
+ }
+}

@@ -120,6 +120,15 @@ def test_herhaalbaar(tmp_path):
     assert eerst == nogmaals
 
 
+def test_geen_fetch_in_de_tool(html, app_js):
+    """De tool kent geen netwerk. Alles wat naar buiten praat, staat op de AI-pagina."""
+    script = html.split("<script>", 1)[1].split("</script>", 1)[0]
+    assert "fetch(" not in script
+    assert "new XMLHttpRequest" not in script
+    assert "fetch(" not in app_js
+    assert "window.kern = kern;" in script, "kern.js hoort in de tool te zitten"
+
+
 def test_grootte(gebouwd):
     kb = gebouwd.stat().st_size / 1024
     assert kb < 800, f"de pagina is {kb:.0f} kB; dat is te groot voor een offlinebelofte"

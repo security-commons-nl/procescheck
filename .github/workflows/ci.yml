@@ -1,9 +1,10 @@
 name: CI
 
-# Twee jobs. De eerste bewaakt dat procescheck.json nog is wat er in de applicatie op tag
-# v0-applicatie staat en dat de rekenregels kloppen; de tweede bouwt de pagina en loopt hem in een
-# echte browser door. Die browsertests vergelijken wat op het scherm staat met instrument/reken.py,
-# dus hier valt het door de mand als de app en de referentie uit elkaar lopen.
+# Drie jobs. De eerste bewaakt dat procescheck.json nog is wat er in de applicatie op tag
+# v0-applicatie staat en dat de rekenregels kloppen; de tweede bouwt de tool en loopt hem in een echte
+# browser door; de derde doet hetzelfde voor de AI-hulp, met de leverancier nagespeeld (page.route):
+# geen sleutel, geen netwerk. De browsertests vergelijken wat op het scherm staat met de
+# Python-referentie, dus hier valt het door de mand als de app en de referentie uit elkaar lopen.
 #
 # fetch-depth: 0 is nodig omdat de bron van de tag komt; met een ondiepe checkout is die er niet.
 
@@ -32,16 +33,19 @@ jobs:
       - name: Installeren
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install pytest openpyxl
 
       - name: procescheck.json loopt gelijk met tag v0-applicatie
         run: python instrument/haal_bron.py --check
 
-      - name: Tests
+      - name: Tests van de tool
         run: python -m pytest instrument/tests/test_bron.py instrument/tests/test_reken.py -v
 
+      - name: Tests van de AI-hulp, zonder browser
+        run: python -m pytest ai/tests/test_opdrachten.py ai/tests/test_kern.py -v
+
   app:
-    name: De pagina in een browser
+    name: De tool in een browser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -70,3 +74,27 @@ jobs:
           name: procescheck
           path: instrument/dist/index.html
           if-no-files-found: error
+
+  ai:
+    name: De AI-hulp in een browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Installeren
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest playwright openpyxl
+          python -m playwright install --with-deps chromium
+
+      - name: Bouwen
+        run: python ai/bouw.py
+
+      - name: Tests
+        run: python -m pytest ai/tests/test_bouw.py ai/tests/test_app.py -v
