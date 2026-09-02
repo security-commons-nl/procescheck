@@ -202,13 +202,11 @@ def parametertabel(markdown: str) -> list[dict]:
     return rijen
 
 
-def blast_radius_commit() -> str:
-    """De commit van blast-radius waar de rekenregels vandaan komen, als de repo ernaast staat."""
-    buur = REPO.parent / "blast-radius"
-    if not (buur / ".git").exists():
-        return "onbekend"
-    uit = subprocess.run(["git", "log", "-1", "--format=%H"], cwd=buur, capture_output=True)
-    return uit.stdout.decode().strip() if uit.returncode == 0 else "onbekend"
+# De commit van blast-radius waar de rekenregels vandaan komen, vastgelegd op het moment van
+# overnemen (02-09-2026). Bewust een constante en geen `git log` in de buurmap: de herkomst is een
+# feit van toen, en `--check` moet op elke machine hetzelfde antwoord geven, ook in CI waar die repo
+# er niet is.
+BLAST_RADIUS_COMMIT = "21d4f3405ad4dc71f9d3ca00701050dba16acca3"
 
 
 def bouw_bron() -> dict:
@@ -224,7 +222,7 @@ def bouw_bron() -> dict:
             "regels": f"{DASHBOARD} op tag {TAG}",
             "sjabloon": "Template BIA & BIV-Classificatie.xlsx, genoemd in de code als herkomst van de vragen",
             "blast_radius": "security-commons-nl/blast-radius, blastradius/analysis.py en parsers.py, "
-                            "commit " + blast_radius_commit(),
+                            "commit " + BLAST_RADIUS_COMMIT,
             "gegenereerd_door": "instrument/haal_bron.py; wijzig de bron niet met de hand",
         },
         "schaal": [{"score": i + 1, "label": label} for i, label in enumerate(labels)],
