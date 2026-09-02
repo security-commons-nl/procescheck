@@ -1,69 +1,51 @@
-# Bijdragen aan ProcesCheck
+# Bijdragen
 
-## Werkwijze
+Dit project hoort bij [security-commons-nl](https://github.com/security-commons-nl). De
+organisatiebrede regels staan in
+[CONTRIBUTING.md](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md) en het
+[redactiestatuut](https://github.com/security-commons-nl/.github/blob/main/REDACTIESTATUUT.md).
 
-1. Maak een feature branch aan vanuit `main`:
-   ```bash
-   git checkout -b feat/naam-van-feature
-   ```
-2. Maak commits volgens de conventie hieronder.
-3. Push de branch en open een Pull Request naar `main`.
-4. Laat de PR reviewen voor merge.
+## Wat helpt
 
-Directe pushes naar `main` zijn niet toegestaan.
+- **Een vraag die in de praktijk niet werkt.** De zes vragen komen uit een sjabloon dat in gebruik
+  was; klemt er een tijdens een interview, dan willen we weten welke en waarom.
+- **Een klasse die verkeerd valt.** Noem het proces (verzonnen mag), de zes antwoorden en de klasse
+  die je verwachtte.
+- **Een landschapsformaat dat we niet lezen.** Exporteert jouw CMDB anders, stuur dan een voorbeeld
+  met verzonnen data; het importformaat mag groeien.
+- **De risicolaag.** Deze tool zegt hoe erg het is als een proces uitvalt, niet hoe waarschijnlijk dat
+  is. De koppeling naar
+  [Risicoanalyse langs aanvalspaden](https://security-commons-nl.github.io/kennisbank/security/risicoanalyse-aanvalspaden/)
+  loopt nu via de kroonjuwelenlijst in de uitdraai; een betere brug is welkom.
 
----
+Een [issue](../../issues/new/choose) of
+[discussion](https://github.com/security-commons-nl/.github/discussions) is een volwaardige bijdrage.
+"Maak maar een pull request" is nooit het antwoord.
 
-## Commit-conventies
+## Voor wie een pull request doet
 
-Gebruik [Conventional Commits](https://www.conventionalcommits.org/):
+- Nederlands in documentatie en commitboodschappen. Eén onderwerp per commit, met de map als prefix.
+- Geen persoonsnamen, organisatienamen of e-mailadressen in documentatie of fixtures (redactiestatuut
+  A1 tot en met A3). Alle voorbeelddata is verzonnen en blijft dat.
+- **Wijzig `procescheck.json` niet met de hand.** Dat bestand komt uit `instrument/haal_bron.py`, dat
+  de code op tag `v0-applicatie` leest; CI controleert het met `--check`.
+- Verander je een rekenregel, verander hem dan in `instrument/reken.py` **en** in
+  `instrument/bron/app.js` onder dezelfde naam, en draai
+  `python instrument/tests/fixtures/maak_doorloop.py` opnieuw. De diff van de fixture laat zien welke
+  uitkomsten je hebt veranderd.
+- Lees `instrument/LEESMIJ.md` voor de valkuilen: de omgekeerde schaal, half omhoog afronden, lege
+  keuzes die `null` moeten worden en de voorvoegsels in de graaf.
 
-```
-<type>(<scope>): <omschrijving>
-```
+## Lokaal bouwen en testen
 
-### Types
+```bash
+git fetch --tags                        # de tag v0-applicatie draagt de bron
+python instrument/bouw.py               # instrument/dist/index.html
+python -m pytest instrument/tests -v    # 78 tests
 
-| Type | Wanneer |
-|---|---|
-| `feat` | Nieuwe functionaliteit |
-| `fix` | Bugfix |
-| `chore` | Onderhoud, dependencies, configuratie |
-| `docs` | Documentatie |
-| `refactor` | Code herschrijven zonder gedragsverandering |
-| `style` | Opmaak, witruimte (geen logica) |
-| `test` | Tests toevoegen of aanpassen |
-| `ci` | CI/CD pipeline wijzigingen |
-
-### Scope (optioneel)
-
-Gebruik de module als scope: `dashboard`, `bia`, `processes`, `export`, `auth`, `backend`, `frontend`
-
-### Voorbeelden
-
-```
-feat(dashboard): voeg reviewmonitoring sectie toe
-fix(auth): JWKS cache verversen na 24 uur
-chore: verwijder __pycache__ uit git tracking
-docs: README uitbreiden met installatie-instructies
-refactor(bia): extraheer vragenlijst naar apart bestand
+npm install && npm run build            # de uitleg op /uitleg/
 ```
 
-### Regels
-
-- Omschrijving in het **Nederlands**, lowercase, zonder punt aan het einde
-- Maximaal 72 tekens voor de eerste regel
-- Gebruik de body (tweede alinea) voor context als de wijziging niet voor zichzelf spreekt
-
----
-
-## Branch naamgeving
-
-| Prefix | Wanneer |
-|---|---|
-| `feat/` | Nieuwe functionaliteit |
-| `fix/` | Bugfix |
-| `chore/` | Onderhoud |
-| `docs/` | Documentatie |
-
-Voorbeeld: `feat/export-powerpoint`, `fix/dashboard-percentages`
+Python 3.12 of nieuwer. Voor de browsertests: `pip install pytest playwright` en
+`python -m playwright install chromium`. De pagina is self-contained: geen externe fonts, geen externe
+scripts, en een Content-Security-Policy dat dat afdwingt.
