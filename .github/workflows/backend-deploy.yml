@@ -9,6 +9,11 @@ on:
 env:
   IMAGE_NAME: procescheck-backend
 
+# Het token van deze workflow mag alleen lezen. Dat is nu ook de standaard van de
+# organisatie, maar expliciet blijft het staan als die standaard ooit verandert.
+permissions:
+  contents: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
