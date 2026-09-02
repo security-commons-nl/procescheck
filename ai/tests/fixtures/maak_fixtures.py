@@ -150,6 +150,10 @@ def xlsx_bytes(rijen: list[list[str]], pad: pathlib.Path) -> None:
                              ("xl/worksheets/sheet1.xml", blad)):
             info = zipfile.ZipInfo(naam, date_time=(2026, 9, 3, 0, 0, 0))
             info.compress_type = zipfile.ZIP_STORED
+            # zipfile schrijft anders het besturingssysteem van de maker in de header (3 = Unix,
+            # 0 = Windows), en dan verschilt het bestand per platform.
+            info.create_system = 0
+            info.external_attr = 0
             z.writestr(info, inhoud.encode("utf-8"))
 
 
