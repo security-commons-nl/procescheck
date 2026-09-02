@@ -142,13 +142,14 @@ def xlsx_bytes(rijen: list[list[str]], pad: pathlib.Path) -> None:
              '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
              '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
              '</Types>')
-    # Vaste datum in de zip, zodat het bestand byte-gelijk blijft bij opnieuw genereren.
-    with zipfile.ZipFile(pad, "w", zipfile.ZIP_DEFLATED) as z:
+    # Vaste datum en GEEN compressie: deflate levert per zlib-versie andere bytes op, en dan is het
+    # bestand op Linux niet gelijk aan dat op Windows. Ongecomprimeerd is het op elk platform hetzelfde.
+    with zipfile.ZipFile(pad, "w", zipfile.ZIP_STORED) as z:
         for naam, inhoud in (("[Content_Types].xml", types), ("_rels/.rels", root_rels),
                              ("xl/workbook.xml", werkboek), ("xl/_rels/workbook.xml.rels", rels),
                              ("xl/worksheets/sheet1.xml", blad)):
             info = zipfile.ZipInfo(naam, date_time=(2026, 9, 3, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = zipfile.ZIP_STORED
             z.writestr(info, inhoud.encode("utf-8"))
 
 
