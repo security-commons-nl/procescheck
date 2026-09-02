@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-__SCRIPT_HASH__'; style-src 'sha256-__STYLE_HASH__'; img-src data:; form-action 'none'; base-uri 'none'">
+<title>procescheck</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJTZWN1cml0eSBDb21tb25zIE5MIj4KICA8dGl0bGU+U2VjdXJpdHkgQ29tbW9ucyBOTDwvdGl0bGU+CiAgPHBhdGggZD0iTTE2IDIgNCA2LjV2MTAuMkM0IDI0IDkuMiAyOC42IDE2IDMwLjUgMjIuOCAyOC42IDI4IDI0IDI4IDE2LjdWNi41TDE2IDJ6IiBmaWxsPSIjMTU0MjczIi8+CiAgPHBhdGggZD0iTTE2IDIgNCA2LjV2My4yTDE2IDUuMmwxMiA0LjVWNi41TDE2IDJ6IiBmaWxsPSIjZTE3MDAwIi8+CiAgPGNpcmNsZSBjeD0iMTYiIGN5PSIxNSIgcj0iMy42IiBmaWxsPSIjZmZmIi8+CiAgPHBhdGggZD0iTTE0LjYgMTcuNGgyLjhsMS4xIDYuMmgtNWwxLjEtNi4yeiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K" type="image/svg+xml">
+<meta name="description" content="Breng je processen in kaart, bepaal per proces de BIA en BIV-classificatie met RTO en RPO, en zie welke applicaties en componenten eronder liggen. Werkt offline in je eigen browser.">
+<style>__CSS__</style>
+</head>
+<body>
+<header>
+  <div class="binnen">
+    <nav class="kruimel" aria-label="Kruimelpad"><a href="https://security-commons-nl.github.io/">Security Commons NL</a> &rsaquo; <span>procescheck</span></nav>
+    <div class="naam">procescheck</div>
+    <div class="sub">Processen &middot; BIA en BIV &middot; blast radius &nbsp;|&nbsp; werkt offline, je dossier blijft op dit apparaat</div>
+  </div>
+</header>
+
+<div class="balk">
+  <div class="binnen">
+    <div class="knoppen">
+      <button type="button" id="knop-opslaan">Dossier opslaan</button>
+      <button type="button" id="knop-laden">Dossier laden</button>
+      <input type="file" id="bestand-laden" accept=".json,application/json" hidden>
+      <button type="button" id="knop-afdrukken">Afdrukken</button>
+      <button type="button" id="knop-wissen">Wissen</button>
+      <a href="uitleg/">Werkwijze en verantwoording</a>
+    </div>
+    <p id="dossier-status">Nog geen processen ingevuld.</p>
+    <nav class="tabs" role="tablist" aria-label="Onderdelen">
+      <button type="button" role="tab" id="tab-processen" data-scherm="scherm-processen">1 &middot; Processen</button>
+      <button type="button" role="tab" id="tab-applicaties" data-scherm="scherm-applicaties">2 &middot; Applicaties</button>
+      <button type="button" role="tab" id="tab-bia" data-scherm="scherm-bia">3 &middot; BIA en BIV</button>
+      <button type="button" role="tab" id="tab-context" data-scherm="scherm-context">4 &middot; Businesscontext</button>
+      <button type="button" role="tab" id="tab-blast" data-scherm="scherm-blast">Blast radius</button>
+      <button type="button" role="tab" id="tab-dashboard" data-scherm="scherm-dashboard">Dashboard</button>
+      <button type="button" role="tab" id="tab-uitdraai" data-scherm="scherm-uitdraai">Uitdraai</button>
+    </nav>
+  </div>
+</div>
+
+<main class="binnen">
+  <noscript>
+    <section class="kaart">
+      <h1>procescheck</h1>
+      <p>Deze pagina rekent in je eigen browser, zodat je dossier nergens heen gaat. Daarvoor is
+      JavaScript nodig. De vragen, de antwoordklassen en de rekenregels staan open in
+      <code>procescheck.json</code> in de repository, dus je kunt ze ook zonder deze pagina lezen.</p>
+    </section>
+  </noscript>
+
+  <section class="scherm" id="scherm-processen">
+    <h1>Processen</h1>
+    <p class="leid">Begin met de processen die je organisatie draait. Een proces is kritiek als de
+    dienstverlening eronder lijdt zodra het stilvalt; die keuze bepaalt straks welke processen als
+    kroonjuweel in de uitdraai komen. Alles wat je hier invult, blijft in deze browser.</p>
+
+    <div class="kaart">
+      <h2>Organisatie</h2>
+      <div class="raster">
+        <label>Organisatie<input type="text" id="org-naam"></label>
+        <label>Peildatum<input type="date" id="org-peildatum"></label>
+      </div>
+    </div>
+
+    <div class="kaart">
+      <h2>Overzicht</h2>
+      <button type="button" id="knop-proces-nieuw">Proces toevoegen</button>
+      <div class="rol" tabindex="0"><table class="regels" id="tabel-processen"></table></div>
+    </div>
+
+    <div class="kaart" id="proces-form" hidden>
+      <h2 id="proces-form-kop">Proces</h2>
+      <div class="raster">
+        <label>Code<input type="text" id="p-code" placeholder="P01"></label>
+        <label>Naam<input type="text" id="p-naam"></label>
+        <label>Eigenaar<input type="text" id="p-eigenaar"></label>
+        <label>Afdeling<input type="text" id="p-afdeling"></label>
+        <label>Laatste beoordelingsdatum<input type="date" id="p-laatste-beoordeling"></label>
+        <label class="vink"><input type="checkbox" id="p-kritiek"> Kritiek proces</label>
+      </div>
+      <label class="breed">Beschrijving<textarea id="p-beschrijving" rows="2"></textarea></label>
+      <label class="breed">Doelstelling<textarea id="p-doelstelling" rows="2"></textarea></label>
+      <label class="breed">Reden kritiek<textarea id="p-reden-kritiek" rows="2"></textarea></label>
+      <label class="breed">Gekoppelde applicaties<select id="p-applicaties" multiple size="5"></select></label>
+      <label class="breed">Notities<textarea id="p-notities" rows="2"></textarea></label>
+      <p class="melding" id="p-melding" hidden></p>
+      <button type="button" id="p-opslaan">Opslaan</button>
+      <button type="button" id="p-annuleren">Annuleren</button>
+    </div>
+  </section>
+
+  <section class="scherm" id="scherm-applicaties" hidden>
+    <h1>Applicaties</h1>
+    <p class="leid">De applicaties onder je processen. Een object met industriële automatisering
+    (toegangscontrole, gemalen, verkeersregeling) hoort hier ook thuis; voor de eisen aan zo'n object
+    bestaat de CSIR Assessment Tool, en je kunt hier naar dat dossier verwijzen.</p>
+
+    <div class="kaart">
+      <h2>Overzicht</h2>
+      <button type="button" id="knop-app-nieuw">Applicatie toevoegen</button>
+      <div class="rol" tabindex="0"><table class="regels" id="tabel-applicaties"></table></div>
+    </div>
+
+    <div class="kaart" id="app-form" hidden>
+      <h2 id="app-form-kop">Applicatie</h2>
+      <div class="raster">
+        <label>Code<input type="text" id="a-code" placeholder="A01"></label>
+        <label>Naam<input type="text" id="a-naam"></label>
+        <label>Soort<select id="a-soort"></select></label>
+        <label>Eigenaar (business)<input type="text" id="a-eigenaar-business"></label>
+        <label>Eigenaar (technisch)<input type="text" id="a-eigenaar-technisch"></label>
+        <label>Reviewdatum<input type="date" id="a-reviewdatum"></label>
+        <label>CSIR-dossier (bestand)<input type="text" id="a-csir-bestand"></label>
+        <label>CSIR-dossier (vingerafdruk)<input type="text" id="a-csir-vingerafdruk"></label>
+      </div>
+      <label class="breed">Beschrijving<textarea id="a-beschrijving" rows="2"></textarea></label>
+      <label class="breed">Notities<textarea id="a-notities" rows="2"></textarea></label>
+      <p class="melding" id="a-melding" hidden></p>
+      <button type="button" id="a-opslaan">Opslaan</button>
+      <button type="button" id="a-annuleren">Annuleren</button>
+    </div>
+  </section>
+
+  <section class="scherm" id="scherm-bia" hidden>
+    <h1>BIA en BIV</h1>
+    <p class="leid">Zes vragen per proces. De schaal loopt van 1 (Catastrofaal) tot 5
+    (Verwaarloosbaar): 1 is het ergst. Beschikbaarheid is de zwaarste van de vier B-vragen, de
+    procesklasse is de zwaarste van B, I en V. De onderbouwing is wat je later moet kunnen uitleggen,
+    niet het cijfer.</p>
+
+    <div class="kaart">
+      <label>Proces<select id="bia-proces"></select></label>
+    </div>
+
+    <div id="bia-vragen"></div>
+
+    <div class="kaart" id="bia-uitkomst">
+      <h2>Uitkomst</h2>
+      <table class="uitkomst">
+        <tbody>
+          <tr><th scope="row">Beschikbaarheid (B)</th><td id="bia-b">-</td></tr>
+          <tr><th scope="row">Integriteit (I)</th><td id="bia-i">-</td></tr>
+          <tr><th scope="row">Vertrouwelijkheid (V)</th><td id="bia-v">-</td></tr>
+          <tr><th scope="row">Procesklasse</th><td id="bia-klasse">nog niet bepaald</td></tr>
+          <tr class="tweede"><th scope="row">RTO (uit B1)</th><td id="bia-rto">-</td></tr>
+          <tr class="tweede"><th scope="row">RPO (uit B2)</th><td id="bia-rpo">-</td></tr>
+          <tr class="tweede"><th scope="row">WRT (uit B3)</th><td id="bia-wrt">-</td></tr>
+          <tr class="tweede"><th scope="row">MTPD (uit B4)</th><td id="bia-mtpd">-</td></tr>
+        </tbody>
+      </table>
+      <details>
+        <summary>De klassen naast elkaar (naslag)</summary>
+        <table class="uitkomst" id="tabel-parameters"></table>
+        <p class="klein">De vragenlijst en deze tabel lopen voor WRT tegen elkaar in; beide zijn
+        overgenomen zoals ze in de bron staan. De vragenlijst bepaalt de score, de tabel is naslag.
+        Zie de verantwoording.</p>
+      </details>
+    </div>
+
+    <div class="kaart">
+      <h2>RTO en RPO met de hand</h2>
+      <p class="klein">Een expliciete afspraak naast de klasselabels hierboven. Let op: de
+      volledigheidscontrole kijkt naar de BIA-vragen B1 en B2, niet naar deze velden.</p>
+      <div class="raster">
+        <label>RTO<input type="text" id="rto-waarde"></label>
+        <label>Eenheid<input type="text" id="rto-eenheid" placeholder="uur"></label>
+        <label>RPO<input type="text" id="rpo-waarde"></label>
+        <label>Eenheid<input type="text" id="rpo-eenheid" placeholder="uur"></label>
+      </div>
+      <label class="breed">Toelichting<textarea id="rto-rpo-toelichting" rows="2"></textarea></label>
+    </div>
+
+    <div class="kaart">
+      <h2>Interview</h2>
+      <div class="raster">
+        <label>Interviewer<input type="text" id="bia-interviewer"></label>
+        <label>Interviewdatum<input type="date" id="bia-interviewdatum"></label>
+      </div>
+      <label class="breed">Algemene beschrijving<textarea id="bia-beschrijving" rows="2"></textarea></label>
+      <label class="breed">Ketenafhankelijkheden<textarea id="bia-keten" rows="2"></textarea></label>
+      <label class="breed">Afwijkende mening van de eigenaar<textarea id="bia-afwijking-eigenaar" rows="2"></textarea></label>
+      <label class="breed">Notities<textarea id="bia-notities" rows="2"></textarea></label>
+    </div>
+  </section>
+
+  <section class="scherm" id="scherm-context" hidden>
+    <h1>Businesscontext</h1>
+    <p class="leid">Waar het proces van afhangt en wie het raakt. Deze velden vullen de BIA aan: ze
+    maken zichtbaar welke partners, wettelijke grondslag en continuiteitseisen achter de scores zitten.</p>
+
+    <div class="kaart">
+      <label>Proces<select id="context-proces"></select></label>
+    </div>
+
+    <div class="kaart">
+      <h2>Canvas</h2>
+      <div class="raster">
+        <label>Partners<textarea data-context="partners" rows="2"></textarea></label>
+        <label>Kernactiviteiten<textarea data-context="activiteiten" rows="2"></textarea></label>
+        <label>Middelen<textarea data-context="middelen" rows="2"></textarea></label>
+        <label>Waardepropositie<textarea data-context="propositie" rows="2"></textarea></label>
+        <label>Klantrelaties<textarea data-context="klantrelaties" rows="2"></textarea></label>
+        <label>Kanalen<textarea data-context="kanalen" rows="2"></textarea></label>
+        <label>Klantsegmenten<textarea data-context="segmenten" rows="2"></textarea></label>
+        <label>Kostenstructuur<textarea data-context="kosten" rows="2"></textarea></label>
+        <label>Opbrengsten<textarea data-context="opbrengsten" rows="2"></textarea></label>
+      </div>
+    </div>
+
+    <div class="kaart">
+      <h2>Grondslag, keten en continuiteit</h2>
+      <div class="raster">
+        <label>Wettelijke basis<textarea data-context="wettelijke_basis" rows="2"></textarea></label>
+        <label>Stakeholders<textarea data-context="stakeholders" rows="2"></textarea></label>
+        <label>Ketenpositie<textarea data-context="ketenpositie" rows="2"></textarea></label>
+        <label>Kernaspecten<textarea data-context="kernaspecten" rows="2"></textarea></label>
+        <label>Continuiteitseisen<textarea data-context="continuiteitseisen" rows="2"></textarea></label>
+      </div>
+      <div class="raster">
+        <label class="vink"><input type="checkbox" id="context-persoonsgegevens"> Verwerkt persoonsgegevens</label>
+        <label class="vink"><input type="checkbox" id="context-bijzonder"> Verwerkt bijzondere persoonsgegevens</label>
+        <label>Reviewdatum<input type="date" id="context-reviewdatum"></label>
+      </div>
+      <label class="breed">Notities<textarea id="context-notities" rows="2"></textarea></label>
+    </div>
+  </section>
+
+  <section class="scherm" id="scherm-blast" hidden>
+    <h1>Blast radius</h1>
+    <p class="leid">Als een component uitvalt, wat valt er dan mee om, en raakt dat een kritiek proces?
+    Importeer je CI-landschap of vul de componenten met de hand; de keten loopt van component naar
+    applicatie naar proces. Deze analyse komt uit blast-radius, dat hierin is opgegaan.</p>
+
+    <div class="kaart">
+      <h2>Landschap</h2>
+      <div class="knoppen">
+        <button type="button" id="knop-landschap-laden">Landschap importeren (JSON of CSV)</button>
+        <input type="file" id="bestand-landschap" accept=".json,.csv,application/json,text/csv" hidden>
+        <button type="button" id="knop-landschap-voorbeeld">Voorbeeld laden</button>
+        <button type="button" id="knop-componenten-wissen">Componenten wissen</button>
+      </div>
+      <p class="klein" id="landschap-melding"></p>
+      <div class="rol" tabindex="0"><table class="regels" id="tabel-componenten"></table></div>
+    </div>
+
+    <div class="kaart">
+      <h2>Wat valt er om</h2>
+      <div class="rol" tabindex="0"><table class="regels" id="tabel-blast"></table></div>
+    </div>
+
+    <div class="kaart">
+      <h2>Kritieke processen zonder redundantie</h2>
+      <p class="klein">Een kritiek proces dat op hoogstens een applicatie steunt.</p>
+      <ul id="blast-spof"></ul>
+      <div id="blast-cyclus"></div>
+      <div id="blast-waarschuwingen"></div>
+    </div>
+
+    <div class="kaart">
+      <h2>Tekening</h2>
+      <p class="klein" id="graaf-melding"></p>
+      <div class="rol" tabindex="0"><svg id="blast-graaf" role="img" aria-label="Landschap van componenten, applicaties en processen"></svg></div>
+    </div>
+  </section>
+
+  <section class="scherm" id="scherm-dashboard" hidden>
+    <h1>Dashboard</h1>
+    <p class="leid">De stand van het dossier: hoeveel processen compleet zijn, waar de zwaarste
+    klassen zitten, en wat als eerste aandacht vraagt.</p>
+    <div id="dashboard-inhoud"></div>
+  </section>
+
+  <section class="scherm" id="scherm-uitdraai" hidden>
+    <h1>Uitdraai</h1>
+    <p class="leid nietprint">Alles wat je hebt ingevuld, op een rij. Druk af met de knop hierboven of
+    met Ctrl+P.</p>
+    <div id="uitdraai-inhoud"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="binnen">
+    <p>procescheck &middot; <span id="versie"></span> &middot;
+    <a href="https://github.com/security-commons-nl/procescheck" rel="noopener">bron en methode op GitHub</a> &middot;
+    licentie <a href="https://github.com/security-commons-nl/procescheck/blob/main/LICENSE" rel="noopener">EUPL-1.2</a> &middot;
+    <a href="https://github.com/security-commons-nl/procescheck/issues/new/choose" rel="noopener">verbetering voorstellen</a>.
+    Geen account, geen server, geen telemetrie. Deze uitkomst komt uit je eigen antwoorden en is geen
+    technische verificatie. Offline gebruiken? Sla deze pagina op met Ctrl+S; alles zit erin.</p>
+  </div>
+</footer>
+
+<script>__SCRIPT__</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+name: CI
+
+# Twee jobs. De eerste bewaakt dat procescheck.json nog is wat er in de applicatie op tag
+# v0-applicatie staat en dat de rekenregels kloppen; de tweede bouwt de pagina en loopt hem in een
+# echte browser door. Die browsertests vergelijken wat op het scherm staat met instrument/reken.py,
+# dus hier valt het door de mand als de app en de referentie uit elkaar lopen.
+#
+# fetch-depth: 0 is nodig omdat de bron van de tag komt; met een ondiepe checkout is die er niet.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  bron:
+    name: Bron en rekenregels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Installeren
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: procescheck.json loopt gelijk met tag v0-applicatie
+        run: python instrument/haal_bron.py --check
+
+      - name: Tests
+        run: python -m pytest instrument/tests/test_bron.py instrument/tests/test_reken.py -v
+
+  app:
+    name: De pagina in een browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Installeren
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Bouwen
+        run: python instrument/bouw.py
+
+      - name: Tests
+        run: python -m pytest instrument/tests/test_bouw.py instrument/tests/test_app.py -v
+
+      - name: De gebouwde tool bewaren
+        uses: actions/upload-artifact@v5
+        with:
+          name: procescheck
+          path: instrument/dist/index.html
+          if-no-files-found: error

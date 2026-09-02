@@ -1,152 +1,77 @@
 # procescheck
 
-Webapplicatie voor Business Impact Analyses en BIV-classificaties.
+Business Impact Analyse en BIV-classificatie per bedrijfsproces, met de applicaties en
+infrastructuurcomponenten die eronder liggen.
 
-Status: prototype. Werkt en is te draaien, zonder belofte over onderhoud.
+Vier stappen achter elkaar. Je legt je **processen** vast en zegt welke kritiek zijn. Je koppelt de
+**applicaties** die ze dragen. Je beantwoordt per proces **zes vragen** over beschikbaarheid,
+integriteit en vertrouwelijkheid; daaruit volgen de BIV-scores, de procesklasse en de continuiteits-
+parameters RTO, RPO, WRT en MTPD. En je importeert je **CI-landschap**, waarna de blast radius laat
+zien wat er omvalt als een component uitvalt, en welke kritieke processen op maar een enkele
+applicatie steunen.
 
-Interne webapplicatie voor het uitvoeren en beheren van **Business Impact Analyses (BIA)** en **BIV-classificaties** (Beschikbaarheid, Integriteit, Vertrouwelijkheid) binnen een organisatie.
+Het rekent in je eigen browser: geen server, geen account, geen telemetrie. Je dossier is een
+JSON-bestand dat je zelf opslaat en dat je apparaat niet verlaat.
 
-De applicatie brengt processen, applicaties en procescontext samen in één dashboard dat inzicht geeft in het beveiligingslandschap en de continuïteitsrisico's.
+**[Open de tool](https://security-commons-nl.github.io/procescheck/)** ·
+[uitleg en verantwoording](https://security-commons-nl.github.io/procescheck/uitleg/)
+
+Status: prototype. Werkt en is te draaien, maar zonder belofte over volledigheid, onderhoud of
+ondersteuning. De vragen, de antwoordklassen en de rekenregels zijn woordelijk overgenomen uit de
+applicatie die procescheck tot september 2026 was (tag `v0-applicatie`) en staan getest in
+`procescheck.json`. Wat nog niet is beproefd: het gebruik in een echte BIA-ronde met meerdere
+proceseigenaren.
 
 ## Voor wie
 
-ISO's en proceseigenaren bij publieke organisaties.
+CISO's, informatiebeveiligers en proceseigenaren bij publieke organisaties die een BIA of
+BIV-classificatie moeten doen, en iedereen die wil weten welke processen omvallen als een component
+uitvalt. Je hebt niets nodig behalve een browser.
 
 ## Snel starten
 
-### Vereisten
+1. Open **[de tool](https://security-commons-nl.github.io/procescheck/)**. Wil je hem offline? Sla de
+   pagina op met Ctrl+S; alles zit erin, ook de vragen en de rekenregels.
+2. Vul bij **Processen** je organisatie in en voeg je processen toe. Zet het vinkje *kritiek* bij de
+   processen waar de dienstverlening op stilvalt.
+3. Voeg bij **Applicaties** de systemen toe en koppel ze aan de processen. Een object met industriele
+   automatisering hoort er ook bij; voor de eisen aan zo'n object bestaat de
+   [CSIR Assessment Tool](https://security-commons-nl.github.io/csir-assessment-tool/), en je kunt
+   hier naar dat dossier verwijzen.
+4. Beantwoord bij **BIA en BIV** de zes vragen per proces. De schaal loopt van 1 (Catastrofaal) tot 5
+   (Verwaarloosbaar): **1 is het ergst**, en de zwaarste score telt.
+5. Vul bij **Businesscontext** in waar het proces van afhangt en wie het raakt.
+6. Importeer bij **Blast radius** je CI-landschap als JSON of CSV, of klik *Voorbeeld laden* om te
+   zien wat de analyse doet. Het formaat staat in
+   [de verantwoording](https://security-commons-nl.github.io/procescheck/uitleg/#verantwoording).
+7. Kijk op het **Dashboard** wat als eerste aandacht vraagt en druk de **Uitdraai** af.
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [Docker Compose](https://docs.docker.com/compose/)
+Sla je dossier tussendoor op met *Dossier opslaan*. De browser onthoudt je werk ook zelf, maar een
+opgeslagen bestand is wat je deelt, archiveert en de volgende ronde terugzet.
 
-### Stappen
+De **Uitdraai** bevat een kroonjuwelenlijst: de kritieke processen met hun eigenaar en de systemen
+eronder. Dat is precies stap 1 van
+[Risicoanalyse langs aanvalspaden](https://security-commons-nl.github.io/kennisbank/security/risicoanalyse-aanvalspaden/).
 
-1. **Clone de repository**
-   ```bash
-   git clone https://github.com/security-commons-nl/procescheck.git
-   cd ProcesCheck
-   ```
-
-2. **Maak een `.env` bestand aan voor de backend**
-   ```bash
-   cp backend/.env.example backend/.env
-   ```
-   Pas de waarden aan indien nodig (zie [Environment variables](#environment-variables)).
-
-3. **Start alle services**
-   ```bash
-   docker compose up --build
-   ```
-
-4. **Open de applicatie**
-   - Frontend: [http://localhost:3300](http://localhost:3300)
-   - Backend API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### Database migraties
-
-Alembic wordt automatisch uitgevoerd bij het starten van de backend container. Handmatig uitvoeren:
+### Zelf bouwen
 
 ```bash
-docker exec procescheck_backend alembic upgrade head
+python instrument/haal_bron.py --check   # procescheck.json loopt gelijk met tag v0-applicatie
+python instrument/bouw.py                # schrijft instrument/dist/index.html
+python -m pytest instrument/tests -v     # 78 tests, inclusief een doorloop in Chromium
 ```
+
+Python 3.12 of nieuwer, alleen standaardbibliotheek. Voor de browsertests: `pip install pytest
+playwright` en `python -m playwright install chromium`. `git fetch --tags` is nodig voor de tag
+`v0-applicatie`, waar de bron uit komt.
 
 ## Bijdragen
 
-Zie de [CONTRIBUTING](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md) van de organisatie: daar staat per project een formulier, ook zonder Git-ervaring.
-
-Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor de werkwijze en commit-conventies.
+Zie [CONTRIBUTING.md](CONTRIBUTING.md). Een vraag die niet klopt, een klasse die verkeerd valt of een
+landschapsformaat dat we niet lezen: open een issue. Wijzig `procescheck.json` niet met de hand; dat
+bestand komt uit `instrument/haal_bron.py` en CI controleert dat.
 
 ## Licentie
 
-EUPL-1.2, zie [LICENSE](LICENSE).
-
-## Functionaliteit
-- **Processen** - registreer en beheer organisatieprocessen met classificatie en eigenaarschap
-- **Applicaties** - koppel applicaties aan processen en volg reviewstatus
-- **BIA & BIV-Classificatie** - voer gestructureerde beoordelingen uit op beschikbaarheid, integriteit en vertrouwelijkheid
-- **Procescontext** - leg de bredere context van een proces vast (afhankelijkheden, risico's)
-- **Dashboard** - security posture overzicht met KPI's, risico-landschap en reviewmonitoring
-- **Export** - exporteer rapportages naar Word, Excel en PowerPoint
-- **Ketenarchitectuur** - visualiseer koppelingen tussen processen en applicaties
-
-## Architectuur
-```
-┌─────────────────┐     ┌──────────────────┐     ┌──────────────┐
-│   Frontend      │────▶│   Backend API    │────▶│  PostgreSQL  │
-│   React + Vite  │     │   FastAPI        │     │  Database    │
-│   Tailwind CSS  │     │   SQLAlchemy     │     │              │
-│   Port 3300     │     │   Port 8000      │     │  Port 5435   │
-└─────────────────┘     └──────────────────┘     └──────────────┘
-                                │
-                         Azure AD (OIDC)
-                         Authenticatie
-```
-
-| Laag | Technologie |
-|---|---|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS |
-| Backend | Python 3.12, FastAPI, SQLAlchemy, Alembic |
-| Database | PostgreSQL 15 |
-| Authenticatie | Azure Active Directory (OIDC/JWT) |
-| Deployment | Azure Container Apps (backend) + Azure Static Web Apps (frontend) |
-
-## Environment variables
-### Backend (`backend/.env`)
-
-| Variabele | Vereist | Beschrijving |
-|---|---|---|
-| `DATABASE_URL` | Ja | PostgreSQL connection string |
-| `CORS_ORIGINS` | Nee | Komma-gescheiden lijst van toegestane origins (default: `http://localhost:3300`) |
-| `AZURE_TENANT_ID` | Nee | Azure AD tenant ID - leeg = authenticatie uitgeschakeld (dev-mode) |
-| `AZURE_CLIENT_ID` | Nee | Azure AD client ID - leeg = authenticatie uitgeschakeld (dev-mode) |
-
-Voorbeeld:
-```env
-DATABASE_URL=postgresql://procescheck:procescheck_dev@localhost:5435/procescheck
-CORS_ORIGINS=http://localhost:3300
-AZURE_TENANT_ID=
-AZURE_CLIENT_ID=
-```
-
-### Frontend (`frontend/.env.local`)
-
-| Variabele | Vereist | Beschrijving |
-|---|---|---|
-| `VITE_API_URL` | Ja | URL van de backend API |
-| `VITE_AZURE_CLIENT_ID` | Nee | Azure AD client ID voor frontend authenticatie |
-| `VITE_AZURE_TENANT_ID` | Nee | Azure AD tenant ID voor frontend authenticatie |
-
-## Projectstructuur
-```
-ProcesCheck/
-├── backend/               # FastAPI applicatie
-│   ├── app/
-│   │   ├── models/        # SQLAlchemy database modellen
-│   │   ├── routers/       # API endpoints
-│   │   ├── schemas/       # Pydantic request/response schemas
-│   │   ├── auth.py        # Azure AD authenticatie
-│   │   ├── config.py      # Applicatieconfiguratie
-│   │   └── main.py        # FastAPI app entry point
-│   ├── alembic/           # Database migraties
-│   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/              # React applicatie
-│   ├── src/
-│   │   ├── components/    # Herbruikbare UI-componenten
-│   │   ├── pages/         # Pagina-componenten per module
-│   │   └── api/           # API client functies
-│   ├── Dockerfile
-│   └── package.json
-├── Docs/                  # Projectdocumentatie
-├── docker-compose.yml     # Lokale development omgeving
-└── .github/workflows/     # CI/CD pipelines
-```
-
-## Deployment
-De applicatie wordt gehost op Azure:
-
-- **Backend** - Azure Container Apps via Azure Container Registry
-- **Frontend** - Azure Static Web Apps
-- **Database** - Azure Database for PostgreSQL
-
-Zie `Docs/Azure-Deployment-Handleiding.md` voor de volledige deployment instructies.
+[EUPL-1.2](LICENSE). De vragen en antwoordteksten komen uit het sjabloon *Template BIA &
+BIV-Classificatie.xlsx* dat de oorspronkelijke applicatie gebruikte; zie de verantwoording.

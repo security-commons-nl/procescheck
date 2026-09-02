@@ -1,0 +1,177 @@
+{
+ "naam": "Voorbeeldgemeente - kernlandschap",
+ "toelichting": "Verzonnen data. Een klein maar herkenbaar gemeentelijk landschap: drie processen, vier applicaties, zeven infrastructuurcomponenten. netwerk-core en auth-proxy zijn bewust gedeelde onderlagen, zodat de blast radius zichtbaar wordt.",
+ "herkomst": "Kopie van testdata/landschap.json uit security-commons-nl/blast-radius; verzonnen data, meegekomen bij het opgaan van die repo in procescheck (02-09-2026).",
+ "nodes": [
+  {
+   "id": "proc-paspoort",
+   "label": "Paspoort- en rijbewijsuitgifte",
+   "type": "proces",
+   "kritiek": true
+  },
+  {
+   "id": "proc-uitkering",
+   "label": "Uitkeringen Werk en Inkomen",
+   "type": "proces",
+   "kritiek": true
+  },
+  {
+   "id": "proc-belasting",
+   "label": "Gemeentelijke belastinginning",
+   "type": "proces",
+   "kritiek": false
+  },
+  {
+   "id": "app-brp",
+   "label": "BRP (basisregistratie personen)",
+   "type": "app"
+  },
+  {
+   "id": "app-zaak",
+   "label": "Zaaksysteem",
+   "type": "app"
+  },
+  {
+   "id": "app-betaal",
+   "label": "Betaalengine",
+   "type": "app"
+  },
+  {
+   "id": "app-belasting",
+   "label": "Belastingapplicatie",
+   "type": "app"
+  },
+  {
+   "id": "ci-db-brp",
+   "label": "db-brp01 (database)",
+   "type": "ci"
+  },
+  {
+   "id": "ci-app-zaak",
+   "label": "app-zaak01 (appserver)",
+   "type": "ci"
+  },
+  {
+   "id": "ci-db-zaak",
+   "label": "db-zaak01 (database)",
+   "type": "ci"
+  },
+  {
+   "id": "ci-betaal",
+   "label": "vm-betaal01 (appserver)",
+   "type": "ci"
+  },
+  {
+   "id": "ci-belasting",
+   "label": "vm-belasting01 (appserver)",
+   "type": "ci"
+  },
+  {
+   "id": "ci-auth",
+   "label": "auth-proxy (DigiD-koppeling)",
+   "type": "ci"
+  },
+  {
+   "id": "ci-netwerk",
+   "label": "netwerk-core (kernswitch)",
+   "type": "ci"
+  }
+ ],
+ "edges": [
+  {
+   "from": "app-brp",
+   "to": "proc-paspoort",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "app-zaak",
+   "to": "proc-paspoort",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "app-zaak",
+   "to": "proc-uitkering",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "app-betaal",
+   "to": "proc-uitkering",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "app-belasting",
+   "to": "proc-belasting",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "app-betaal",
+   "to": "proc-belasting",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-db-brp",
+   "to": "app-brp",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-app-zaak",
+   "to": "app-zaak",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-db-zaak",
+   "to": "app-zaak",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-betaal",
+   "to": "app-betaal",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-belasting",
+   "to": "app-belasting",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-auth",
+   "to": "app-brp",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-auth",
+   "to": "app-zaak",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-netwerk",
+   "to": "ci-db-brp",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-netwerk",
+   "to": "ci-app-zaak",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-netwerk",
+   "to": "ci-db-zaak",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-netwerk",
+   "to": "ci-betaal",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-netwerk",
+   "to": "ci-belasting",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-netwerk",
+   "to": "ci-auth",
+   "relatie": "ondersteunt"
+  }
+ ]
+}

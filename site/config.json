@@ -1,0 +1,26 @@
+{
+  "repoUrl": "https://github.com/security-commons-nl/procescheck",
+  "title": "procescheck uitleg · Security Commons NL",
+  "description": "Breng processen in kaart, bepaal per proces de BIA en BIV-classificatie met RTO en RPO, en zie met de blast radius welke applicaties en componenten eronder liggen.",
+  "siteTitle": "procescheck · uitleg",
+  "tabs": [
+    {
+      "file": "README.md",
+      "id": "start",
+      "label": "Start"
+    },
+    {
+      "file": "werkwijze.md",
+      "id": "werkwijze",
+      "label": "Werkwijze",
+      "title": "Zo gebruik je procescheck"
+    },
+    {
+      "file": "verantwoording.md",
+      "id": "verantwoording",
+      "label": "Verantwoording",
+      "title": "Waar de inhoud vandaan komt"
+    }
+  ],
+  "assets": []
+}

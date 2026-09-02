@@ -1,0 +1,20 @@
+from,from_label,from_type,from_kritiek,to,to_label,to_type,to_kritiek,relatie
+app-brp,"BRP (basisregistratie personen)",app,nee,proc-paspoort,"Paspoort- en rijbewijsuitgifte",proces,ja,ondersteunt
+app-zaak,"Zaaksysteem",app,nee,proc-paspoort,"Paspoort- en rijbewijsuitgifte",proces,ja,ondersteunt
+app-zaak,"Zaaksysteem",app,nee,proc-uitkering,"Uitkeringen Werk en Inkomen",proces,ja,ondersteunt
+app-betaal,"Betaalengine",app,nee,proc-uitkering,"Uitkeringen Werk en Inkomen",proces,ja,ondersteunt
+app-belasting,"Belastingapplicatie",app,nee,proc-belasting,"Gemeentelijke belastinginning",proces,nee,ondersteunt
+app-betaal,"Betaalengine",app,nee,proc-belasting,"Gemeentelijke belastinginning",proces,nee,ondersteunt
+ci-db-brp,"db-brp01 (database)",ci,nee,app-brp,"BRP (basisregistratie personen)",app,nee,ondersteunt
+ci-app-zaak,"app-zaak01 (appserver)",ci,nee,app-zaak,"Zaaksysteem",app,nee,ondersteunt
+ci-db-zaak,"db-zaak01 (database)",ci,nee,app-zaak,"Zaaksysteem",app,nee,ondersteunt
+ci-betaal,"vm-betaal01 (appserver)",ci,nee,app-betaal,"Betaalengine",app,nee,ondersteunt
+ci-belasting,"vm-belasting01 (appserver)",ci,nee,app-belasting,"Belastingapplicatie",app,nee,ondersteunt
+ci-auth,"auth-proxy (DigiD-koppeling)",ci,nee,app-brp,"BRP (basisregistratie personen)",app,nee,ondersteunt
+ci-auth,"auth-proxy (DigiD-koppeling)",ci,nee,app-zaak,"Zaaksysteem",app,nee,ondersteunt
+ci-netwerk,"netwerk-core (kernswitch)",ci,nee,ci-db-brp,"db-brp01 (database)",ci,nee,ondersteunt
+ci-netwerk,"netwerk-core (kernswitch)",ci,nee,ci-app-zaak,"app-zaak01 (appserver)",ci,nee,ondersteunt
+ci-netwerk,"netwerk-core (kernswitch)",ci,nee,ci-db-zaak,"db-zaak01 (database)",ci,nee,ondersteunt
+ci-netwerk,"netwerk-core (kernswitch)",ci,nee,ci-betaal,"vm-betaal01 (appserver)",ci,nee,ondersteunt
+ci-netwerk,"netwerk-core (kernswitch)",ci,nee,ci-belasting,"vm-belasting01 (appserver)",ci,nee,ondersteunt
+ci-netwerk,"netwerk-core (kernswitch)",ci,nee,ci-auth,"auth-proxy (DigiD-koppeling)",ci,nee,ondersteunt

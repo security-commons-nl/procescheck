@@ -1,0 +1,69 @@
+name: Build and deploy Pages
+
+# Deze repo publiceert twee dingen: de tool op de hoofdpagina, en de uitleg (README, werkwijze,
+# verantwoording) op /uitleg/. Daarom niet de herbruikbare pages-docs.yml, die alleen de
+# documentatiebuild kent.
+#
+# De volgorde is bewust: eerst de documentatiebuild, die schrijft dist/index.html; die pagina verhuist
+# naar dist/uitleg/. Pas daarna schrijft het instrumentscript de tool over dist/index.html heen.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  bouwen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: De uitleg bouwen
+        run: |
+          npm ci
+          node site/build.mjs
+          mkdir -p dist/uitleg
+          mv dist/index.html dist/uitleg/index.html
+          test -s dist/uitleg/index.html
+
+      - name: De tool bouwen
+        run: |
+          python instrument/bouw.py dist
+          test -s dist/index.html
+          # Dezelfde pagina ook als download onder een sprekende naam, en de bron ernaast.
+          cp dist/index.html dist/procescheck.html
+          cp procescheck.json dist/procescheck.json
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  publiceren:
+    needs: bouwen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5

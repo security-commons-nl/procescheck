@@ -1,0 +1,687 @@
+{
+ "formaat": "procescheck-dossier",
+ "versie": 1,
+ "bron_versie": "2026-09",
+ "bron_sha256": "",
+ "bijgewerkt": "2026-09-02",
+ "organisatie": {
+  "naam": "Gemeente Voorbeeld",
+  "peildatum": "2026-09-02"
+ },
+ "processen": [
+  {
+   "code": "P01",
+   "naam": "Paspoort- en rijbewijsuitgifte",
+   "beschrijving": "Verzonnen procesbeschrijving.",
+   "doelstelling": "Verzonnen doel.",
+   "eigenaar": "J. Jansen",
+   "afdeling": "Dienstverlening",
+   "kritiek": true,
+   "reden_kritiek": "Wettelijke termijn, geen alternatief kanaal.",
+   "laatste_beoordeling": "2026-06-01",
+   "notities": "",
+   "applicaties": [
+    "A01",
+    "A02",
+    "A03"
+   ],
+   "bia": {
+    "b1": 3,
+    "b2": 2,
+    "b3": 5,
+    "b4": 4,
+    "i1": 4,
+    "v1": 1,
+    "onderbouwing": {
+     "b1": "Vastgesteld in het interview van 2026-06-01.",
+     "b2": "Vastgesteld in het interview van 2026-06-01.",
+     "b3": "Vastgesteld in het interview van 2026-06-01.",
+     "b4": "Vastgesteld in het interview van 2026-06-01.",
+     "i1": "Vastgesteld in het interview van 2026-06-01.",
+     "v1": "Vastgesteld in het interview van 2026-06-01."
+    },
+    "interviewer": "A. de Vries",
+    "interviewdatum": "2026-06-01",
+    "beschrijving": "Verzonnen data voor de test.",
+    "ketenafhankelijkheden": "",
+    "afwijking_eigenaar": "",
+    "notities": ""
+   },
+   "rto_rpo": {
+    "rto": "8",
+    "rto_eenheid": "uur",
+    "rpo": "4",
+    "rpo_eenheid": "uur",
+    "toelichting": "Handmatige overschrijving naast de klasselabels."
+   },
+   "context": {
+    "partners": "Verzonnen invulling voor partners.",
+    "activiteiten": "Verzonnen invulling voor activiteiten.",
+    "middelen": "Verzonnen invulling voor middelen.",
+    "propositie": "Verzonnen invulling voor propositie.",
+    "klantrelaties": "Verzonnen invulling voor klantrelaties.",
+    "kanalen": "Verzonnen invulling voor kanalen.",
+    "segmenten": "Verzonnen invulling voor segmenten.",
+    "kosten": "Verzonnen invulling voor kosten.",
+    "opbrengsten": "Verzonnen invulling voor opbrengsten.",
+    "wettelijke_basis": "Verzonnen invulling voor wettelijke_basis.",
+    "stakeholders": "Verzonnen invulling voor stakeholders.",
+    "ketenpositie": "Verzonnen invulling voor ketenpositie.",
+    "kernaspecten": "Verzonnen invulling voor kernaspecten.",
+    "continuiteitseisen": "Verzonnen invulling voor continuiteitseisen.",
+    "reviewdatum": "2026-06-01",
+    "notities": "",
+    "persoonsgegevens": true,
+    "bijzondere_persoonsgegevens": true
+   }
+  },
+  {
+   "code": "P02",
+   "naam": "Uitkeringen Werk en Inkomen",
+   "beschrijving": "Verzonnen procesbeschrijving.",
+   "doelstelling": "Verzonnen doel.",
+   "eigenaar": "J. Jansen",
+   "afdeling": "Dienstverlening",
+   "kritiek": true,
+   "reden_kritiek": "",
+   "laatste_beoordeling": "2026-02-01",
+   "notities": "",
+   "applicaties": [
+    "A04"
+   ],
+   "bia": {
+    "b1": null,
+    "b2": null,
+    "b3": null,
+    "b4": null,
+    "i1": null,
+    "v1": null,
+    "onderbouwing": {
+     "b1": "",
+     "b2": "",
+     "b3": "",
+     "b4": "",
+     "i1": "",
+     "v1": ""
+    },
+    "interviewer": "",
+    "interviewdatum": "",
+    "beschrijving": "",
+    "ketenafhankelijkheden": "",
+    "afwijking_eigenaar": "",
+    "notities": ""
+   },
+   "rto_rpo": {
+    "rto": "",
+    "rto_eenheid": "",
+    "rpo": "",
+    "rpo_eenheid": "",
+    "toelichting": ""
+   },
+   "context": {
+    "partners": "",
+    "activiteiten": "",
+    "middelen": "",
+    "propositie": "",
+    "klantrelaties": "",
+    "kanalen": "",
+    "segmenten": "",
+    "kosten": "",
+    "opbrengsten": "",
+    "wettelijke_basis": "",
+    "stakeholders": "",
+    "ketenpositie": "",
+    "kernaspecten": "",
+    "continuiteitseisen": "",
+    "reviewdatum": "",
+    "notities": "",
+    "persoonsgegevens": false,
+    "bijzondere_persoonsgegevens": false
+   }
+  },
+  {
+   "code": "P03",
+   "naam": "Gemeentelijke belastinginning",
+   "beschrijving": "Verzonnen procesbeschrijving.",
+   "doelstelling": "",
+   "eigenaar": "K. Bakker",
+   "afdeling": "",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "laatste_beoordeling": "",
+   "notities": "",
+   "applicaties": [],
+   "bia": {
+    "b1": 4,
+    "b2": 4,
+    "b3": null,
+    "b4": null,
+    "i1": 2,
+    "v1": null,
+    "onderbouwing": {
+     "b1": "Vastgesteld in het interview van .",
+     "b2": "Vastgesteld in het interview van .",
+     "b3": "",
+     "b4": "",
+     "i1": "Vastgesteld in het interview van .",
+     "v1": ""
+    },
+    "interviewer": "",
+    "interviewdatum": "",
+    "beschrijving": "",
+    "ketenafhankelijkheden": "",
+    "afwijking_eigenaar": "",
+    "notities": ""
+   },
+   "rto_rpo": {
+    "rto": "",
+    "rto_eenheid": "",
+    "rpo": "",
+    "rpo_eenheid": "",
+    "toelichting": ""
+   },
+   "context": {
+    "partners": "",
+    "activiteiten": "",
+    "middelen": "",
+    "propositie": "",
+    "klantrelaties": "",
+    "kanalen": "",
+    "segmenten": "",
+    "kosten": "",
+    "opbrengsten": "",
+    "wettelijke_basis": "",
+    "stakeholders": "",
+    "ketenpositie": "",
+    "kernaspecten": "",
+    "continuiteitseisen": "",
+    "reviewdatum": "",
+    "notities": "",
+    "persoonsgegevens": false,
+    "bijzondere_persoonsgegevens": false
+   }
+  },
+  {
+   "code": "P04",
+   "naam": "Subsidieverstrekking",
+   "beschrijving": "",
+   "doelstelling": "",
+   "eigenaar": "",
+   "afdeling": "",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "laatste_beoordeling": "2024-01-01",
+   "notities": "",
+   "applicaties": [
+    "A05"
+   ],
+   "bia": {
+    "b1": null,
+    "b2": null,
+    "b3": null,
+    "b4": null,
+    "i1": null,
+    "v1": null,
+    "onderbouwing": {
+     "b1": "",
+     "b2": "",
+     "b3": "",
+     "b4": "",
+     "i1": "",
+     "v1": ""
+    },
+    "interviewer": "",
+    "interviewdatum": "",
+    "beschrijving": "",
+    "ketenafhankelijkheden": "",
+    "afwijking_eigenaar": "",
+    "notities": ""
+   },
+   "rto_rpo": {
+    "rto": "",
+    "rto_eenheid": "",
+    "rpo": "",
+    "rpo_eenheid": "",
+    "toelichting": ""
+   },
+   "context": {
+    "partners": "",
+    "activiteiten": "",
+    "middelen": "",
+    "propositie": "",
+    "klantrelaties": "",
+    "kanalen": "",
+    "segmenten": "",
+    "kosten": "",
+    "opbrengsten": "",
+    "wettelijke_basis": "",
+    "stakeholders": "",
+    "ketenpositie": "",
+    "kernaspecten": "",
+    "continuiteitseisen": "",
+    "reviewdatum": "",
+    "notities": "",
+    "persoonsgegevens": false,
+    "bijzondere_persoonsgegevens": false
+   }
+  },
+  {
+   "code": "P05",
+   "naam": "Vergunningverlening",
+   "beschrijving": "Verzonnen procesbeschrijving.",
+   "doelstelling": "Verzonnen doel.",
+   "eigenaar": "J. Jansen",
+   "afdeling": "Dienstverlening",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "laatste_beoordeling": "2026-01-15",
+   "notities": "",
+   "applicaties": [
+    "A05"
+   ],
+   "bia": {
+    "b1": 3,
+    "b2": 3,
+    "b3": 3,
+    "b4": 3,
+    "i1": 3,
+    "v1": 3,
+    "onderbouwing": {
+     "b1": "Vastgesteld in het interview van 2026-01-15.",
+     "b2": "Vastgesteld in het interview van 2026-01-15.",
+     "b3": "Vastgesteld in het interview van 2026-01-15.",
+     "b4": "Vastgesteld in het interview van 2026-01-15.",
+     "i1": "Vastgesteld in het interview van 2026-01-15.",
+     "v1": "Vastgesteld in het interview van 2026-01-15."
+    },
+    "interviewer": "A. de Vries",
+    "interviewdatum": "2026-01-15",
+    "beschrijving": "Verzonnen data voor de test.",
+    "ketenafhankelijkheden": "",
+    "afwijking_eigenaar": "",
+    "notities": ""
+   },
+   "rto_rpo": {
+    "rto": "",
+    "rto_eenheid": "",
+    "rpo": "",
+    "rpo_eenheid": "",
+    "toelichting": ""
+   },
+   "context": {
+    "partners": "Verzonnen invulling voor partners.",
+    "activiteiten": "Verzonnen invulling voor activiteiten.",
+    "middelen": "Verzonnen invulling voor middelen.",
+    "propositie": "Verzonnen invulling voor propositie.",
+    "klantrelaties": "Verzonnen invulling voor klantrelaties.",
+    "kanalen": "Verzonnen invulling voor kanalen.",
+    "segmenten": "Verzonnen invulling voor segmenten.",
+    "kosten": "Verzonnen invulling voor kosten.",
+    "opbrengsten": "Verzonnen invulling voor opbrengsten.",
+    "wettelijke_basis": "Verzonnen invulling voor wettelijke_basis.",
+    "stakeholders": "Verzonnen invulling voor stakeholders.",
+    "ketenpositie": "Verzonnen invulling voor ketenpositie.",
+    "kernaspecten": "Verzonnen invulling voor kernaspecten.",
+    "continuiteitseisen": "Verzonnen invulling voor continuiteitseisen.",
+    "reviewdatum": "2026-01-15",
+    "notities": "",
+    "persoonsgegevens": false,
+    "bijzondere_persoonsgegevens": false
+   }
+  },
+  {
+   "code": "P06",
+   "naam": "Archiefbeheer",
+   "beschrijving": "Verzonnen procesbeschrijving.",
+   "doelstelling": "",
+   "eigenaar": "J. Jansen",
+   "afdeling": "Dienstverlening",
+   "kritiek": false,
+   "reden_kritiek": "",
+   "laatste_beoordeling": "2026-05-01",
+   "notities": "",
+   "applicaties": [
+    "A05"
+   ],
+   "bia": {
+    "b1": 5,
+    "b2": 5,
+    "b3": 5,
+    "b4": 5,
+    "i1": 5,
+    "v1": 5,
+    "onderbouwing": {
+     "b1": "Vastgesteld in het interview van 2026-05-01.",
+     "b2": "Vastgesteld in het interview van 2026-05-01.",
+     "b3": "Vastgesteld in het interview van 2026-05-01.",
+     "b4": "Vastgesteld in het interview van 2026-05-01.",
+     "i1": "Vastgesteld in het interview van 2026-05-01.",
+     "v1": "Vastgesteld in het interview van 2026-05-01."
+    },
+    "interviewer": "A. de Vries",
+    "interviewdatum": "2026-05-01",
+    "beschrijving": "Verzonnen data voor de test.",
+    "ketenafhankelijkheden": "",
+    "afwijking_eigenaar": "",
+    "notities": ""
+   },
+   "rto_rpo": {
+    "rto": "",
+    "rto_eenheid": "",
+    "rpo": "",
+    "rpo_eenheid": "",
+    "toelichting": ""
+   },
+   "context": {
+    "partners": "Verzonnen invulling voor partners.",
+    "activiteiten": "Verzonnen invulling voor activiteiten.",
+    "middelen": "Verzonnen invulling voor middelen.",
+    "propositie": "Verzonnen invulling voor propositie.",
+    "klantrelaties": "Verzonnen invulling voor klantrelaties.",
+    "kanalen": "Verzonnen invulling voor kanalen.",
+    "segmenten": "Verzonnen invulling voor segmenten.",
+    "kosten": "Verzonnen invulling voor kosten.",
+    "opbrengsten": "Verzonnen invulling voor opbrengsten.",
+    "wettelijke_basis": "Verzonnen invulling voor wettelijke_basis.",
+    "stakeholders": "Verzonnen invulling voor stakeholders.",
+    "ketenpositie": "Verzonnen invulling voor ketenpositie.",
+    "kernaspecten": "Verzonnen invulling voor kernaspecten.",
+    "continuiteitseisen": "Verzonnen invulling voor continuiteitseisen.",
+    "reviewdatum": "2026-05-01",
+    "notities": "",
+    "persoonsgegevens": false,
+    "bijzondere_persoonsgegevens": false
+   }
+  }
+ ],
+ "applicaties": [
+  {
+   "code": "A01",
+   "naam": "BRP (basisregistratie personen)",
+   "beschrijving": "Verzonnen omschrijving van BRP (basisregistratie personen).",
+   "eigenaar_business": "J. Jansen",
+   "eigenaar_technisch": "P. Pietersen",
+   "soort": "applicatie",
+   "csir_dossier": {
+    "bestand": "",
+    "vingerafdruk": ""
+   },
+   "notities": "",
+   "reviewdatum": "2026-03-01"
+  },
+  {
+   "code": "A02",
+   "naam": "Zaaksysteem",
+   "beschrijving": "Verzonnen omschrijving van Zaaksysteem.",
+   "eigenaar_business": "J. Jansen",
+   "eigenaar_technisch": "P. Pietersen",
+   "soort": "applicatie",
+   "csir_dossier": {
+    "bestand": "",
+    "vingerafdruk": ""
+   },
+   "notities": "",
+   "reviewdatum": "2026-03-01"
+  },
+  {
+   "code": "A03",
+   "naam": "Toegangscontrole publiekshal",
+   "beschrijving": "Verzonnen omschrijving van Toegangscontrole publiekshal.",
+   "eigenaar_business": "J. Jansen",
+   "eigenaar_technisch": "P. Pietersen",
+   "soort": "object met industriële automatisering",
+   "csir_dossier": {
+    "bestand": "csir-dossier-toegangscontrole-2026-08-20.json",
+    "vingerafdruk": "b3f1c0a9d2e4"
+   },
+   "notities": "",
+   "reviewdatum": "2025-01-01"
+  },
+  {
+   "code": "A04",
+   "naam": "Uitkeringsadministratie",
+   "beschrijving": "Verzonnen omschrijving van Uitkeringsadministratie.",
+   "eigenaar_business": "J. Jansen",
+   "eigenaar_technisch": "P. Pietersen",
+   "soort": "applicatie",
+   "csir_dossier": {
+    "bestand": "",
+    "vingerafdruk": ""
+   },
+   "notities": "",
+   "reviewdatum": ""
+  },
+  {
+   "code": "A05",
+   "naam": "Documentmanagementsysteem",
+   "beschrijving": "Verzonnen omschrijving van Documentmanagementsysteem.",
+   "eigenaar_business": "J. Jansen",
+   "eigenaar_technisch": "P. Pietersen",
+   "soort": "applicatie",
+   "csir_dossier": {
+    "bestand": "",
+    "vingerafdruk": ""
+   },
+   "notities": "",
+   "reviewdatum": ""
+  }
+ ],
+ "componenten": [
+  {
+   "id": "ci-db1",
+   "label": "db-burgerzaken01 (database)",
+   "kritiek": true
+  },
+  {
+   "id": "ci-net1",
+   "label": "netwerk-core (kernswitch)",
+   "kritiek": true
+  },
+  {
+   "id": "ci-srv1",
+   "label": "vm-toegang01 (appserver)",
+   "kritiek": false
+  },
+  {
+   "id": "ci-srv2",
+   "label": "vm-toegang02 (appserver)",
+   "kritiek": false
+  },
+  {
+   "id": "ci-web1",
+   "label": "vm-uitkering01 (appserver)",
+   "kritiek": false
+  },
+  {
+   "id": "ci-los",
+   "label": "vm-test01 (losstaande testserver)",
+   "kritiek": false
+  }
+ ],
+ "component_edges": [
+  {
+   "from": "ci-db1",
+   "to": "A01",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-db1",
+   "to": "A02",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-db1",
+   "to": "A01",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-net1",
+   "to": "ci-db1",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-srv1",
+   "to": "A03",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-srv2",
+   "to": "A03",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-web1",
+   "to": "A04",
+   "relatie": "ondersteunt"
+  },
+  {
+   "from": "ci-net1",
+   "to": "A99",
+   "relatie": "ondersteunt"
+  }
+ ],
+ "landschap_bron": {
+  "bestand": "",
+  "geimporteerd": ""
+ },
+ "verwacht": {
+  "totaal": 6,
+  "kritiek": 2,
+  "compleet": 2,
+  "aandacht": 1,
+  "onvolledig": 3,
+  "hoog_risico": 2,
+  "verdeling.B.1": 0,
+  "verdeling.B.2": 1,
+  "verdeling.B.3": 1,
+  "verdeling.B.4": 1,
+  "verdeling.B.5": 1,
+  "verdeling.B.leeg": 2,
+  "verdeling.I.1": 0,
+  "verdeling.I.2": 1,
+  "verdeling.I.3": 1,
+  "verdeling.I.4": 1,
+  "verdeling.I.5": 1,
+  "verdeling.I.leeg": 2,
+  "verdeling.V.1": 1,
+  "verdeling.V.2": 0,
+  "verdeling.V.3": 1,
+  "verdeling.V.4": 0,
+  "verdeling.V.5": 1,
+  "verdeling.V.leeg": 3,
+  "dekking.bia.done": 4,
+  "dekking.bia.total": 6,
+  "dekking.bia.pct": 67,
+  "dekking.rto_rpo.done": 4,
+  "dekking.rto_rpo.total": 6,
+  "dekking.rto_rpo.pct": 67,
+  "dekking.context.done": 3,
+  "dekking.context.total": 6,
+  "dekking.context.pct": 50,
+  "dekking.applicaties.done": 5,
+  "dekking.applicaties.total": 6,
+  "dekking.applicaties.pct": 83,
+  "privacy.persoonsgegevens": 1,
+  "privacy.bijzonder": 1,
+  "review.processen.on_time": 4,
+  "review.processen.total": 6,
+  "review.processen.pct": 67,
+  "review.bia.on_time": 3,
+  "review.bia.total": 6,
+  "review.bia.pct": 50,
+  "review.context.on_time": 3,
+  "review.context.total": 6,
+  "review.context.pct": 50,
+  "review.applicaties.on_time": 2,
+  "review.applicaties.total": 5,
+  "review.applicaties.pct": 40,
+  "prioriteiten": [
+   {
+    "code": "P02",
+    "prioriteit": "critical",
+    "reden": "Informatie ontbreekt",
+    "ontbrekend": [
+     "Reden kritiek",
+     "BIA / BIV",
+     "RTO / RPO",
+     "Business context"
+    ]
+   },
+   {
+    "code": "P03",
+    "prioriteit": "medium",
+    "reden": "5 velden ontbreken",
+    "ontbrekend": [
+     "Doelstelling",
+     "Afdeling",
+     "Laatste beoordelingsdatum",
+     "Gekoppelde applicaties",
+     "Business context"
+    ]
+   },
+   {
+    "code": "P04",
+    "prioriteit": "medium",
+    "reden": "7 velden ontbreken",
+    "ontbrekend": [
+     "Beschrijving",
+     "Doelstelling",
+     "Eigenaar",
+     "Afdeling",
+     "BIA / BIV",
+     "RTO / RPO",
+     "Business context"
+    ]
+   },
+   {
+    "code": "P06",
+    "prioriteit": "low",
+    "reden": "1 veld(en) ontbreken",
+    "ontbrekend": [
+     "Doelstelling"
+    ]
+   }
+  ],
+  "ranglijst": [
+   "ci:ci-net1",
+   "ci:ci-db1",
+   "ci:ci-srv1",
+   "ci:ci-srv2",
+   "ci:ci-web1",
+   "app:A01",
+   "app:A02",
+   "app:A03",
+   "app:A04",
+   "app:A05",
+   "ci:ci-los"
+  ],
+  "single_points": [
+   "proces:P02"
+  ],
+  "dragende_nodes": [
+   "app:A01",
+   "app:A02",
+   "app:A03",
+   "app:A04",
+   "ci:ci-db1",
+   "ci:ci-net1",
+   "ci:ci-srv1",
+   "ci:ci-srv2",
+   "ci:ci-web1",
+   "proces:P01",
+   "proces:P02"
+  ],
+  "bereik_ci_net1": [
+   "app:A01",
+   "app:A02",
+   "ci:ci-db1",
+   "proces:P01"
+  ],
+  "landschap_nodes": 17,
+  "landschap_edges": 13,
+  "waarschuwingen": [
+   "edge ci-net1 naar A99: onbekend doel"
+  ],
+  "vandaag": "2026-09-02"
+ }
+}
