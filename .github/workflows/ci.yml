@@ -69,7 +69,7 @@ jobs:
         run: python -m pytest instrument/tests/test_bouw.py instrument/tests/test_app.py -v
 
       - name: De gebouwde tool bewaren
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: procescheck
           path: instrument/dist/index.html
