@@ -98,7 +98,12 @@ def kies(blad, opdracht: str, tekst: str | None = None, bestand: pathlib.Path | 
         blad.set_input_files("#invoer-bestand", str(bestand))
         blad.wait_for_function("() => document.getElementById('invoer-tekst').value.length > 0")
     else:
-        blad.fill("#invoer-tekst", tekst)
+        # fill typt de tekst via insertText; een tekst van 100.000 tekens (test_chunking, test_stoppen) duurde
+        # op een trage runner langer dan de time-out. Waarde zetten plus het input-event is voor de pagina
+        # hetzelfde als typen en hangt niet van de snelheid van de runner af.
+        blad.eval_on_selector("#invoer-tekst",
+                              "(e, t) => { e.value = t; e.dispatchEvent(new Event('input', {bubbles: true})); }",
+                              tekst)
     blad.check("#toestemming")
 
 
