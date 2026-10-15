@@ -1,5 +1,6 @@
-/* Base: calm editorial style in Dutch-government colours.
-   Serif display headings (report feel), sans body, no external resources. */
+/* Base: rustige opmaak in de huisstijl van de voorpagina (security-commons-nl.github.io).
+   Geen externe bronnen. Het blok "Huisstijl" onderaan trekt de kop en de letter gelijk met de voorpagina
+   en de kennisbank (kennisbank/tools/huisstijl.py); wijzig ze samen. */
 :root {
   --blauw: #154273;
   --blauw-donker: #0d2b4d;
@@ -168,3 +169,29 @@ footer {
 /* Kruimelpad in de masthead (statuut B10). */
 .site-kicker a{color:inherit;text-decoration:none}
 .site-kicker a:hover{text-decoration:underline}
+
+/* Huisstijl (15-10-2026): kop als donkerblauwe balk, zoals op de voorpagina en in de kennisbank; titels in
+   dezelfde letter als de tekst. Het streepje bovenaan valt weg, de balk zelf is nu het herkenningsteken. */
+:root {
+  --sans: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: var(--sans);
+  --inkt: #14202b;
+}
+.site-header { background: var(--blauw-donker); border-bottom: 0; box-shadow: none; }
+.site-header::before { display: none; }
+.site-kicker { color: #c9d6e4; letter-spacing: normal; text-transform: none; font-size: 0.875rem; }
+.site-kicker a { color: #fff; }
+.site-title { color: #fff; font-weight: 800; letter-spacing: -0.01em; }
+.tab { color: #c9d6e4; }
+.tab:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.tab[aria-selected="true"] { color: #fff; border-bottom-color: var(--oranje); }
+h1, h2, h3 { letter-spacing: -0.02em; }
+/* Een codeblok wordt nooit breder dan zijn kolom; een lange regel scrolt binnen het blok, de pagina niet. */
+pre { max-width: 100%; min-width: 0; }
+.tab-panel, .tab-panel > * { min-width: 0; }
+/* Inline code met een lange URL of naam breekt af op een smal scherm (tabellen staan al in .tablewrap). */
+:not(pre) > code { overflow-wrap: anywhere; }
+@media print {
+  .site-header { background: #fff; }
+  .site-kicker, .site-title { color: var(--inkt); }
+}
